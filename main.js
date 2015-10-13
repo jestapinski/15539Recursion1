@@ -1,7 +1,0 @@
-"Hello World"
-"Does the committing work?"
-"Hey all, if you can see this than GitHub is working correctly"
-"Check 4"
-"Check 5"
-"Check 6"
-"If you can read this, edit the file!!"
