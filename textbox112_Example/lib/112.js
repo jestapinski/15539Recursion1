@@ -2582,7 +2582,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
         };
 
     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
-            console.log(TextboxElement);
+            // console.log(TextboxElement);
             var identifier = "$TEXTAREA$";
             assertArgsLength(arguments,2,2);
             assertTypes(arguments,["object","object"]);
