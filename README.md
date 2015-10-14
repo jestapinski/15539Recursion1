@@ -7,3 +7,8 @@ For project with Radix Sort for 15539 at CMU
 
 #ADDITIONS 10/14 3:25PM
 3:25 PM Bug Fixes with textarea and buttons (should run fine now)
+
+
+#Known Bugs
+Some Textareas and Buttons not embedding consistantly
+Keybinding letter shows in the wrong place
