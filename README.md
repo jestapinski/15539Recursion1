@@ -1,3 +1,8 @@
+# Latest Build - 10/14/2015
+#
+Fixed example to be more stable. Need <text></text> tages around text to help distinguish from buttons when using together.
+When using multiple embedded items, embed the later one first to avoid confusion (unsure exactly why, but this works). Updated: main.js and 112.js
+
 # 15539RecursionRadix
 For project with Radix Sort for 15539 at CMU
 
@@ -10,5 +15,4 @@ For project with Radix Sort for 15539 at CMU
 
 
 #Known Bugs
-Some Textareas and Buttons not embedding consistantly
 Keybinding letter shows in the wrong place
