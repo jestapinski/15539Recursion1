@@ -2582,19 +2582,24 @@ function define112Exercise(exerciseConstructor,wrapper) {
         };
 
     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
+            console.log(TextboxElement);
             var identifier = "$TEXTAREA$";
             assertArgsLength(arguments,2,2);
             assertTypes(arguments,["object","object"]);
             // Get the DOM elements from _elementReferences
             var $Code = $(_elementReferences[TextboxElement._elementReferenceID]);
             var $Dropdown = $(_elementReferences[textarea._elementReferenceID]);
-
+            console.log($Code);
+            console.log($Dropdown);
             // Get the target span
             // jQuery has no way to use `:contains()` to select the innermost
             // matches... just using pure JS to do the span selection
-            var spans = $Code[0].getElementsByTagName("span");
-            var $targetSpan = undefined;
+            console.log($Code[0]);
+            var spans = $Code[0].getElementsByTagName("text");
+            console.log(spans);
+            var $targetSpan = [];
             for (var i = 0; i < spans.length; i++) {
+                console.log(spans[i]);
                 if (spans[i].innerHTML.indexOf(identifier) !== -1) {
                     $targetSpan = $(spans[i]);
                 }
@@ -2609,7 +2614,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
             $Dropdown.removeAttr("style");
 
             // Add dropdown to a new span
-            var $span = $("<span></span>");
+            var $span = $("<text></text>");
             $span.css({
                 display: "inline-block",
                 "vertical-align": "bottom",
