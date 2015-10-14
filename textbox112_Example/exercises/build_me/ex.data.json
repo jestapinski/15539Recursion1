@@ -1,0 +1,19 @@
+{
+    "meta": {
+        "author": "",
+        "email": "",
+
+        "title": "Change Me",
+        "description": "Fill me in.",
+        "id": "answerid-stl",
+        "language": "python",
+        "difficulty": "medium",
+        "mainFile": "main.js",
+        "instrFile": "instr.html",
+        "constructorName": "main",
+        "menuDisplayName": "Change Me!",
+        "requires": {
+            "js":["textbox112.js"]
+        }
+    }
+}
