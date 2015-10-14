@@ -13,7 +13,6 @@
         "constructorName": "main",
         "menuDisplayName": "Change Me!",
         "requires": {
-            "js":["textbox112.js"]
         }
     }
 }

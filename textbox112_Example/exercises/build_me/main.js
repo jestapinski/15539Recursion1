@@ -32,15 +32,17 @@ var main = function(ex) {
         "textColor": "black"
     }, ex.width()/2, ex.height()/4, ex.height()/4);
 
-    var codeDrop = ex.createDropdown(0,0,"f(x)",{
+        var codeDrop = ex.createDropdown(0,0,"f(x)",{
             elements: {
                 "Choose One": function() {},
                 "f(x)": function () {console.log("Correct");},
                 "g(x, y)": function () {console.log("Incorrect")}
-            },
+            }
         });
 
-    ex.insertDropdownTextbox112(trialBox, codeDrop);
+        ex.insertDropdownTextbox112(trialBox, codeDrop)};
+
+
     makeABox();
     // trialBox.remove();
     var makeABox = function(){
@@ -49,16 +51,17 @@ var main = function(ex) {
         "stay": true,
         "color": "red",
         "textColor": "black"
-    });
+        });
     
-    var input1 = ex.createInputText(0,0,"placeholder");
+        var input1 = ex.createInputText(0,0,"placeholder");
 
-    var button1 = ex.createButton(0,0,"Press e",{
-        keybinding: ["e", 69]
-    }).on("click", function() { alert("e")});
-
-    ex.insertTextAreaTextbox112(trialBox, input1);
-    ex.insertButtonTextbox112(trialBox, button1);
+        var button1 = ex.createButton(0,0,"Press e",{
+            keybinding: ["e", 69]
+            }).on("click", function() { alert("e")});
+        ex.insertTextAreaTextbox112(trialBox, input1);
+        ex.insertButtonTextbox112(trialBox, button1)};
     makeABox();
+
+    
 
 };
