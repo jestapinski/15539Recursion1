@@ -40,10 +40,11 @@ var main = function(ex) {
             }
         });
 
-        ex.insertDropdownTextbox112(trialBox, codeDrop)};
+        ex.insertDropdownTextbox112(trialBox, codeDrop)
+    };
 
 
-    makeABox();
+    // makeABox();
     // trialBox.remove();
     var makeABox = function(){
         var trialBox = ex.textbox112("Please choose the function below that takes one parameter <span>$TEXTAREA$</span> <span>$BUTTON$</span>", {
@@ -59,7 +60,9 @@ var main = function(ex) {
             keybinding: ["e", 69]
             }).on("click", function() { alert("e")});
         ex.insertTextAreaTextbox112(trialBox, input1);
-        ex.insertButtonTextbox112(trialBox, button1)};
+        ex.insertButtonTextbox112(trialBox, button1)
+        // input1.remove();
+    }
     makeABox();
 
     

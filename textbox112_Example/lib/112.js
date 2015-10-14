@@ -2602,11 +2602,11 @@ function define112Exercise(exerciseConstructor,wrapper) {
             assert($targetSpan != [], "identifier not found.");
 
             // Set dropdown classes
-            // $Dropdown.find("button").addClass("dropdown-inline");
-            // $Dropdown.find("ul").addClass("dropdown-inline");
+            $Dropdown.find("button").addClass("dropdown-inline");
+            $Dropdown.find("ul").addClass("dropdown-inline");
 
             // Remove absolute positioning
-            // $Dropdown.removeAttr("style");
+            $Dropdown.removeAttr("style");
 
             // Add dropdown to a new span
             var $span = $("<span></span>");
@@ -2649,17 +2649,17 @@ function define112Exercise(exerciseConstructor,wrapper) {
             assert($targetSpan != [], "identifier not found.");
 
             // Set dropdown classes
-            // $Dropdown.find("button").addClass("dropdown-inline");
-            // $Dropdown.find("ul").addClass("dropdown-inline");
+            $Dropdown.find("button").addClass("dropdown-inline");
+            $Dropdown.find("ul").addClass("dropdown-inline");
 
             // Remove absolute positioning
-            // $Dropdown.removeAttr("style");
+            $Dropdown.removeAttr("style");
 
             // Add dropdown to a new span
             var $span = $("<span></span>");
             $span.css({
                 display: "inline-block",
-                "vertical-align": "bottom",
+                "vertical-align": "top",
                 "size": "large",
                 "color": "black"
             });
