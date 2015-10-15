@@ -1,4 +1,13 @@
 ToDo:
+Bug Fixes:
 10/15/15:
-- Fix the functionalities of the hints (for example, when you get a wrong bucket and hit "okay", it restarts the whole excercise rather than only moving that element back.) (As another example, if you click "x" on that same hint, it disables the element that was wrong, so you cannot fix it.)
+- Fix the functionalities of the hints (for example, when you get a wrong bucket and hit "okay", it restarts the whole exercise rather than only moving that element back.) (As another example, if you click "x" on that same hint, it disables the element that was wrong, so you cannot fix it.)
+- For some reason, when the stepText is enabled, a user cannot click and drag the elements of the list.
+
+Features To Add:
+10/15/15:
 - Add assesment Qs
+
+Notes:
+10/15/15:
+- In general, we should avoid using global variables.  For example, I created a variable x0 for the start location of a paragraph element, but that same name was being used for the start of the list elements.  Hence, let us try to put everything inside functions, to avoid clashes of variable names.

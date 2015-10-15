@@ -15,5 +15,18 @@
         "requires": {
             "js":["draggableListElements.js"]
         }
+    },
+    "assesments": {
+        "comparingSorts": {
+            "question":"This list is better sorted using radix sort than _.  Why?",
+            "variable":"_",
+            "choices":["merge sort", "selection sort", "bubble sort", "quick sort"],
+            "answerCoices":["The length of the maximum number is less than log(n), where n is the number of elements in the list.",
+                            "This list consists of numbers rather than strings",
+                            "The numbers in the list are all close in value to each other.",
+                            "The numbers in the list all have the same number of digits.",
+                            "The list is already partially sorted.",
+                            "The length of the maximum number is the same as the number of elements in the list."]
+        }
     }
 }
