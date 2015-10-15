@@ -1,0 +1,4 @@
+ToDo:
+10/15/15:
+- Fix the functionalities of the hints (for example, when you get a wrong bucket and hit "okay", it restarts the whole excercise rather than only moving that element back.) (As another example, if you click "x" on that same hint, it disables the element that was wrong, so you cannot fix it.)
+- Add assesment Qs

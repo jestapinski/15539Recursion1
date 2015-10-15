@@ -1,0 +1,21 @@
+{
+    "meta": {
+        "author": "",
+        "email": "",
+        "description": "Assignment III",
+        "id": "answerid-assignment3",
+        "languages": ["python"],
+        "difficulty": "medium",
+        "mode": "practice",
+        "exercises": [{
+            "path":"exercises/placeholder"
+        }, {
+            "path":"exercises/draggable_list_element_example"
+        }, {   
+            "path":"exercises/textbox_112_example"
+        }, {
+            "path":"exercises/radix_sort"
+            }]
+    }
+
+}
