@@ -64,9 +64,9 @@ function runPracticeMode (ex) {
     var recentBucket = 0;
     var correctBucket = false;
 
-    var nextButton = ex.createButton(margin,1.5*margin,"Next",{
-            color: "LightBlue",
-    });
+    // var nextButton = ex.createButton(margin,1.5*margin,"Next",{
+    //         color: "LightBlue",
+    // });
 
     //var stepText = ex.createParagraph(canvasWidth/8,margin,"Step: ",{ size: "large"});
 
@@ -229,7 +229,7 @@ function runPracticeMode (ex) {
         }
 
         if(didDrop){
-            nextButton.enable();
+            // nextButton.enable();
             updateBucket();
             //logList();
         }
@@ -343,7 +343,7 @@ function runPracticeMode (ex) {
             if(maxIndex >= listLength-1){
                 ex.chromeElements.submitButton.enable();
                 draggableListElements[workingIndex].disable();
-                nextButton.disable();
+                // nextButton.disable();
                 drawAll();
                 return;
             }
@@ -354,7 +354,7 @@ function runPracticeMode (ex) {
         console.log("text");
         //stepText.text("Step: " + maxIndex);
         draggableListElements[workingIndex].enable();
-        nextButton.disable();
+        // nextButton.disable();
         correctBucket = false;
         drawAll();
     }
@@ -486,12 +486,12 @@ function runPracticeMode (ex) {
     function bindButtons(){
         ex.graphics.on("mousedown", mousedown);
         ex.chromeElements.submitButton.on("click", submit);
-        nextButton.on("click", updateBucket);
+        // nextButton.on("click", updateBucket);
         ex.chromeElements.resetButton.on("click",restart);
     }
      function setUp(){
         ex.chromeElements.submitButton.disable();
-        nextButton.disable();
+        // nextButton.disable();
     }
 
 
