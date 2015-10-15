@@ -47,6 +47,10 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
         element.x = x;
         element.y = y;
     };
+    element.moveBackToStartPos = function () {
+        element.x = element.startX;
+        element.y = element.startY;
+    };
     element.drag = function () {
         element.isBeingDragged = true;
     };

@@ -254,9 +254,12 @@ function runPracticeMode (ex) {
             var h = bucketSpots[spot][3];
             ex.graphics.ctx.fillRect(x, y, w, h);
             ex.graphics.ctx.strokeRect(x, y, w, h);
-            // ex.createParagraph(x + w / 2, y + h / 2, String(i));
-            // i++;
-            
+            ex.graphics.ctx.fillStyle = "black";
+            ex.graphics.ctx.font = "15 px Arial";
+            ex.graphics.ctx.textAlign = "center";
+            ex.graphics.ctx.textBaseline="middle";
+            ex.graphics.ctx.fillText(String(i),x+w/2,y+h/2);
+            i++;            
         }
      }
 
