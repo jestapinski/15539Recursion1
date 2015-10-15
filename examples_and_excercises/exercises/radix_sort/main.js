@@ -42,7 +42,7 @@ var main = function(ex) {
         //Create the actual list
         var maxNumberOfDigits = 3;
         var startList = randList(maxNumberOfDigits);
-
+        var correctList = LSDdigitSort(startList);
 
         //index being move/click
         var workingIndex = 0;
@@ -268,6 +268,20 @@ var main = function(ex) {
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
+        
+        function LSDdigitSort(L){
+            var buckets = []
+            for(var i = 0; i < 10; i++){
+                buckets[i] = [];
+            }
+            var digit;
+            for(var i=0; i < L.length; i++){
+                digit = (L[i]/Math.pow(10,digitIndex))%10
+                buckets[digit].push(L[i]);
+            }
+            var flatten = [].concat.apply([], buckets);
+            return flatten;
+        }
 
         /***************************************************************************
          * Functions for Updating List at Each Step
@@ -383,7 +397,7 @@ var main = function(ex) {
                 button2 = ex.createButton(0, 0, "New");
                 button1.on("click", function() {console.log("new");})
                 ex.insertButtonTextbox112(correctBox, button2);
-                correctAnsContinue(newList);
+                correctAnsContinue();
                 //ex.showFeedBack("Correct!");
             } else {
                incorrectAns();
@@ -392,8 +406,10 @@ var main = function(ex) {
             disableButtons();
         }   
 
-        function correctAnsContinue(correctList){
-            console.log("continuing");
+        function correctAnsContinue(){
+            startList = correctList;
+            digitIndex++;
+            restart();
         }
 
         function incorrectAns(correctList){
@@ -426,7 +442,7 @@ var main = function(ex) {
             } else if (ex.data.attempts == 2){
                 //get correct list
                 ex.alert("Incorrect. The correct answer is...");
-               //call correctAns
+               correctAnsContinue();
             }
             ex.chromeElements.resetButton.enable();
             attempts++;
@@ -443,12 +459,10 @@ var main = function(ex) {
             correctBucket = false;
             setUp();
             drawAll();
-            console.log("after restart workingIndex:",workingIndex);
         }
 
         function loadSavedData(){
             if(ex.data.attempts) attempts = ex.data.attempts
-            console.log("attempts: ",attempts);
         }
 
         function bindButtons(){
