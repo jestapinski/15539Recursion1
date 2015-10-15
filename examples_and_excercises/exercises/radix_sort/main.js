@@ -1,5 +1,5 @@
 var main = function(ex) {
-    //ex.data.meta.mode = "practice"; 
+    // ex.data.meta.mode = "practice"; 
     ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
@@ -10,7 +10,7 @@ var main = function(ex) {
 
 };
 
-function runPracticeMode(ex) {
+function runPracticeMode (ex) {
     /***************************************************************************
      * Initialize List
      **************************************************************************/
@@ -211,11 +211,11 @@ function runPracticeMode(ex) {
                 {
                     stay: true
                 });
-                button1 = ex.createButton(0, 0, "OK!");
-                button1.on("click", function() {
+                button234 = ex.createButton(0, 0, "OK!");
+                button234.on("click", function() {
                     correctBox.remove();
                     restart();})
-                ex.insertButtonTextbox112(correctBox, button1);
+                ex.insertButtonTextbox112(correctBox, button234);
                 // alert("Wrong Bucket!");
             }
 
@@ -430,24 +430,25 @@ function runPracticeMode(ex) {
                 {
                     stay: true
                 });
-            button1 = ex.createButton(0, 0, "restart");
-            button1.on("click", function() {
+            button112 = ex.createButton(0, 0, "restart");
+            button112.on("click", function() {
                 correctBox.remove();
                 restart();
             })
-            ex.insertButtonTextbox112(correctBox, button1);
+            ex.insertButtonTextbox112(correctBox, button112);
         } else if (ex.data.attempts == 1){
+            console.log("here");
             // ex.alert("Not quite right! Are you sure you are looking at the right digit?");
             var correctBox = ex.textbox112("Not quite right! Are you sure you are looking at the right digit? <span>$BUTTON$</span>",
                 {
                     stay: true
                 });
-            button1 = ex.createButton(0, 0, "restart");
-            button1.on("click", function() {
+            button122 = ex.createButton(0, 0, "restart");
+            button122.on("click", function() {
                 correctBox.remove();
                 restart();
             })
-            ex.insertButtonTextbox112(correctBox, button1);
+            ex.insertButtonTextbox112(correctBox, button122);
         } else if (ex.data.attempts == 2){
             //get correct list
             ex.alert("Incorrect. The correct answer is...");
@@ -787,5 +788,3 @@ function runQuizMode(ex) {
 
     run();
 }
-
-
