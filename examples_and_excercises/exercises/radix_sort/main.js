@@ -1,6 +1,6 @@
 var main = function(ex) {
     ex.data.meta.mode = "practice"; 
-    // ex.data.meta.mode = "quiz-immediate"; 
+    ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -661,10 +661,14 @@ function runQuizMode(ex) {
                     })
                     ex.insertButtonTextbox112(newBox112, button539);
                 } else {
-                    ex.alert("Wrong Answer!", {
+                    var newBox112 = ex.textbox112("Inorrect Answer! <span>$BUTTON$</span>", {
                         color: "red",
-                        opacity: "10%"
+                        stay: true
                     });
+                    var buttonKOZ = ex.createButton(0, 0, "Next!").on("click", function(){
+                        newBox112.remove();
+                    })
+                    ex.insertButtonTextbox112(newBox112, buttonKOZ);
                 }
             })
         }
