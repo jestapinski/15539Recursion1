@@ -3075,3 +3075,4 @@ function define112Exercise(exerciseConstructor,wrapper) {
 
     return ex;
 }
+
