@@ -2661,7 +2661,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
             $Dropdown.removeAttr("style");
 
             // Add dropdown to a new span
-            var $span = $("<span></span>");
+            var $span = $("<btn></btn>");
             $span.css({
                 display: "inline-block",
                 "vertical-align": "top",
