@@ -1,6 +1,6 @@
 var main = function(ex) {
-    // ex.data.meta.mode = "practice"; 
-    ex.data.meta.mode = "quiz-immediate"; 
+    ex.data.meta.mode = "practice"; 
+    // ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -114,6 +114,9 @@ function runPracticeMode (ex) {
             x = bucketX;
             //create spacing
             y = bucketY + i*(elementH + spacing);
+            // ex.createParagraph(x + 50, y + 20, String(i), {
+            //     size: "medium"
+            // });
             bucketSpots[i] = [x,y,elementW,elementH,[],[]];
         }
 
@@ -122,6 +125,9 @@ function runPracticeMode (ex) {
             //create spacing
             y = bucketY + (j-numLeft)*(elementH + spacing);
             console.log(y);
+            // ex.createParagraph(x + 50, y + 20, String(j), {
+            //     size: "medium"
+            // });
             bucketSpots[j] = [x,y,elementW,elementH,[],[]];
         }
 
@@ -218,6 +224,7 @@ function runPracticeMode (ex) {
                 ex.insertButtonTextbox112(correctBox, button234);
                 // alert("Wrong Bucket!");
             }
+            drawBuckets();
 
         }
 
@@ -263,6 +270,7 @@ function runPracticeMode (ex) {
         }
         //ex.graphics.ctx.fillText = ("hello",canvasWidth/2,canvasHeight/2);
      }
+
      function drawAll() {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawList();
@@ -632,22 +640,33 @@ function runQuizMode(ex) {
             text = alphaChar.charAt(i).concat(". ").concat(ex.data.assesments.comparingSorts.answerChoices[index]);
         }
 
-        function createModifiedParagraph () {
+        function createModifiedParagraph (i) {
             var paragraph = ex.createParagraph(x,y+dy*i,text, {
                                                 size: "large",
                                                 transition: "fade"
                                                });
+            var newButton = ex.createButton(x - 70, y+dy*i, String.fromCharCode(65 + i));
             paragraph.isCorrect = (i == indexOfSol);
-            paragraph.on("click", function (event) {
+            newButton.on("click", function (event) {
                 if (paragraph.isCorrect) {
-                    alert("Correct Answer!");
+                    var newBox112 = ex.textbox112("Correct Answer! <span>$BUTTON$</span>", {
+                        color: "green",
+                        stay: true
+                    });
+                    var button539 = ex.createButton(0, 0, "Next!").on("click", function(){
+                        newBox112.remove();
+                    })
+                    ex.insertButtonTextbox112(newBox112, button539);
                 } else {
-                    alert("Wrong Answer!");
+                    ex.alert("Wrong Answer!", {
+                        color: "red",
+                        opacity: "10%"
+                    });
                 }
             })
         }
 
-        answerList[i] = createModifiedParagraph ();
+        answerList[i] = createModifiedParagraph (i);
      }
 
     /***************************************************************************
