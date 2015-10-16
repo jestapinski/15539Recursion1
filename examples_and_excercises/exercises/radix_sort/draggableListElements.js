@@ -1,4 +1,4 @@
-function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForBuckets, enabledColor, disabledColor, fontSize) {
+function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, enabledColor, disabledColor, fontSize) {
     var element = {};
     
     element.x = bbox[0];
@@ -9,18 +9,20 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
     element.h = bbox[3];
     element.text = text;
     element.digitIndex = digitIndex;
-    element.emptySpotsForBuckets = emptySpotsForBuckets;
+    element.emptySpots = emptySpots;
     element.enabledColor = (enabledColor == undefined) ? "LightSalmon" : enabledColor;
     element.disabledColor = (disabledColor == undefined) ? "LightGray" : disabledColor;
     element.color = element.enabledColor;
     element.fontSize = (fontSize === undefined) ? 15 : fontSize;
     element.isEnabled = true;
     element.isBeingDragged = false;
+    element.currentBucket = undefined;
 
     element.draw = function () {
         ctx.fillStyle = element.color;
         ctx.fillRect(element.x, element.y, element.w, element.h);
         ctx.strokeStyle = "black";
+        ctx.setLineDash([]);
         ctx.strokeRect(element.x, element.y, element.w, element.h);
         ctx.textAlign = "left";
         ctx.textBaseline="middle";
@@ -43,6 +45,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
     element.setDigitIndex = function(digitIndex) { 
         element.digitIndex = digitIndex;
     };
+    element.setEmptySpots = function(emptySpots) {
+        element.emptySpots = emptySpots;
+    }
     element.move = function(x, y) {
         element.x = x;
         element.y = y;
@@ -63,13 +68,13 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
             // is because if the element is on top of 2 spots, it shoudl snap to
             // the one it overlaps with more.
             var overlapAreas = {};
-            for (var spot in element.emptySpotsForBuckets) {
-                if (element.emptySpotsForBuckets.hasOwnProperty(spot)) {
-                    //Every value in emptySpotsForBuckets is of the form [x,y,w,h]
-                    var spotX0 = element.emptySpotsForBuckets[spot][0];
-                    var spotY0 = element.emptySpotsForBuckets[spot][1];
-                    var spotX1 = spotX0 + element.emptySpotsForBuckets[spot][2];
-                    var spotY1 = spotY0 + element.emptySpotsForBuckets[spot][3];
+            for (var spot in element.emptySpots) {
+                if (element.emptySpots.hasOwnProperty(spot)) {
+                    //Every value in emptySpots is of the form [x,y,w,h]
+                    var spotX0 = element.emptySpots[spot][0];
+                    var spotY0 = element.emptySpots[spot][1];
+                    var spotX1 = spotX0 + element.emptySpots[spot][2];
+                    var spotY1 = spotY0 + element.emptySpots[spot][3];
 
                     var elemX0 = element.x;
                     var elemY0 = element.y;
@@ -95,17 +100,20 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
             }
             if (maxOverlap > 0) {
                 //Snap into place
-                element.x = element.emptySpotsForBuckets[maxSpot][0];
-                element.y = element.emptySpotsForBuckets[maxSpot][1];
+                element.x = element.emptySpots[maxSpot][0];
+                element.y = element.emptySpots[maxSpot][1];
                 didSnapIntoSpot = true;
                 //Check if this is the correct bucket
-                if (element.text.charAt(element.text.length-1-element.digitIndex) === maxSpot) {
-                    return true;
+                if (element.digitIndex < element.text.length) {
+                    element.currentBucket = maxSpot;
+                    return element.text.charAt(element.text.length-1-element.digitIndex) === maxSpot;
                 } else {
-                    return false;
+                    element.currentBucket = maxSpot;
+                    return maxSpot === '0' || maxSpot === 'a' || maxSpot === 'A';
                 }
             }
             if (didSnapIntoSpot === false) {
+                element.currentBucket = undefined;
                 element.x = element.startX;
                 element.y = element.startY;
             }
@@ -128,4 +136,159 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpotsForB
         return false;
     }
     return element;
+}
+
+//Create the draggable list
+function createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAllFn, digitIndex, emptySpots, enabledColor, disabledColor, fontSize){
+    var self = {};
+    self.elementList = elementList;
+    self.elementW = elementW;
+    self.elementH = elementH;
+    self.x0 = x0;
+    self.y0 = y0;
+    self.successFn = successFn;
+    self.failureFn = failureFn;
+    self.drawAllFn = drawAllFn;
+    self.digitIndex = digitIndex;
+
+    //This ensures smooth motion for the element, to prevent it from jumping 
+    // to mouse location when you first click it.
+    self.mouseXOffset = 0;
+    self.mouseYOffset = 0;
+
+    self.list = [];
+
+    for (var i = 0; i < self.elementList.length; i++) {
+        var x = x0 + i*self.elementW;
+        var text = String(self.elementList[i]);
+        self.list[i] = createDraggableListElement(ex.graphics.ctx, [x,self.y0,self.elementW,self.elementH], 
+            text, self.digitIndex, emptySpots, enabledColor, disabledColor, fontSize);
+        //Only enable the zeroth list element
+        if (i != 0) {
+            self.list[i].disable();
+        }
+    }
+
+    self.setDigitIndex = function (digitIndex) {
+        self.digitIndex = digitIndex;
+        for (var i = 0; i < self.list.length; i++) {
+            self.list[i].setDigitIndex(digitIndex);
+        }
+    };
+
+    self.setEmptySpots = function (emptySpots) {
+        self.emptySpots = emptySpots;
+        for (var i = 0; i < self.list.length; i++) {
+            self.list[i].setEmptySpots(emptySpots);
+        }
+    };
+
+    self.draw = function () {
+        // ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
+        ex.graphics.ctx.strokeStyle = "black";
+        ex.graphics.ctx.fillStyle = "LightGray";
+        ex.graphics.ctx.setLineDash([]);
+        ex.graphics.ctx.fillRect(self.x0, self.y0, self.elementW*self.elementList.length, self.elementH);
+        ex.graphics.ctx.strokeRect(self.x0, self.y0, self.elementW*self.elementList.length, self.elementH);
+        for (var i = 0; i < self.list.length; i++) {
+            self.list[i].draw();
+        }
+    }
+
+    self.enable = function (i) {
+        self.list[i].enable();
+    }
+
+    self.disable = function (i) {
+        self.list[i].disable();
+    }
+
+    self.mousedown = function (event) {
+        console.log("Mouse Down");
+        var x = event.offsetX;
+        var y = event.offsetY;
+        for (var i = 0; i < self.list.length; i++) {
+            if (self.list[i].isXYInElement(x,y)) {
+                if (self.list[i].isEnabled) {
+                    console.log(i);
+                    self.mouseXOffset = self.list[i].x - x;
+                    self.mouseXOffset = self.list[i].y - y;
+                    self.list[i].drag();
+                }
+            }
+        }
+        ex.graphics.on("mousemove", self.mousemove);
+        ex.graphics.on("mouseup", self.mouseup);
+    }
+
+    self.mousemove = function (event) {
+        console.log("Mouse Move");
+        var x = event.offsetX;
+        var y = event.offsetY;
+        for (var i = 0; i < self.list.length; i++) {
+            if (self.list[i].isBeingDragged) {
+                self.list[i].move(x+self.mouseXOffset,y+self.mouseYOffset);
+            }
+        }
+        self.drawAllFn();
+    }
+
+    self.mouseup = function (event) {
+        console.log("Mouse Up");
+        // var didDrop = false;
+        // var didSnap = false;
+        // bucketSearch(x,y);//get current bucket
+        for (var i = 0; i < self.list.length; i++) { 
+            if (self.list[i].isBeingDragged) {
+                console.log(emptySpots);
+                console.log(self.list[i].x);
+                console.log(self.list[i].y);
+                var didSnap = self.list[i].drop();
+                console.log(didSnap);
+                if (didSnap === true) {
+                    //Correct Bucket!
+                    //Create the necessary feedback
+                    // bucketSearch(draggableList[i].x,draggableList[i].y);
+                    // didDrop = true;
+                    // correctBucket = true;
+                    self.successFn (i, self.list[i].currentBucket);
+                    // workingIndex = i
+                    //alert("Correct Bucket!");
+                }
+                if (didSnap === false) {
+                    self.failureFn (i, self.list[i].currentBucket);
+                    //Wrong Bucket!
+                    //Create the necessary feedback
+                    // bucketSearch(draggableList[i].x,draggableList[i].y);
+        //             didDrop = true;
+        //             correctBucket = false;
+        //             workingIndex = i
+        //             //bucketSpots[recentBucket][5].push(i);
+        //             var correctBox = ex.textbox112("Wrong Bucket! Let's look at the red digits and try again! <span>$BUTTON$</span>",
+        //             {
+        //                 stay: true
+        //             });
+        //             button234 = ex.createButton(0, 0, "OK!");
+        //             button234.on("click", function() {
+        //                 correctBox.remove();
+        //                 restart();})
+        //             ex.insertButtonTextbox112(correctBox, button234);
+        //             // alert("Wrong Bucket!");
+        //         }
+        //         drawBuckets();
+                }
+                break;
+            }
+        // if(didDrop){
+        //     // nextButton.enable();
+        //     updateBucket();
+        //     //logList();
+        }
+        self.drawAllFn();
+        // drawAll();
+        ex.graphics.off("mousemove", self.mousemove);
+        ex.graphics.off("mouseup", self.mouseup);
+    }
+
+    return self;
 }
