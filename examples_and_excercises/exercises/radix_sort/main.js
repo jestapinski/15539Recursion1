@@ -116,7 +116,7 @@ function runPracticeMode (ex) {
     // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
     // var elementH = elementW/2;
     var elementH = (3*ex.height()/4 - 2*margin)/listLength;
-    var elementW = elementH*2;
+    var elementW = elementH*1.5;
 
     //Top Left corner of the list
     // var x0 = ex.width()/2 - elementW*listLength/2;
@@ -177,7 +177,7 @@ function runPracticeMode (ex) {
     //for integers only
     var bucketNum = 10;
 
-    var bucketX = ex.width()/3;
+    var bucketX = ex.width()/4;
     var bucketY = 0;
     var bucketW = ex.width();
     var bucketH = ex.height()-bucketY;
