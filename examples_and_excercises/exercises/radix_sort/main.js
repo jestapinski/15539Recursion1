@@ -520,29 +520,29 @@ function runPracticeMode (ex) {
     //     ex.chromeElements.newButton.disable();
     //     ex.chromeElements.displayCAButton.disable();
     // }
-    // function submit(){
-    //     var newList = createListFromBucket();
-    //     ex.data.newList = newList;
-    //     if(isCorrect()){
-    //         //Bug, cannot put two buttons in one element
-    //         var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON$</span>",
-    //             {
-    //                 stay: true
-    //             });
-    //         button1 = ex.createButton(0, 0, "Next");
-    //         button1.on("click", function() {correctBox.remove();})
-    //         ex.insertButtonTextbox112(correctBox, button1);
-    //         button2 = ex.createButton(0, 0, "New");
-    //         button1.on("click", function() {console.log("new");})
-    //         ex.insertButtonTextbox112(correctBox, button2);
-    //         correctAnsContinue();
-    //         //ex.showFeedBack("Correct!");
-    //     } else {
-    //        incorrectAns();
-    //     }
-    //     console.log(newList);
-    //     disableButtons();
-    // }   
+    function submit(){
+        var newList = createListFromBucket();
+        ex.data.newList = newList;
+        if(isCorrect()){
+            //Bug, cannot put two buttons in one element
+            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON$</span>",
+                {
+                    stay: true
+                });
+            button1 = ex.createButton(0, 0, "Next");
+            button1.on("click", function() {correctBox.remove();})
+            ex.insertButtonTextbox112(correctBox, button1);
+            button2 = ex.createButton(0, 0, "New");
+            button1.on("click", function() {console.log("new");})
+            ex.insertButtonTextbox112(correctBox, button2);
+            correctAnsContinue();
+            //ex.showFeedBack("Correct!");
+        } else {
+           incorrectAns();
+        }
+        console.log(newList);
+        disableButtons();
+    }   
 
     // function correctAnsContinue(){
     //     startList = correctList;
@@ -588,17 +588,17 @@ function runPracticeMode (ex) {
     //     ex.data.attempts = attempts;
     // }
 
-    // function restart(){
-    //     //store data 
-    //     bucketSpots = getBucketSpots();
-    //     emptySpots  = getEmptySpots();
-    //     draggableList = createDraggableList();
-    //     workingIndex = 0;
-    //     maxIndex = 0;
-    //     correctBucket = false;
-    //     setUp();
-    //     drawAll();
-    // }
+    function restart(){
+        //store data 
+        bucketSpots = getBucketSpots();
+        emptySpots  = getEmptySpots();
+        draggableList = createDraggableList();
+        workingIndex = 0;
+        maxIndex = 0;
+        correctBucket = false;
+        setUp();
+        drawAll();
+    }
 
     function loadSavedData(){
         if(ex.data.attempts) attempts = ex.data.attempts
