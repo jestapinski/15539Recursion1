@@ -23,30 +23,34 @@ function createRandomIntegerList(listLength, maxNumberOfDigits){
 function getBucketSpots(bucketNum, x0, y0, width, height, elementW, elementH){
     var bucketSpots = {};
     var x,y;
-    var numLeft = Math.ceil(bucketNum/2);
-    var spacing = (height/(numLeft))-elementH;
+    // var numLeft = Math.ceil(bucketNum/2);
+    var spacing = (height/bucketNum)-elementH;
     // var numRight = Math.floor(bucketNum/2);
-    for(var i=0; i < numLeft;i++){
-        x = x0;
-        y = y0 + i*(elementH + spacing);
-        bucketSpots[i] = [x,y,elementW,elementH,[],[]];
-    }
+    // for(var i=0; i < numLeft;i++){
+    //     x = x0;
+    //     y = y0 + i*(elementH + spacing);
+    //     bucketSpots[String(i)] = [x,y,elementW,elementH,[],[]];
+    // }
 
-    for(var j=numLeft;j < bucketNum;j++){
-        x = width/2;
-        //create spacing
-        y = y0 + (j-numLeft)*(elementH + spacing);
-        // ex.createParagraph(x + 50, y + 20, String(j), {
-        //     size: "medium"
-        // });
-        bucketSpots[j] = [x,y,elementW,elementH,[]];
+    // for(var j=numLeft;j < bucketNum;j++){
+    //     x = width/2;
+    //     //create spacing
+    //     y = y0 + (j-numLeft)*(elementH + spacing);
+    //     // ex.createParagraph(x + 50, y + 20, String(j), {
+    //     //     size: "medium"
+    //     // });
+    //     bucketSpots[String(j)] = [x,y,elementW,elementH,[]];
+    // }
+    for (var i = 0; i < bucketNum; i++) {
+        var y = y0 + i*(elementH + spacing);
+        bucketSpots[String(i)] = [x0,y,elementW,elementH,[],[]];
     }
 
     console.log(bucketSpots);
     return bucketSpots;
 }
 
-function getEmptySpots(bucketSpots){
+function getEmptySpots(bucketSpots, bucketOrdering) {
     var emptySpots = {};
     for (var spot in bucketSpots){
         var x = bucketSpots[spot][0];
@@ -59,6 +63,18 @@ function getEmptySpots(bucketSpots){
     console.log(bucketSpots);
     console.log(emptySpots);
     return emptySpots;
+}
+
+function moveBack (draggableList, bucketSpots, bucketOrdering) {
+    var newOrder = [];
+    for (var i = 0; i < bucketOrdering.length; i++) {
+        var bucketLabel = bucketOrdering[i];
+        for (var j = 0; j < bucketSpots[bucketLabel][4].length; j++) {
+            newOrder.push(bucketSpots[bucketLabel][4][j]);
+        }
+        bucketSpots[bucketLabel][4] = [];
+    }
+    draggableList.moveElementsBack(newOrder);
 }
 
 /***************************************************************************
@@ -97,17 +113,21 @@ function runPracticeMode (ex) {
 
     //Width/Heigh of list elements
     //var elementW = (ex.width()/2-margin)/(listLength+1);
-    var elementW = (3*ex.width()/4 - 2*margin)/listLength;
-    var elementH = elementW/2;
+    // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
+    // var elementH = elementW/2;
+    var elementH = (3*ex.height()/4 - 2*margin)/listLength;
+    var elementW = elementH*2;
 
     //Top Left corner of the list
-    var x0 = ex.width()/2 - elementW*listLength/2;
-    var y0 = margin;
+    // var x0 = ex.width()/2 - elementW*listLength/2;
+    // var y0 = margin;
+    var x0 = margin; 
+    var y0 = ex.height()/2 - elementH*listLength/2;
 
     //Digit Index - 0 is the one's digit, 1 is the 10's digit, etc.
     var digitIndex = 0;
 
-    //Set color scheme of list element (otpional)
+    //Set color scheme of list element (optional)
     var enabledColor = "LightSalmon";
     var disabledColor = "LightGray";
 
@@ -124,33 +144,32 @@ function runPracticeMode (ex) {
     var successFn = function (i, bucket) {
         console.log(i);
         console.log(bucket);
-        workingIndex = i;
+        draggableList.disable(workingIndex);
+        maxIndex = workingIndex;
+        workingIndex++;
         console.log("workingIndex:",workingIndex);
         bucketSpots[bucket][4].push(i);
-        emptySpots = getEmptySpots(bucketSpots);
-        draggableList.setEmptySpots(emptySpots);
         // updateList();
-        if(workingIndex > maxIndex){
-            maxIndex = workingIndex;
-            //if we are at the last step
-            if(maxIndex >= listLength-1){
-                ex.chromeElements.submitButton.enable();
-                draggableList.disable(workingIndex);
-                // nextButton.disable();
-                drawAll();
-                return;
-            }
+        if(workingIndex < listLength) {
+            draggableList.enable(workingIndex);
+        } else {
+            moveBack(draggableList, bucketSpots, bucketOrdering);
+            workingIndex = 0;
+            draggableList.enable(workingIndex);
+            digitIndex++;
+            draggableList.setDigitIndex(digitIndex);
+            currentIteration++;
         }
-        draggableList.disable(workingIndex);
-        workingIndex++;
-        //var text = "Step: " + maxIndex;
-        console.log("text");
-        //stepText.text("Step: " + maxIndex);
-        draggableList.enable(workingIndex);
-        // nextButton.disable();
-        // correctBucket = false;
+        emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+        draggableList.setEmptySpots(emptySpots);
         drawAll();
+        if (currentIteration >= numberOfIterations) {
+            draggableList.disable(workingIndex);
+            alert("Sorted!");
+            ex.chromeElements.submitButton.enable();
+        }
     };
+
     var failureFn = function (i, bucket) {
         alert("Wrong Bucket!");
     }
@@ -158,25 +177,26 @@ function runPracticeMode (ex) {
     //for integers only
     var bucketNum = 10;
 
-    var spacing = Math.min(ex.width(), ex.height())/20;
-    var bucketX = 0;
-    var bucketY = ex.height()/4;
+    var bucketX = ex.width()/3;
+    var bucketY = 0;
     var bucketW = ex.width();
     var bucketH = ex.height()-bucketY;
 
+    var bucketOrdering = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
     //Empty Spots for Buckets -- CHANGE THIS FROM HARDCODED LOCATIONS!
     var bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
-    var emptySpots = getEmptySpots(bucketSpots);
+    var emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
 
-    var draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex, emptySpots, enabledColor, disabledColor, fontSize);
+    var draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
 
     //index being move/click
     var workingIndex = 0;
     //highest index that has been moved so far
     var maxIndex = 0;
+    var numberOfIterations = Math.floor(Math.log10(Math.max(...startList)))+1;
     var currentIteration = 0;
     var attempts = 0;
-
 
     var recentBucket = 0;
     var correctBucket = false;
@@ -363,8 +383,6 @@ function runPracticeMode (ex) {
      * Draw Functions
      **************************************************************************/
      function drawBuckets(){
-        var bucketLabel = 0;
-        var i = 0;
         for (var spot in bucketSpots) {
             ex.graphics.ctx.strokeStyle = "black";
             ex.graphics.ctx.fillStyle = bucketColor;
@@ -379,8 +397,7 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.font = "15 px Arial";
             ex.graphics.ctx.textAlign = "center";
             ex.graphics.ctx.textBaseline="middle";
-            ex.graphics.ctx.fillText(String(i),x+w/2,y+h/2);
-            i++;            
+            ex.graphics.ctx.fillText(spot,x+w/2,y+h/2);        
         }
         for (var spot in emptySpots) {
             var x = emptySpots[spot][0];
@@ -474,114 +491,114 @@ function runPracticeMode (ex) {
      * Functions for Submitting the Current List
      **************************************************************************/
 
-    function createListFromBucket(){
-        var newList = []
-        var elem;
-        for(var spot in bucketSpots){
-            var L = bucketSpots[spot][4]
-            for(var i = 0; i < L.length;i++){
-                elem = startList[L[i]];
-                newList.push(elem);
-            }
-        }
-        return newList;
-    }
+    // function createListFromBucket(){
+    //     var newList = []
+    //     var elem;
+    //     for(var spot in bucketSpots){
+    //         var L = bucketSpots[spot][4]
+    //         for(var i = 0; i < L.length;i++){
+    //             elem = startList[L[i]];
+    //             newList.push(elem);
+    //         }
+    //     }
+    //     return newList;
+    // }
 
-    function isCorrect(){
-        for(var spot in bucketSpots){
-            //if there is something in the wrongList of the bucket
-            if(bucketSpots[spot][5].length != 0){
-                console.log("error",bucketSpots[spot][5]);
-                return false;
-            }
-        }
-        return true;
-    }
+    // function isCorrect(){
+    //     for(var spot in bucketSpots){
+    //         //if there is something in the wrongList of the bucket
+    //         if(bucketSpots[spot][5].length != 0){
+    //             console.log("error",bucketSpots[spot][5]);
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
-    function disableButtons(){
-        ex.chromeElements.submitButton.disable();
-        ex.chromeElements.newButton.disable();
-        ex.chromeElements.displayCAButton.disable();
-    }
-    function submit(){
-        var newList = createListFromBucket();
-        ex.data.newList = newList;
-        if(isCorrect()){
-            //Bug, cannot put two buttons in one element
-            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON$</span>",
-                {
-                    stay: true
-                });
-            button1 = ex.createButton(0, 0, "Next");
-            button1.on("click", function() {correctBox.remove();})
-            ex.insertButtonTextbox112(correctBox, button1);
-            button2 = ex.createButton(0, 0, "New");
-            button1.on("click", function() {console.log("new");})
-            ex.insertButtonTextbox112(correctBox, button2);
-            correctAnsContinue();
-            //ex.showFeedBack("Correct!");
-        } else {
-           incorrectAns();
-        }
-        console.log(newList);
-        disableButtons();
-    }   
+    // function disableButtons(){
+    //     ex.chromeElements.submitButton.disable();
+    //     ex.chromeElements.newButton.disable();
+    //     ex.chromeElements.displayCAButton.disable();
+    // }
+    // function submit(){
+    //     var newList = createListFromBucket();
+    //     ex.data.newList = newList;
+    //     if(isCorrect()){
+    //         //Bug, cannot put two buttons in one element
+    //         var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON$</span>",
+    //             {
+    //                 stay: true
+    //             });
+    //         button1 = ex.createButton(0, 0, "Next");
+    //         button1.on("click", function() {correctBox.remove();})
+    //         ex.insertButtonTextbox112(correctBox, button1);
+    //         button2 = ex.createButton(0, 0, "New");
+    //         button1.on("click", function() {console.log("new");})
+    //         ex.insertButtonTextbox112(correctBox, button2);
+    //         correctAnsContinue();
+    //         //ex.showFeedBack("Correct!");
+    //     } else {
+    //        incorrectAns();
+    //     }
+    //     console.log(newList);
+    //     disableButtons();
+    // }   
 
-    function correctAnsContinue(){
-        startList = correctList;
-        digitIndex++;
-        restart();
-    }
+    // function correctAnsContinue(){
+    //     startList = correctList;
+    //     digitIndex++;
+    //     restart();
+    // }
 
-    function incorrectAns(correctList){
-        //change to switch?
-        if(ex.data.attempts == 0){
-            attempts++;
-            // ex.alert("Not quite right :( Click restart to try again!");
-            var correctBox = ex.textbox112("Not quite right :( Click restart to try again! <span>$BUTTON$</span>",
-                {
-                    stay: true
-                });
-            button112 = ex.createButton(0, 0, "restart");
-            button112.on("click", function() {
-                correctBox.remove();
-                restart();
-            })
-            ex.insertButtonTextbox112(correctBox, button112);
-        } else if (ex.data.attempts == 1){
-            console.log("here");
-            // ex.alert("Not quite right! Are you sure you are looking at the right digit?");
-            var correctBox = ex.textbox112("Not quite right! Are you sure you are looking at the right digit? <span>$BUTTON$</span>",
-                {
-                    stay: true
-                });
-            button122 = ex.createButton(0, 0, "restart");
-            button122.on("click", function() {
-                correctBox.remove();
-                restart();
-            })
-            ex.insertButtonTextbox112(correctBox, button122);
-        } else if (ex.data.attempts == 2){
-            //get correct list
-            ex.alert("Incorrect. The correct answer is...");
-           correctAnsContinue();
-        }
-        ex.chromeElements.resetButton.enable();
-        attempts++;
-        ex.data.attempts = attempts;
-    }
+    // function incorrectAns(correctList){
+    //     //change to switch?
+    //     if(ex.data.attempts == 0){
+    //         attempts++;
+    //         // ex.alert("Not quite right :( Click restart to try again!");
+    //         var correctBox = ex.textbox112("Not quite right :( Click restart to try again! <span>$BUTTON$</span>",
+    //             {
+    //                 stay: true
+    //             });
+    //         button112 = ex.createButton(0, 0, "restart");
+    //         button112.on("click", function() {
+    //             correctBox.remove();
+    //             restart();
+    //         })
+    //         ex.insertButtonTextbox112(correctBox, button112);
+    //     } else if (ex.data.attempts == 1){
+    //         console.log("here");
+    //         // ex.alert("Not quite right! Are you sure you are looking at the right digit?");
+    //         var correctBox = ex.textbox112("Not quite right! Are you sure you are looking at the right digit? <span>$BUTTON$</span>",
+    //             {
+    //                 stay: true
+    //             });
+    //         button122 = ex.createButton(0, 0, "restart");
+    //         button122.on("click", function() {
+    //             correctBox.remove();
+    //             restart();
+    //         })
+    //         ex.insertButtonTextbox112(correctBox, button122);
+    //     } else if (ex.data.attempts == 2){
+    //         //get correct list
+    //         ex.alert("Incorrect. The correct answer is...");
+    //        correctAnsContinue();
+    //     }
+    //     ex.chromeElements.resetButton.enable();
+    //     attempts++;
+    //     ex.data.attempts = attempts;
+    // }
 
-    function restart(){
-        //store data 
-        bucketSpots = getBucketSpots();
-        emptySpots  = getEmptySpots();
-        draggableList = createDraggableList();
-        workingIndex = 0;
-        maxIndex = 0;
-        correctBucket = false;
-        setUp();
-        drawAll();
-    }
+    // function restart(){
+    //     //store data 
+    //     bucketSpots = getBucketSpots();
+    //     emptySpots  = getEmptySpots();
+    //     draggableList = createDraggableList();
+    //     workingIndex = 0;
+    //     maxIndex = 0;
+    //     correctBucket = false;
+    //     setUp();
+    //     drawAll();
+    // }
 
     function loadSavedData(){
         if(ex.data.attempts) attempts = ex.data.attempts

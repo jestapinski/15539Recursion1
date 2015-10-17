@@ -1,4 +1,4 @@
-function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, enabledColor, disabledColor, fontSize) {
+function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAllFn) {
     var element = {};
     
     element.x = bbox[0];
@@ -8,6 +8,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, en
     element.w = bbox[2];
     element.h = bbox[3];
     element.text = text;
+    element.maxDigits = maxDigits;
     element.digitIndex = digitIndex;
     element.emptySpots = emptySpots;
     element.enabledColor = (enabledColor == undefined) ? "LightSalmon" : enabledColor;
@@ -17,6 +18,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, en
     element.isEnabled = true;
     element.isBeingDragged = false;
     element.currentBucket = undefined;
+    element.drawAllFn = drawAllFn;
 
     element.draw = function () {
         ctx.fillStyle = element.color;
@@ -27,7 +29,8 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, en
         ctx.textAlign = "left";
         ctx.textBaseline="middle";
         ctx.font = String(element.fontSize).concat("px Arial");
-        var x0 = element.x + element.w/2 - ctx.measureText(element.text).width/2;
+        var fullDigitNumber = "0".repeat(maxDigits-element.text.length).concat(element.text);
+        var x0 = element.x + element.w/2 - ctx.measureText(fullDigitNumber).width/2 + (maxDigits-element.text.length)*ctx.measureText("0").width;
         for(var i = 0; i < element.text.length; ++i) {
             var character = element.text.charAt(i);
             if (element.text.length-1-i === element.digitIndex) {
@@ -48,9 +51,30 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, en
     element.setEmptySpots = function(emptySpots) {
         element.emptySpots = emptySpots;
     }
-    element.move = function(x, y) {
-        element.x = x;
-        element.y = y;
+    element.move = function(x, y, animate) {
+        var steps = 20;
+        if (animate) {
+            var dx = (x - element.x)/steps;
+            var dy = (y - element.y)/steps;
+            var i = 1;
+            var isAnimationFinished = false;
+            var animateFn = function () {
+                if (i <= steps) {
+                    element.x = element.x + dx;
+                    element.y = element.y + dy;
+                    console.log(i);
+                    element.drawAllFn();
+                    i++;
+                    setTimeout(animateFn, 50);
+                } else {
+                    isAnimationFinished = true;
+                }
+            };
+            animateFn();
+        } else {
+            element.x = x;
+            element.y = y;
+        }
     };
     element.moveBackToStartPos = function () {
         element.x = element.startX;
@@ -135,11 +159,12 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, emptySpots, en
         }
         return false;
     }
+
     return element;
 }
 
 //Create the draggable list
-function createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAllFn, digitIndex, emptySpots, enabledColor, disabledColor, fontSize){
+function createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAllFn, digitIndex, maxDigits, emptySpots, enabledColor, disabledColor, fontSize){
     var self = {};
     self.elementList = elementList;
     self.elementW = elementW;
@@ -149,7 +174,9 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
     self.successFn = successFn;
     self.failureFn = failureFn;
     self.drawAllFn = drawAllFn;
+    self.maxDigits = maxDigits;
     self.digitIndex = digitIndex;
+    self.emptySpots = emptySpots;
 
     //This ensures smooth motion for the element, to prevent it from jumping 
     // to mouse location when you first click it.
@@ -159,10 +186,10 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
     self.list = [];
 
     for (var i = 0; i < self.elementList.length; i++) {
-        var x = x0 + i*self.elementW;
+        var y = self.y0 + i*self.elementH;
         var text = String(self.elementList[i]);
-        self.list[i] = createDraggableListElement(ex.graphics.ctx, [x,self.y0,self.elementW,self.elementH], 
-            text, self.digitIndex, emptySpots, enabledColor, disabledColor, fontSize);
+        self.list[i] = createDraggableListElement(ex.graphics.ctx, [self.x0,y,self.elementW,self.elementH], 
+            text, digitIndex, maxDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAllFn);
         //Only enable the zeroth list element
         if (i != 0) {
             self.list[i].disable();
@@ -188,8 +215,8 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         ex.graphics.ctx.strokeStyle = "black";
         ex.graphics.ctx.fillStyle = "LightGray";
         ex.graphics.ctx.setLineDash([]);
-        ex.graphics.ctx.fillRect(self.x0, self.y0, self.elementW*self.elementList.length, self.elementH);
-        ex.graphics.ctx.strokeRect(self.x0, self.y0, self.elementW*self.elementList.length, self.elementH);
+        ex.graphics.ctx.fillRect(self.x0, self.y0, self.elementW, self.elementH*self.elementList.length);
+        ex.graphics.ctx.strokeRect(self.x0, self.y0, self.elementW, self.elementH*self.elementList.length);
         for (var i = 0; i < self.list.length; i++) {
             self.list[i].draw();
         }
@@ -288,6 +315,20 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         // drawAll();
         ex.graphics.off("mousemove", self.mousemove);
         ex.graphics.off("mouseup", self.mouseup);
+    }
+
+    self.moveElementsBack = function (newOrder) {
+        var newList = [];
+        var newElementList = [];
+        for (var i = 0; i < newOrder.length; i++) {
+            newList.push(self.list[newOrder[i]]);
+            newElementList.push(self.elementList[newOrder[i]]);
+        }
+        self.list = newList;
+        for (var j = 0; j < self.list.length; j++) {
+            var y = y0 + j*self.elementH;
+            self.list[j].move(x0, y, true);
+        }
     }
 
     return self;

@@ -1,13 +1,12 @@
 ToDo:
-Bug Fixes:
-10/15/15:
-- Fix the functionalities of the hints (for example, when you get a wrong bucket and hit "okay", it restarts the whole exercise rather than only moving that element back.) (As another example, if you click "x" on that same hint, it disables the element that was wrong, so you cannot fix it.)
-- For some reason, when the stepText is enabled, a user cannot click and drag the elements of the list.
-
-Features To Add:
-10/15/15:
-- Add assesment Qs
-
-Notes:
-10/15/15:
-- In general, we should avoid using global variables.  For example, I created a variable x0 for the start location of a paragraph element, but that same name was being used for the start of the list elements.  Hence, let us try to put everything inside functions, to avoid clashes of variable names.
+- Add hint functionality for when the students get it wrong.  This was formerly 
+  in the incorrectAns function, given how our code is structured now it should 
+  be in the failureFn.  (But it can be placed in a helper and called from that 
+  function.)
+- Add instructions
+- Add assesment
+- Possibly add step, digit, etc. counter
+- Make sure the list is such that there (a) won't be repeat elements and (b)
+  that the number of elements in the same bucket at any iteration will be able 
+  to fix on the screen.
+- Save state
