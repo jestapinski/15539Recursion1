@@ -165,13 +165,41 @@ function runPracticeMode (ex) {
         drawAll();
         if (currentIteration >= numberOfIterations) {
             draggableList.disable(workingIndex);
-            alert("Sorted!");
+            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON1$</span>",
+                {
+                    stay: true
+                });
+            var button1 = ex.createButton(0, 0, "Next");
+            button1.on("click", function() {correctBox.remove();})
+            ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
+            var button2 = ex.createButton(0, 0, "New");
+            button2.on("click", function() {console.log("new");})
+            ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
             ex.chromeElements.submitButton.enable();
         }
     };
 
     var failureFn = function (i, bucket) {
-        alert("Wrong Bucket!");
+        // var correctBox = ex.textbox112("Incorrect! <span>BTNA</span> <span>BTNB</span>",
+        //         {
+        //             stay: true
+        //         });
+        //     var button1 = ex.createButton(0, 0, "Next");
+        //     button1.on("click", function() {correctBox.remove();})
+        var button1 = ex.createButton(0, 0, "Next");
+        button1.on("click", function() {correctBox.remove();})
+        var button2 = ex.createButton(0, 0, "New");
+        button2.on("click", function() {console.log("new");})
+        var correctBox = ex.textbox112("Incorrect! <span>BTNA</span> <span>BTNB</SPAN>",
+                {
+                    stay: true
+                });             
+        ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+        ex.insertButtonTextbox112(correctBox, button2, "BTNB");
+
+            //     console.log(x);
+
+            
     }
 
     //for integers only
@@ -361,7 +389,7 @@ function runPracticeMode (ex) {
     //             button234.on("click", function() {
     //                 correctBox.remove();
     //                 restart();})
-    //             ex.insertButtonTextbox112(correctBox, button234);
+    //             ex.insertButtonTextbox112(correctBox, button234, "$BUTTON$");
     //             // alert("Wrong Bucket!");
     //         }
     //         drawBuckets();
@@ -410,7 +438,7 @@ function runPracticeMode (ex) {
      }
 
      function drawList(){
-        console.log("DrawingList");
+        // console.log("DrawingList");
         draggableList.draw();
         //ex.graphics.ctx.fillText = ("hello",ex.width()/2,ex.height()/2);
      }
@@ -525,16 +553,16 @@ function runPracticeMode (ex) {
         ex.data.newList = newList;
         if(isCorrect()){
             //Bug, cannot put two buttons in one element
-            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON$</span>",
+            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON1$</span>",
                 {
                     stay: true
                 });
-            button1 = ex.createButton(0, 0, "Next");
+            var button1 = ex.createButton(0, 0, "Next");
             button1.on("click", function() {correctBox.remove();})
-            ex.insertButtonTextbox112(correctBox, button1);
-            button2 = ex.createButton(0, 0, "New");
-            button1.on("click", function() {console.log("new");})
-            ex.insertButtonTextbox112(correctBox, button2);
+            ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
+            var button2 = ex.createButton(0, 0, "New");
+            button2.on("click", function() {console.log("new");})
+            ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
             correctAnsContinue();
             //ex.showFeedBack("Correct!");
         } else {

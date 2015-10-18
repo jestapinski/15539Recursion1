@@ -2633,24 +2633,41 @@ function define112Exercise(exerciseConstructor,wrapper) {
             $Code.css("overflow", "visible");
         };
 
-        ex.insertButtonTextbox112 = function(TextboxElement, button) {
-            var identifier = "$BUTTON$";
-            assertArgsLength(arguments,2,2);
-            assertTypes(arguments,["object","object"]);
+        ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
+            console.log(identifier);
+            assertArgsLength(arguments,3,3);
+            assertTypes(arguments,["object","object", "string"]);
             // Get the DOM elements from _elementReferences
             var $Code = $(_elementReferences[TextboxElement._elementReferenceID]);
+            console.log($Code);
+            console.log($Code.context.localName);
+            if ($Code.context.localName === "button") {
+                console.log("here");
+                return false;}
             var $Dropdown = $(_elementReferences[button._elementReferenceID]);
+            // console.log($Dropdown);
+            // console.log($Code == $Dropdown);
 
             // Get the target span
             // jQuery has no way to use `:contains()` to select the innermost
             // matches... just using pure JS to do the span selection
+            // while (spans !== []){
             var spans = $Code[0].getElementsByTagName("span");
+            // }
+            // console.log(spans);
             var $targetSpan = undefined;
+            // console.log("length");
+            var testSpans = "<span>HelpMe</span>";
+            // var testLen = loadXMLDoc(testSpans).getElementsByTagName("span");
+            // console.log(testLen.length);
+            console.log(spans.length);
             for (var i = 0; i < spans.length; i++) {
+                spans[i].innerHTML.indexOf(identifier)
                 if (spans[i].innerHTML.indexOf(identifier) !== -1) {
                     $targetSpan = $(spans[i]);
                 }
             }
+            // console.log($targetSpan);
             assert($targetSpan != [], "identifier not found.");
 
             // Set dropdown classes
@@ -2678,6 +2695,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
 
             // Fix overflow
             $Code.css("overflow", "visible");
+            return true;
         };
 
         ex.textbox112 = function(message, options, width, left, top) {
