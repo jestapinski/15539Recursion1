@@ -101,6 +101,7 @@ function LSDDigitSort(L, digitIndex){
 }
 
 function runPracticeMode (ex) {
+    
     /***************************************************************************
      * Initialize List & Buckets
      **************************************************************************/
@@ -153,6 +154,14 @@ function runPracticeMode (ex) {
         if(workingIndex < listLength) {
             draggableList.enable(workingIndex);
         } else {
+           var button1 = ex.createButton(0, 0, "Got it!");
+           button1.on("click", function() {correctBox.remove();})
+           var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
+                {
+                    stay: true,
+                    color: "green"
+                });             
+            ex.insertButtonTextbox112(correctBox, button1, "BTNA");
             moveBack(draggableList, bucketSpots, bucketOrdering);
             workingIndex = 0;
             draggableList.enable(workingIndex);
@@ -165,38 +174,38 @@ function runPracticeMode (ex) {
         drawAll();
         if (currentIteration >= numberOfIterations) {
             draggableList.disable(workingIndex);
+            var button1 = ex.createButton(0, 0, "Next");
+            button1.on("click", function() {correctBox.remove();})
+            var button2 = ex.createButton(0, 0, "New");
+            button2.on("click", function() {console.log("new");})
             var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON1$</span>",
                 {
                     stay: true
                 });
-            var button1 = ex.createButton(0, 0, "Next");
-            button1.on("click", function() {correctBox.remove();})
+            
             ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
-            var button2 = ex.createButton(0, 0, "New");
-            button2.on("click", function() {console.log("new");})
             ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
             ex.chromeElements.submitButton.enable();
         }
     };
 
     var failureFn = function (i, bucket) {
+        console.log("I");
+        console.log(i);
         // var correctBox = ex.textbox112("Incorrect! <span>BTNA</span> <span>BTNB</span>",
         //         {
         //             stay: true
         //         });
         //     var button1 = ex.createButton(0, 0, "Next");
         //     button1.on("click", function() {correctBox.remove();})
-        var button1 = ex.createButton(0, 0, "Next");
+        var button1 = ex.createButton(0, 0, "Got it!");
         button1.on("click", function() {correctBox.remove();})
-        var button2 = ex.createButton(0, 0, "New");
-        button2.on("click", function() {console.log("new");})
-        var correctBox = ex.textbox112("Incorrect! <span>BTNA</span> <span>BTNB</SPAN>",
+        var correctBox = ex.textbox112("That's not quite right, try looking at the red digit in the number. If there is no red digit, what should it be considering which digit we are sorting other numbers by? <span>BTNA</span>",
                 {
-                    stay: true
+                    stay: true,
+                    color: "red"
                 });             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
-        ex.insertButtonTextbox112(correctBox, button2, "BTNB");
-
             //     console.log(x);
 
             
@@ -552,16 +561,17 @@ function runPracticeMode (ex) {
         var newList = createListFromBucket();
         ex.data.newList = newList;
         if(isCorrect()){
-            //Bug, cannot put two buttons in one element
+            var button1 = ex.createButton(0, 0, "Next");
+            button1.on("click", function() {correctBox.remove();})
+
+            var button2 = ex.createButton(0, 0, "New");
+            button2.on("click", function() {console.log("new");})
+
             var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON1$</span>",
                 {
                     stay: true
                 });
-            var button1 = ex.createButton(0, 0, "Next");
-            button1.on("click", function() {correctBox.remove();})
             ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
-            var button2 = ex.createButton(0, 0, "New");
-            button2.on("click", function() {console.log("new");})
             ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
             correctAnsContinue();
             //ex.showFeedBack("Correct!");
@@ -643,7 +653,14 @@ function runPracticeMode (ex) {
         // nextButton.disable();
     }
 
-
+    var button2 = ex.createButton(0, 0, "OK!");
+    button2.on("click", function() {correctBox.remove();})
+    var correctBox = ex.textbox112("Radix Sort is a method of sorting that uses the digits in a number to sort the list! Let's try it by sorting these digits by their ones digit to start <span>$BUTTON1$</span>",
+    {
+      stay: true
+    });
+            
+    ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
