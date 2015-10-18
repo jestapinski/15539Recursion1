@@ -56,7 +56,7 @@ var main = function(ex) {
         var button1 = ex.createButton(0,0,"Press e",{
             keybinding: ["e", 69]
             }).on("click", function() { alert("e")});
-        ex.insertButtonTextbox112(trialBox, button1);
+        // ex.insertButtonTextbox112(trialBox, button1);
         var input1 = ex.createInputText(0,0,"placeholder");
         ex.insertTextAreaTextbox112(trialBox, input1);
         

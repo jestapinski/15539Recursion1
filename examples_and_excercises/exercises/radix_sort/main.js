@@ -154,6 +154,7 @@ function runPracticeMode (ex) {
         if(workingIndex < listLength) {
             draggableList.enable(workingIndex);
         } else {
+           if (currentIteration == 0){
            var button1 = ex.createButton(0, 0, "Got it!");
            button1.on("click", function() {correctBox.remove();})
            var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
@@ -162,6 +163,17 @@ function runPracticeMode (ex) {
                     color: "green"
                 });             
             ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+           }
+           else if (currentIteration > 0 && currentIteration < numberOfIterations - 1){
+               var button1 = ex.createButton(0, 0, "Got it!");
+               button1.on("click", function() {correctBox.remove();})
+               var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. <span>BTNA</span>",
+                {
+                    stay: true,
+                    color: "green"
+                });             
+            ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+           }
             moveBack(draggableList, bucketSpots, bucketOrdering);
             workingIndex = 0;
             draggableList.enable(workingIndex);
@@ -174,11 +186,11 @@ function runPracticeMode (ex) {
         drawAll();
         if (currentIteration >= numberOfIterations) {
             draggableList.disable(workingIndex);
-            var button1 = ex.createButton(0, 0, "Next");
+            var button1 = ex.createButton(0, 0, "I am ready for the quiz!");
             button1.on("click", function() {correctBox.remove();})
-            var button2 = ex.createButton(0, 0, "New");
+            var button2 = ex.createButton(0, 0, "More Practice!");
             button2.on("click", function() {console.log("new");})
-            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span>$BUTTON1$</span>",
+            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span> $BUTTON1$</span>",
                 {
                     stay: true
                 });
@@ -187,17 +199,18 @@ function runPracticeMode (ex) {
             ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
             ex.chromeElements.submitButton.enable();
         }
+        attempts = 0;
     };
+    
+    // var checkFn = function(i){
+
+    // }
 
     var failureFn = function (i, bucket) {
         console.log("I");
-        console.log(i);
-        // var correctBox = ex.textbox112("Incorrect! <span>BTNA</span> <span>BTNB</span>",
-        //         {
-        //             stay: true
-        //         });
-        //     var button1 = ex.createButton(0, 0, "Next");
-        //     button1.on("click", function() {correctBox.remove();})
+        console.log(attempts);
+        attempts++;
+        if (attempts == 1){
         var button1 = ex.createButton(0, 0, "Got it!");
         button1.on("click", function() {correctBox.remove();})
         var correctBox = ex.textbox112("That's not quite right, try looking at the red digit in the number. If there is no red digit, what should it be considering which digit we are sorting other numbers by? <span>BTNA</span>",
@@ -206,6 +219,28 @@ function runPracticeMode (ex) {
                     color: "red"
                 });             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+        }
+        else{
+        var button1 = ex.createButton(0, 0, "Guess!");
+        button1.on("click", function() {
+            console.log(input1.text());
+            if (parseInt(input1.text()) == 1){
+                ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
+                    stay: true,
+                    color: "green"
+                })
+                correctBox.remove();
+            }
+            })
+        var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
+        var correctBox = ex.textbox112("That's not quite right, we are looking at the ith digit here, what is the ith digit of 123? <text>$TEXTAREA$</text> <span>BTNA</span>",
+                {
+                    stay: true,
+                    color: "red"
+                });             
+        ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+        ex.insertTextAreaTextbox112(correctBox, input1);        
+        }
             //     console.log(x);
 
             
