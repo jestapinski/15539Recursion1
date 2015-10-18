@@ -2595,7 +2595,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
             // jQuery has no way to use `:contains()` to select the innermost
             // matches... just using pure JS to do the span selection
             console.log($Code[0]);
-            var spans = $Code[0].getElementsByTagName("text");
+            var spans = $Code[0].getElementsByTagName("span");
             console.log(spans);
             var $targetSpan = [];
             for (var i = 0; i < spans.length; i++) {

@@ -229,17 +229,17 @@ function runPracticeMode (ex) {
                     stay: true,
                     color: "green"
                 })
-                correctBox.remove();
+                wrongBox1.remove();
             }
             })
         var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-        var correctBox = ex.textbox112("That's not quite right, we are looking at the ith digit here, what is the ith digit of 123? <text>$TEXTAREA$</text> <span>BTNA</span>",
+        var wrongBox1 = ex.textbox112("That's not quite right, we are looking at the second digit here, what is the second digit of 123? <span>$TEXTAREA$</span> <span>BTNA</span>",
                 {
                     stay: true,
                     color: "red"
                 });             
-        ex.insertButtonTextbox112(correctBox, button1, "BTNA");
-        ex.insertTextAreaTextbox112(correctBox, input1);        
+        ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
+        ex.insertTextAreaTextbox112(wrongBox1, input1);        
         }
             //     console.log(x);
 
