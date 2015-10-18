@@ -116,7 +116,7 @@ function runPracticeMode (ex) {
     // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
     // var elementH = elementW/2;
     var elementH = (3*ex.height()/4 - 2*margin)/listLength;
-    var elementW = elementH*1.5;
+    var elementW = (5*ex.width()/6)/(listLength+1);
 
     //Top Left corner of the list
     // var x0 = ex.width()/2 - elementW*listLength/2;
@@ -205,7 +205,7 @@ function runPracticeMode (ex) {
     //for integers only
     var bucketNum = 10;
 
-    var bucketX = ex.width()/4;
+    var bucketX = ex.width()/6;
     var bucketY = 0;
     var bucketW = ex.width();
     var bucketH = ex.height()-bucketY;
@@ -436,6 +436,17 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.strokeRect(x,y,w,h);
         }
      }
+     
+    function drawStepsAndIterations(){
+        var stepFont = 20;
+        font = "Arial";
+        ex.graphics.ctx.fillStyle = "black";
+        ex.graphics.ctx.font = stepFont + "px " + font;
+        ex.graphics.ctx.textAlign = "left";
+        ex.graphics.ctx.textBaseline = "bottom";
+        ex.graphics.ctx.fillText("Step: "+maxIndex,margin,2*margin);
+        ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,2*margin+stepFont);
+     }
 
      function drawList(){
         // console.log("DrawingList");
@@ -447,6 +458,7 @@ function runPracticeMode (ex) {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawList();
         drawBuckets();
+        drawStepsAndIterations();
      }
 
     /***************************************************************************
