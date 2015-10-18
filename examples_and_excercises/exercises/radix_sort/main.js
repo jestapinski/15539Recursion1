@@ -116,7 +116,7 @@ function runPracticeMode (ex) {
     // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
     // var elementH = elementW/2;
     var elementH = (3*ex.height()/4 - 2*margin)/listLength;
-    var elementW = (5*ex.width()/6)/(listLength+1);
+    var elementW = (5*ex.width()/6)/(listLength+2);
 
     //Top Left corner of the list
     // var x0 = ex.width()/2 - elementW*listLength/2;
