@@ -47,18 +47,19 @@ var main = function(ex) {
     // makeABox();
     // trialBox.remove();
     var makeABox = function(){
-        var trialBox = ex.textbox112("Please choose the function below that takes one parameter <text>$TEXTAREA$</text> <span>$BUTTON$</span>", {
+        var button1 = ex.createButton(0,0,"Press e",{
+            }).on("click", function() { alert("e")});
+        // ex.insertButtonTextbox112(trialBox, button1);
+        var input1 = ex.createInputText(0,0,"placeholder");
+        var trialBox = ex.textbox112("Please choose the function below that takes one parameter <span>$TEXTAREA$</span> <span>$BUTTON$</span>", {
         "height": "200px",
         "stay": true,
         "color": "red",
         "textColor": "black"
         });
-        var button1 = ex.createButton(0,0,"Press e",{
-            keybinding: ["e", 69]
-            }).on("click", function() { alert("e")});
-        // ex.insertButtonTextbox112(trialBox, button1);
-        var input1 = ex.createInputText(0,0,"placeholder");
+
         ex.insertTextAreaTextbox112(trialBox, input1);
+        ex.insertButtonTextbox112(trialBox, button1, "$BUTTON$");
         
         // input1.remove();
     }
