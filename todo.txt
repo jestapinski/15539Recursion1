@@ -10,3 +10,4 @@ ToDo:
   that the number of elements in the same bucket at any iteration will be able 
   to fix on the screen.
 - Save state
+- Bug: user can move an element to a bucket while they are being animated, and that messes it up.

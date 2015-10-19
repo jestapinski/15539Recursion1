@@ -176,60 +176,72 @@ function runPracticeMode (ex) {
         maxIndex = workingIndex;
         workingIndex++;
         console.log("workingIndex:",workingIndex);
+        console.log("currentIteration:",currentIteration);
         bucketSpots[bucket][4].push(i);
         // updateList();
         if(workingIndex < listLength) {
             draggableList.enable(workingIndex);
         } else {
             if (currentIteration == 0){
-            var button1 = ex.createButton(0, 0, "Got it!");
-            button1.on("click", function() {
-                moveBack(draggableList, bucketSpots, bucketOrdering);
-                emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
-                draggableList.setEmptySpots(emptySpots);
-                workingIndex = 0;
-                draggableList.enable(workingIndex);
-                digitIndex++;
-                draggableList.setDigitIndex(digitIndex);
-                currentIteration++;
-                correctBox.remove();
-            });
-           var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
-                {
-                    stay: true,
-                    color: "green"
-                });             
-            ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+               var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
+                    {
+                        stay: true,
+                        color: "green"
+                    });    
+                var button1 = ex.createButton(0, 0, "Got it!");
+                button1.on("click", function() {
+                    moveBack(draggableList, bucketSpots, bucketOrdering);
+                    emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+                    draggableList.setEmptySpots(emptySpots);
+                    workingIndex = 0;
+                    draggableList.enable(workingIndex);
+                    digitIndex++;
+                    draggableList.setDigitIndex(digitIndex);
+                    currentIteration++;
+                    correctBox.remove();
+                });         
+                ex.insertButtonTextbox112(correctBox, button1, "BTNA");
            }
-           else if (currentIteration > 0 && currentIteration < numberOfIterations - 1){
-               var button1 = ex.createButton(0, 0, "Got it!");
-               button1.on("click", function() {correctBox.remove();})
+           else if (currentIteration < numberOfIterations-1){
                var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. <span>BTNA</span>",
-                {
-                    stay: true,
-                    color: "green"
+                    {
+                        stay: true,
+                        color: "green"
+                    });  
+                var button1 = ex.createButton(0, 0, "Got it!");
+                button1.on("click", function() {
+                    moveBack(draggableList, bucketSpots, bucketOrdering);
+                    emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+                    draggableList.setEmptySpots(emptySpots);
+                    workingIndex = 0;
+                    draggableList.enable(workingIndex);
+                    digitIndex++;
+                    draggableList.setDigitIndex(digitIndex);
+                    currentIteration++;
+                    correctBox.remove();
                 });             
-            ex.insertButtonTextbox112(correctBox, button1, "BTNA");
-           }
+                ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+           } else if (currentIteration >= numberOfIterations-1) {
+                draggableList.disable(workingIndex-1);
+                var button1 = ex.createButton(0, 0, "I am ready for the quiz!");
+                button1.on("click", function() {correctBox.remove();})
+                var button2 = ex.createButton(0, 0, "More Practice!");
+                button2.on("click", function() {console.log("new");})
+                var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span> $BUTTON1$</span>",
+                    {
+                        stay: true
+                    });
+                
+                ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
+                ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
+                ex.chromeElements.submitButton.enable();
+            }
         }
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
         draggableList.setEmptySpots(emptySpots);
         drawAll();
-        if (currentIteration >= numberOfIterations) {
-            draggableList.disable(workingIndex);
-            var button1 = ex.createButton(0, 0, "I am ready for the quiz!");
-            button1.on("click", function() {correctBox.remove();})
-            var button2 = ex.createButton(0, 0, "More Practice!");
-            button2.on("click", function() {console.log("new");})
-            var correctBox = ex.textbox112("Correct! <span>$BUTTON$</span> <span> $BUTTON1$</span>",
-                {
-                    stay: true
-                });
-            
-            ex.insertButtonTextbox112(correctBox, button1, "$BUTTON$");
-            ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
-            ex.chromeElements.submitButton.enable();
-        }
+        console.log(currentIteration);
+        console.log(numberOfIterations);
         attempts = 0;
     };
     
