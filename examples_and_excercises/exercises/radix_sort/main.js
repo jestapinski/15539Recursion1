@@ -1,4 +1,5 @@
 var main = function(ex) {
+
     // ex.data.meta.mode = "practice"; 
     ex.data.meta.mode = "quiz-immediate"; 
 
@@ -968,13 +969,15 @@ function runQuizMode (ex) {
 
 
      function drawQuestionBox(question,correctAns){
+         console.log("HEREEEEEEEEEE");
         var questionText = question + "<span>$TEXTAREA$</span> <span>BTNA</span>";
+        console.log(questionText);
         var button = ex.createButton(0, 0, "Submit");
         var input = ex.createInputText(0,0,"?", {inputSize: 2});
-        var questionBox = ex.textbox112(question,{stay: true,});
+        var questionBox = ex.textbox112(questionText,{stay: true,});
         button.on("click", function(){
-            //questionBox.remove();
             verify(input.text(),correctAns,instrNum);
+            questionBox.remove();
         });
         ex.insertButtonTextbox112(questionBox, button, "BTNA"); 
         ex.insertTextAreaTextbox112(questionBox, input);  
@@ -983,6 +986,7 @@ function runQuizMode (ex) {
      function drawInstructionBox(text){
         var instruction  = text + "<span>BTNB</span>";
         var button = ex.createButton(0, 0, "Ok!");
+
         var instructionBox = ex.textbox112(instruction,{stay: true,});
         button.on("click", function(){
             instructionBox.remove();
@@ -999,7 +1003,9 @@ function runQuizMode (ex) {
             }
             drawInstructions();
         });
+
         ex.insertButtonTextbox112(instructionBox, button, "BTNB"); 
+
         console.log("drawAlert");
      }
 
