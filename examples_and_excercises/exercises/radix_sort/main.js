@@ -155,9 +155,19 @@ function runPracticeMode (ex) {
         if(workingIndex < listLength) {
             draggableList.enable(workingIndex);
         } else {
-           if (currentIteration == 0){
-           var button1 = ex.createButton(0, 0, "Got it!");
-           button1.on("click", function() {correctBox.remove();})
+            if (currentIteration == 0){
+            var button1 = ex.createButton(0, 0, "Got it!");
+            button1.on("click", function() {
+                moveBack(draggableList, bucketSpots, bucketOrdering);
+                emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+                draggableList.setEmptySpots(emptySpots);
+                workingIndex = 0;
+                draggableList.enable(workingIndex);
+                digitIndex++;
+                draggableList.setDigitIndex(digitIndex);
+                currentIteration++;
+                correctBox.remove();
+            });
            var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
                 {
                     stay: true,
@@ -175,12 +185,6 @@ function runPracticeMode (ex) {
                 });             
             ex.insertButtonTextbox112(correctBox, button1, "BTNA");
            }
-            moveBack(draggableList, bucketSpots, bucketOrdering);
-            workingIndex = 0;
-            draggableList.enable(workingIndex);
-            digitIndex++;
-            draggableList.setDigitIndex(digitIndex);
-            currentIteration++;
         }
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
         draggableList.setEmptySpots(emptySpots);
