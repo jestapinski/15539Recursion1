@@ -1,6 +1,6 @@
 var main = function(ex) {
-    ex.data.meta.mode = "practice"; 
-    // ex.data.meta.mode = "quiz-immediate"; 
+    // ex.data.meta.mode = "practice"; 
+    ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -264,23 +264,43 @@ function runPracticeMode (ex) {
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
         }
         else{
-        var button1 = ex.createButton(0, 0, "Guess!");
-        button1.on("click", function() {
-            console.log(input1.text());
-            if (parseInt(input1.text()) == 1){
-                ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
-                    stay: true,
-                    color: "green"
-                })
-                wrongBox1.remove();
-            }
-            })
-        var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-        var wrongBox1 = ex.textbox112("That's not quite right, we are looking at the second digit here, what is the second digit of 123? <span>$TEXTAREA$</span> <span>BTNA</span>",
-                {
-                    stay: true,
-                    color: "red"
-                });             
+            var button1 = ex.createButton(0, 0, "Guess!");
+            var num = getRandomInt(100, 999);
+            button1.on("click", function() {
+                console.log(input1.text());
+                console.log((Math.floor(num/10))%10);
+                if (parseInt(input1.text()) == Math.floor(num/10)%10){
+                    ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
+                        stay: true,
+                        color: "green"
+                    })
+                    wrongBox1.remove();
+                }
+                });
+            var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
+            var text = "That's not quite right, we are looking at the second digit here, what is the second digit of ".concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
+            var wrongBox1 = ex.textbox112(text,
+                    {
+                        stay: true,
+                        color: "red"
+                    }); 
+        // var button1 = ex.createButton(0, 0, "Guess!");
+        // button1.on("click", function() {
+        //     console.log(input1.text());
+        //     if (parseInt(input1.text()) == 1){
+        //         ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
+        //             stay: true,
+        //             color: "green"
+        //         })
+        //         wrongBox1.remove();
+        //     }
+        //     })
+        // var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
+        // var wrongBox1 = ex.textbox112("That's not quite right, we are looking at the second digit here, what is the second digit of 123? <span>$TEXTAREA$</span> <span>BTNA</span>",
+        //         {
+        //             stay: true,
+        //             color: "red"
+        //         });             
         ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
         ex.insertTextAreaTextbox112(wrongBox1, input1);        
         }
@@ -802,6 +822,13 @@ function runQuizMode (ex) {
     //Create the actual list
     var maxNumberOfDigits = 3;
     var startList = createRandomIntegerList(listLength, maxNumberOfDigits);
+    var maxNum = 0;
+    for (var i = 0; i < listLength; i++) {
+        if (startList[i] > maxNum) {
+            maxNum = startList[i];
+        }
+    }
+    var numOfDigits = Math.floor(Math.log10(maxNum))+1;
     var correctList;
 
     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect
@@ -833,9 +860,11 @@ function runQuizMode (ex) {
         console.log(attempts);
         attempts++;
         var button1 = ex.createButton(0, 0, "Guess!");
+        var num = getRandomInt(100, 999);
         button1.on("click", function() {
             console.log(input1.text());
-            if (parseInt(input1.text()) == 1){
+            console.log((Math.floor(num/10))%10);
+            if (parseInt(input1.text()) == Math.floor(num/10)%10){
                 ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
                     stay: true,
                     color: "green"
@@ -844,7 +873,8 @@ function runQuizMode (ex) {
             }
             });
         var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-        var wrongBox1 = ex.textbox112("That's not quite right, we are looking at the second digit here, what is the second digit of 123? <span>$TEXTAREA$</span> <span>BTNA</span>",
+        var text = "That's not quite right, we are looking at the second digit here, what is the second digit of ".concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
+        var wrongBox1 = ex.textbox112(text,
                 {
                     stay: true,
                     color: "red"
@@ -984,10 +1014,30 @@ function runQuizMode (ex) {
                     instrOn = false;
                     break;
                 case 1:
-                    instrText = "How many iterations would it take to sort this list?";
-                    answer = maxIndex;
-                    drawInstructionBox(instrText);
-                    //drawQuestionBox(instrText,answer);
+                var button1 = ex.createButton(0, 0, "Guess!");
+                var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
+                var wrongBox1 = ex.textbox112("How many iterations would it take to sort this list? <span>$TEXTAREA$</span> <span>BTNA</span>",
+                            {
+                                stay: true,
+                                color: "red"
+                            });
+                button1.on("click", function() {
+                    console.log(input1.text());
+                    console.log(numOfDigits);
+                    if (parseInt(input1.text()) == numOfDigits){
+                        ex.textbox112("Correct! Now sort this list, starting with the one's digit.",{
+                            stay: true,
+                            color: "green"
+                        });
+                        wrongBox1.remove();
+                    }
+                    });             
+                    ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
+                    ex.insertTextAreaTextbox112(wrongBox1, input1); 
+                    // instrText = "How many iterations would it take to sort this list?";
+                    // answer = maxIndex;
+                    // drawInstructionBox(instrText);
+                    // // drawQuestionBox(instrText,answer);
                     instrOn = false;
                     break;
                 case 2:
@@ -1151,6 +1201,7 @@ function runQuizMode (ex) {
 
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.on("keydown", draggableList.keydown);
         ex.chromeElements.submitButton.on("click", submit);
         // nextButton.on("click", updateBucket);
         ex.chromeElements.resetButton.on("click",restart);
