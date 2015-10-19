@@ -941,46 +941,27 @@ function runQuizMode (ex) {
      }
 
      function drawInstructionBox(text){
-        var instruction  = text + "<span>$TEXTAREA$</span> <span>BTNB</span>";
-        var button1 = ex.createButton(0, 0, "Guess!");
-        button1.on("click", function() {
-            console.log(input1.text());
-            if (parseInt(input1.text()) == 1){
-                ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
-                    stay: true,
-                    color: "green"
-                })
-                wrongBox1.remove();
+        var instruction  = text + "<span>BTNB</span>";
+        var button = ex.createButton(0, 0, "Ok!");
+
+        var instructionBox = ex.textbox112(instruction,{stay: true,});
+        button.on("click", function(){
+            instructionBox.remove();
+            if(instrNum == 0) {
+                instrOn = true;//this is used instead since questionBox is currently buggy
+                instrNum++;
+            } else if(instrNum == 2){
+                startList = partialRadixSort(startList,currentIteration+1);
+                instrNum++;
+                currentIteration++;
+                digitIndex++;
+                //instrOn = true;
+                nextStep();
             }
-            })
-        var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-        var wrongBox1 = ex.textbox112(instruction,
-                {
-                    stay: true,
-                    color: "yellow"
-                });             
-        ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
-        ex.insertTextAreaTextbox112(wrongBox1, input1);  
-        // var button = ex.createButton(0, 0, "Answer!");
-        // var input = ex.createInputText(0,0,"?", {inputSize: 2});
-        // var instructionBox = ex.textbox112(instruction,{stay: true,});
-        // button.on("click", function(){
-        //     instructionBox.remove();
-        //     if(instrNum == 0) {
-        //         instrOn = true;//this is used instead since questionBox is currently buggy
-        //         instrNum++;
-        //     } else if(instrNum == 2){
-        //         startList = partialRadixSort(startList,currentIteration+1);
-        //         instrNum++;
-        //         currentIteration++;
-        //         digitIndex++;
-        //         //instrOn = true;
-        //         nextStep();
-        //     }
-        //     drawInstructions();
-        // });
-        // ex.insertTextAreaTextbox112(instructionBox, input);  
-        // ex.insertButtonTextbox112(instructionBox, button, "BTNB"); 
+            drawInstructions();
+        });
+
+        ex.insertButtonTextbox112(instructionBox, button, "BTNB"); 
 
         console.log("drawAlert");
      }
@@ -998,8 +979,8 @@ function runQuizMode (ex) {
                 case 1:
                     instrText = "How many iterations would it take to sort this list?";
                     answer = maxIndex;
-                    drawInstructionBox(instrText);
-                    //drawQuestionBox(instrText,answer);
+                    // drawInstructionBox(instrText);
+                    drawQuestionBox(instrText,answer);
                     instrOn = false;
                     break;
                 case 2:
