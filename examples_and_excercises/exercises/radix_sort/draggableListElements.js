@@ -51,6 +51,10 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.setEmptySpots = function(emptySpots) {
         element.emptySpots = emptySpots;
     }
+    element.setStartPos = function (startX, startY) {
+        element.startX = startX;
+        element.startY = startY;
+    }
     element.move = function(x, y, animate) {
         var steps = 20;
         if (animate) {
@@ -123,26 +127,28 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                 }
             }
             if (maxOverlap > 0) {
-                //Snap into place
-                element.x = element.emptySpots[maxSpot][0];
-                element.y = element.emptySpots[maxSpot][1];
-                didSnapIntoSpot = true;
-                //Check if this is the correct bucket
-                if (element.digitIndex < element.text.length) {
-                    element.currentBucket = maxSpot;
-                    return element.text.charAt(element.text.length-1-element.digitIndex) === maxSpot;
-                } else {
-                    element.currentBucket = maxSpot;
-                    return maxSpot === '0' || maxSpot === 'a' || maxSpot === 'A';
-                }
+                return element.snapIntoPlace(maxSpot);
             }
-            if (didSnapIntoSpot === false) {
-                element.currentBucket = undefined;
-                element.x = element.startX;
-                element.y = element.startY;
-            }
+            element.currentBucket = undefined;
+            element.x = element.startX;
+            element.y = element.startY;
         }
     };
+    element.snapIntoPlace = function (spot) {
+        //Snap into place - sync bottom right corners
+        element.x = element.emptySpots[spot][0]+element.emptySpots[spot][2];
+        element.y = element.emptySpots[spot][1]+element.emptySpots[spot][3];
+        element.x  = element.x - element.w;
+        element.y  = element.y - element.h;
+        //Check if this is the correct bucket
+        if (element.digitIndex < element.text.length) {
+            element.currentBucket = spot;
+            return (element.text.charAt(element.text.length-1-element.digitIndex) === spot);
+        } else {
+            element.currentBucket = spot;
+            return (spot === '0' || spot === 'a' || spot === 'A');
+        }
+    }
     element.disable = function () {
         element.isEnabled = false;
         element.color = element.disabledColor;
@@ -230,10 +236,28 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         self.list[i].disable();
     }
 
+    self.snapFirstEnabledElementIntoSpot = function(spot) {
+        for (var i = 0; i < self.list.length; i++) {
+            if (self.list[i].isEnabled) {
+                var didSnap = self.list[i].snapIntoPlace(spot);
+                if (didSnap === true) {
+                    self.successFn (i, self.list[i].currentBucket);
+                }
+                if (didSnap === false) {
+                    self.failureFn (i, self.list[i].currentBucket);
+                }
+                self.drawAllFn();
+                break;
+            }
+        }
+    }
+
     self.mousedown = function (event) {
         console.log("Mouse Down");
         var x = event.offsetX;
         var y = event.offsetY;
+        var didClickInsideElement = false;
+        //If they clicked an element, drag it
         for (var i = 0; i < self.list.length; i++) {
             if (self.list[i].isXYInElement(x,y)) {
                 if (self.list[i].isEnabled) {
@@ -241,11 +265,24 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
                     self.mouseXOffset = self.list[i].x - x;
                     self.mouseXOffset = self.list[i].y - y;
                     self.list[i].drag();
+                    didClickInsideElement = true;
+                    ex.graphics.on("mousemove", self.mousemove);
+                    ex.graphics.on("mouseup", self.mouseup);
                 }
             }
         }
-        ex.graphics.on("mousemove", self.mousemove);
-        ex.graphics.on("mouseup", self.mouseup);
+        //If they click an empty spot, move the element there
+        if (didClickInsideElement == false) {
+            for (var spot in self.emptySpots) {
+                var x0 = self.emptySpots[spot][0];
+                var y0 = self.emptySpots[spot][1];
+                var w = self.emptySpots[spot][2];
+                var h = self.emptySpots[spot][3];
+                if (x0 <= x && x <= x0+w && y0 <= y && y <= y0+h) {
+                    self.snapFirstEnabledElementIntoSpot(spot);
+                }
+            }
+        }
     }
 
     self.mousemove = function (event) {
@@ -262,9 +299,6 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
 
     self.mouseup = function (event) {
         console.log("Mouse Up");
-        // var didDrop = false;
-        // var didSnap = false;
-        // bucketSearch(x,y);//get current bucket
         for (var i = 0; i < self.list.length; i++) { 
             if (self.list[i].isBeingDragged) {
                 console.log(emptySpots);
@@ -273,48 +307,36 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
                 var didSnap = self.list[i].drop();
                 console.log(didSnap);
                 if (didSnap === true) {
-                    //Correct Bucket!
-                    //Create the necessary feedback
-                    // bucketSearch(draggableList[i].x,draggableList[i].y);
-                    // didDrop = true;
-                    // correctBucket = true;
                     self.successFn (i, self.list[i].currentBucket);
-                    // workingIndex = i
-                    //alert("Correct Bucket!");
                 }
                 if (didSnap === false) {
                     self.failureFn (i, self.list[i].currentBucket);
-                    //Wrong Bucket!
-                    //Create the necessary feedback
-                    // bucketSearch(draggableList[i].x,draggableList[i].y);
-        //             didDrop = true;
-        //             correctBucket = false;
-        //             workingIndex = i
-        //             //bucketSpots[recentBucket][5].push(i);
-        //             var correctBox = ex.textbox112("Wrong Bucket! Let's look at the red digits and try again! <span>$BUTTON$</span>",
-        //             {
-        //                 stay: true
-        //             });
-        //             button234 = ex.createButton(0, 0, "OK!");
-        //             button234.on("click", function() {
-        //                 correctBox.remove();
-        //                 restart();})
-        //             ex.insertButtonTextbox112(correctBox, button234);
-        //             // alert("Wrong Bucket!");
-        //         }
-        //         drawBuckets();
                 }
                 break;
             }
-        // if(didDrop){
-        //     // nextButton.enable();
-        //     updateBucket();
-        //     //logList();
         }
         self.drawAllFn();
-        // drawAll();
         ex.graphics.off("mousemove", self.mousemove);
         ex.graphics.off("mouseup", self.mouseup);
+    }
+
+    self.keydown = function(event) {
+        switch (event.keyCode) {
+            case 48: // '0' is 48, '9' is 57
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+            case 54:
+            case 55:
+            case 56:
+            case 57:
+                self.snapFirstEnabledElementIntoSpot(String.fromCharCode(event.keyCode));
+            default:
+                console.log("Keypress!");
+                console.log(String.fromCharCode(event.keyCode));
+        }
     }
 
     self.moveElementsBack = function (newOrder) {
@@ -326,8 +348,9 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         }
         self.list = newList;
         for (var j = 0; j < self.list.length; j++) {
-            var y = y0 + j*self.elementH;
-            self.list[j].move(x0, y, true);
+            var y = self.y0+j*self.elementH;
+            self.list[j].setStartPos(self.x0, y);
+            self.list[j].move(self.x0, y, true);
         }
     }
 

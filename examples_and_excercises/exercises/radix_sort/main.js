@@ -53,12 +53,13 @@ function getBucketSpots(bucketNum, x0, y0, width, height, elementW, elementH){
 function getEmptySpots(bucketSpots, bucketOrdering) {
     var emptySpots = {};
     for (var spot in bucketSpots){
-        var x = bucketSpots[spot][0];
-        var y = bucketSpots[spot][1];
+        var x0 = bucketSpots[spot][0];
+        var y0 = bucketSpots[spot][1];
         var w = bucketSpots[spot][2];
         var h = bucketSpots[spot][3];
         var elemsInBucket = bucketSpots[spot][4].length;
-        emptySpots[spot] = [x+w*(elemsInBucket+1),y,w,h];
+        var x1 = x0+w*(elemsInBucket+2);
+        emptySpots[spot] = [x0,y0,x1-x0,h];
     }
     console.log(bucketSpots);
     console.log(emptySpots);
@@ -270,9 +271,8 @@ function runPracticeMode (ex) {
     var currentIteration = 0;
     var attempts = 0;
 
-    var recentBucket = 0;
-    var correctBucket = false;
-    var bucketColor = "#CEE8F0";
+    // var recentBucket = 0;
+    // var correctBucket = false;
 
     // var nextButton = ex.createButton(margin,1.5*margin,"Next",{
     //         color: "LightBlue",
@@ -284,7 +284,7 @@ function runPracticeMode (ex) {
     //     var list = [];
     //     for (var i = 0; i < listLength; i++) {
     //         var numOfDigits = getRandomInt(1, maxNumberOfDigits);
-    //         //Generate a random number with numOfDigits digits
+    //         //Generate a random number with numOfDig its digits
     //         list[i] = getRandomInt(Math.pow(10, numOfDigits-1), Math.pow(10, numOfDigits)-1);
     //     }
     //     return list
@@ -455,8 +455,19 @@ function runPracticeMode (ex) {
      * Draw Functions
      **************************************************************************/
      function drawBuckets(){
+        //Draw dashed lines
+        for (var spot in emptySpots) {
+            var x = emptySpots[spot][0];
+            var y = emptySpots[spot][1];
+            var w = emptySpots[spot][2];
+            var h = emptySpots[spot][3];
+            ex.graphics.ctx.setLineDash([6]);
+            ex.graphics.ctx.strokeRect(x,y,w,h);
+        }
+        //Draw buckets
         for (var spot in bucketSpots) {
             ex.graphics.ctx.strokeStyle = "black";
+            var bucketColor = "#CEE8F0";
             ex.graphics.ctx.fillStyle = bucketColor;
             var x = bucketSpots[spot][0];
             var y = bucketSpots[spot][1];
@@ -466,18 +477,10 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.setLineDash([]);
             ex.graphics.ctx.strokeRect(x, y, w, h);
             ex.graphics.ctx.fillStyle = "black";
-            ex.graphics.ctx.font = "15 px Arial";
+            ex.graphics.ctx.font = "15px Arial";
             ex.graphics.ctx.textAlign = "center";
             ex.graphics.ctx.textBaseline="middle";
             ex.graphics.ctx.fillText(spot,x+w/2,y+h/2);        
-        }
-        for (var spot in emptySpots) {
-            var x = emptySpots[spot][0];
-            var y = emptySpots[spot][1];
-            var w = emptySpots[spot][2];
-            var h = emptySpots[spot][3];
-            ex.graphics.ctx.setLineDash([6]);
-            ex.graphics.ctx.strokeRect(x,y,w,h);
         }
      }
      
@@ -500,8 +503,8 @@ function runPracticeMode (ex) {
 
      function drawAll() {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
-        drawList();
         drawBuckets();
+        drawList();
         drawStepsAndIterations();
      }
 
@@ -691,6 +694,7 @@ function runPracticeMode (ex) {
 
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.on("keydown", draggableList.keydown);
         ex.chromeElements.submitButton.on("click", submit);
         // nextButton.on("click", updateBucket);
         ex.chromeElements.resetButton.on("click",restart);
