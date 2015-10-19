@@ -56,7 +56,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         element.startY = startY;
     }
     element.move = function(x, y, animate) {
-        var steps = 20;
+        var steps = 40;
         if (animate) {
             var dx = (x - element.x)/steps;
             var dy = (y - element.y)/steps;
@@ -237,6 +237,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
     }
 
     self.snapFirstEnabledElementIntoSpot = function(spot) {
+        console.log("snapFirstEnabledElementIntoSpot!");
         for (var i = 0; i < self.list.length; i++) {
             if (self.list[i].isEnabled) {
                 var didSnap = self.list[i].snapIntoPlace(spot);
@@ -332,10 +333,13 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
             case 55:
             case 56:
             case 57:
+                console.log("Number was pressed!")
                 self.snapFirstEnabledElementIntoSpot(String.fromCharCode(event.keyCode));
+                break;
             default:
                 console.log("Keypress!");
                 console.log(String.fromCharCode(event.keyCode));
+                console.log(event.keyCode);
         }
     }
 
