@@ -1,7 +1,7 @@
 var main = function(ex) {
 
-    // ex.data.meta.mode = "practice"; 
-    ex.data.meta.mode = "quiz-immediate"; 
+    ex.data.meta.mode = "practice"; 
+    // ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -252,26 +252,34 @@ function runPracticeMode (ex) {
 
     var failureFn = function (i, bucket) {
         console.log("I");
-        console.log(attempts);
+        console.log(bucket);
         attempts++;
         if (attempts == 1){
         var button1 = ex.createButton(0, 0, "Got it!");
         button1.on("click", function() {correctBox.remove();})
-        var correctBox = ex.textbox112("That's not quite right, try looking at the red digit in the number. If there is no red digit, what should it be considering which digit we are sorting other numbers by? <span>BTNA</span>",
+        var hintButton = ex.createButton(0, 0, "Hint");
+        hintButton.on("click", function() {
+            ex.textbox112("Where should numbers without a red digit go?", {
+                stay: true
+            })
+            correctBox.remove();})
+        var correctBox = ex.textbox112("That's not right, try looking at the red digit. <span>BTNB</span> <span>BTNA</span>",
                 {
                     stay: true,
                     color: "red"
-                });             
+                }, undefined, bucketSpots[bucket][0] + bucketSpots[bucket][2] + ex.width() / 4);
+        console.log(emptySpots[bucket]);             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+        ex.insertButtonTextbox112(correctBox, hintButton, "BTNB");
         }
         else{
-            var button1 = ex.createButton(0, 0, "Guess!");
+            var button1 = ex.createButton(0, 0, "Submit");
             var num = getRandomInt(100, 999);
             button1.on("click", function() {
                 console.log(input1.text());
                 console.log((Math.floor(num/10))%10);
                 if (parseInt(input1.text()) == Math.floor(num/10)%10){
-                    ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
+                    ex.textbox112("Correct! Now apply this on the list we are sorting!",{
                         stay: true,
                         color: "green"
                     })
@@ -279,7 +287,7 @@ function runPracticeMode (ex) {
                 }
                 });
             var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-            var text = "That's not quite right, we are looking at the second digit here, what is the second digit of ".concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
+            var text = "That's not right. What is the second digit of ".concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
             var wrongBox1 = ex.textbox112(text,
                     {
                         stay: true,
@@ -769,12 +777,23 @@ function runPracticeMode (ex) {
 
     var button2 = ex.createButton(0, 0, "OK!");
     button2.on("click", function() {correctBox.remove();})
-    var correctBox = ex.textbox112("Radix Sort is a method of sorting that uses the digits in a number to sort the list! Let's try it by sorting these digits by their ones digit to start <span>$BUTTON1$</span>",
+    var moreButton = ex.createButton(0, 0, "More Info");
+    moreButton.on("click", function() {
+        //Will link to an external site with more information about Radix Sorting
+        var externalSiteButton= ex.createButton(0, 0, "Even More Info!");
+        externalSiteButton.on("click", function() {moreInfoBox.remove();})
+        var moreInfoBox = ex.textbox112("Radix sorting sorts a list by sorting one digit at a time in a number. <span>LINK</span>",{
+            stay: true
+        }, undefined, ex.width() / 2);
+        ex.insertButtonTextbox112(moreInfoBox, externalSiteButton, "LINK");
+        correctBox.remove();})
+    var correctBox = ex.textbox112("Let's Radix Sort this list by sorting these numbers by each digit <span>$BUTTON1$</span> <span>MORE</span>",
     {
       stay: true
-    });
+    }, undefined, ex.width() / 2);
             
     ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
+    ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
@@ -858,7 +877,6 @@ function runQuizMode (ex) {
 
     var failureFn = function (i, bucket) {
         console.log("I");
-        console.log(attempts);
         attempts++;
         var button1 = ex.createButton(0, 0, "Guess!");
         var num = getRandomInt(100, 999);

@@ -2709,7 +2709,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
             $textbox112.css({
                 opacity: "1.0",
                 visibility: "visible",
-                fontSize: "25pt"
+                fontSize: (ex.width()/ex.height() * 18)
             });
 
             var $closeButton = $("<button class='close'></button>")
@@ -3093,4 +3093,3 @@ function define112Exercise(exerciseConstructor,wrapper) {
 
     return ex;
 }
-
