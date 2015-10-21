@@ -1,7 +1,7 @@
 var main = function(ex) {
 
     ex.data.meta.mode = "practice"; 
-    // ex.data.meta.mode = "quiz-immediate"; 
+    ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -261,7 +261,7 @@ function runPracticeMode (ex) {
         hintButton.on("click", function() {
             ex.textbox112("Where should numbers without a red digit go?", {
                 stay: true
-            })
+            }, undefined, bucketSpots[bucket][0] + bucketSpots[bucket][2] + ex.width() / 4)
             correctBox.remove();})
         var correctBox = ex.textbox112("That's not right, try looking at the red digit. <span>BTNB</span> <span>BTNA</span>",
                 {
@@ -535,10 +535,10 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.setLineDash([6]);
             ex.graphics.ctx.strokeRect(x,y,w,h);
         }
+        var bucketColor = "#CEE8F0";
         //Draw buckets
         for (var spot in bucketSpots) {
             ex.graphics.ctx.strokeStyle = "black";
-            var bucketColor = "#CEE8F0";
             ex.graphics.ctx.fillStyle = bucketColor;
             var x = bucketSpots[spot][0];
             var y = bucketSpots[spot][1];
@@ -548,10 +548,10 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.setLineDash([]);
             ex.graphics.ctx.strokeRect(x, y, w, h);
             ex.graphics.ctx.fillStyle = "black";
-            ex.graphics.ctx.font = "15px Arial";
+            ex.graphics.ctx.font = fontSize + "px Arial";
             ex.graphics.ctx.textAlign = "center";
             ex.graphics.ctx.textBaseline="middle";
-            ex.graphics.ctx.fillText(spot,x+w/2,y+h/2);        
+            ex.graphics.ctx.fillText(spot,x+w/2,y+h/2);      
         }
      }
      
@@ -776,7 +776,9 @@ function runPracticeMode (ex) {
     }
 
     var button2 = ex.createButton(0, 0, "OK!");
+
     button2.on("click", function() {correctBox.remove();})
+    console.log(button2);
     var moreButton = ex.createButton(0, 0, "More Info");
     moreButton.on("click", function() {
         //Will link to an external site with more information about Radix Sorting
@@ -787,17 +789,32 @@ function runPracticeMode (ex) {
         }, undefined, ex.width() / 2);
         ex.insertButtonTextbox112(moreInfoBox, externalSiteButton, "LINK");
         correctBox.remove();})
+    console.log(moreButton);
     var correctBox = ex.textbox112("Let's Radix Sort this list by sorting these numbers by each digit <span>$BUTTON1$</span> <span>MORE</span>",
     {
       stay: true
     }, undefined, ex.width() / 2);
-    
+    console.log(button2._elementReferenceID);
+    console.log(moreButton._elementReferenceID);
     console.log(correctBox);
-    console.log(button2);
-    console.log(moreButton);
+
+    if (button2._elementReferenceID == moreButton._elementReferenceID){
+        console.log("here");
+        while (button2._elementReferenceID == moreButton._elementReferenceID){
+            button2.remove();
             
-    ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
-    ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
+        }
+        console.log(button2._elementReferenceID);
+        console.log(moreButton._elementReferenceID);
+        ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
+        ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
+    }
+    else{
+        ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
+        ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
+    }
+
+    
     /***************************************************************************
      * Main Game Code
      **************************************************************************/

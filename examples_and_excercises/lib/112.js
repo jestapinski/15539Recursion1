@@ -1453,7 +1453,8 @@ function define112Exercise(exerciseConstructor,wrapper) {
             this._elementReferenceID = (function() {
                 var id = UNIQUE_ID + Date.now().toString();
                 // Base 64 encoding
-                var b64 = window.btoa(id);
+                var b64 = window.btoa(id) + String(Math.floor(1000 * Math.random()));
+                console.log(b64);
                 // String replace equals signs, only use last 10 digits
                 return (b64.replace(/=/g, "_")).slice(-10);
             })();
