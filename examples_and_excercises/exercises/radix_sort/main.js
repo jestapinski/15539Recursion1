@@ -791,6 +791,10 @@ function runPracticeMode (ex) {
     {
       stay: true
     }, undefined, ex.width() / 2);
+    
+    console.log(correctBox);
+    console.log(button2);
+    console.log(moreButton);
             
     ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
     ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
