@@ -1,7 +1,7 @@
 var main = function(ex) {
 
     ex.data.meta.mode = "practice"; 
-    ex.data.meta.mode = "quiz-immediate"; 
+    // ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -139,6 +139,9 @@ function runPracticeMode (ex) {
 
     //Length of list
     var listLength = 7;
+    
+    //Prevent users from moving list objects while a textbox is open
+
 
     //Width/Heigh of list elements
     //var elementW = (ex.width()/2-margin)/(listLength+1);
@@ -254,15 +257,23 @@ function runPracticeMode (ex) {
         console.log("I");
         console.log(bucket);
         attempts++;
+        draggableList.disable(workingIndex);
         if (attempts == 1){
         var button1 = ex.createButton(0, 0, "Got it!");
-        button1.on("click", function() {correctBox.remove();})
+        button1.on("click", function() {
+            removeAndEnable(correctBox);})
         var hintButton = ex.createButton(0, 0, "Hint");
         hintButton.on("click", function() {
-            ex.textbox112("Where should numbers without a red digit go?", {
+            var newButton = ex.createButton(0, 0, "OK!");
+            newButton.on("click", function(){
+                removeAndEnable(newBox);
+            })
+            var newBox = ex.textbox112("Where should numbers without a red digit go? <span>OK</span>", {
                 stay: true
             }, undefined, bucketSpots[bucket][0] + bucketSpots[bucket][2] + ex.width() / 4)
-            correctBox.remove();})
+            correctBox.remove();
+            ex.insertButtonTextbox112(newBox, newButton, "OK");
+        })
         var correctBox = ex.textbox112("That's not right, try looking at the red digit. <span>BTNB</span> <span>BTNA</span>",
                 {
                     stay: true,
@@ -279,10 +290,15 @@ function runPracticeMode (ex) {
                 console.log(input1.text());
                 console.log((Math.floor(num/10))%10);
                 if (parseInt(input1.text()) == Math.floor(num/10)%10){
-                    ex.textbox112("Correct! Now apply this on the list we are sorting!",{
+                    var goodButton = ex.createButton(0, 0, "OK");
+                    goodButton.on("click", function() {
+                        removeAndEnable(positiveBox);
+                    })
+                    var positiveBox = ex.textbox112("Correct! Now apply this on the list we are sorting! <span>OK</span>",{
                         stay: true,
                         color: "green"
                     })
+                    ex.insertButtonTextbox112(positiveBox, goodButton, "OK");
                     wrongBox1.remove();
                 }
                 });
@@ -341,6 +357,8 @@ function runPracticeMode (ex) {
     var numberOfIterations = Math.floor(Math.log10(getMaxOfArray(startList)))+1;
     var currentIteration = 0;
     var attempts = 0;
+    
+
 
     // var recentBucket = 0;
     // var correctBucket = false;
@@ -777,18 +795,27 @@ function runPracticeMode (ex) {
 
     var button2 = ex.createButton(0, 0, "OK!");
 
-    button2.on("click", function() {correctBox.remove();})
+    button2.on("click", function() {
+        removeAndEnable(correctBox);})
     console.log(button2);
     var moreButton = ex.createButton(0, 0, "More Info");
     moreButton.on("click", function() {
         //Will link to an external site with more information about Radix Sorting
+        var continueButton = ex.createButton(0, 0, "OK!")
+        continueButton.on("click", function() {
+            removeAndEnable(moreInfoBox);
+        })
         var externalSiteButton= ex.createButton(0, 0, "Even More Info!");
-        externalSiteButton.on("click", function() {moreInfoBox.remove();})
-        var moreInfoBox = ex.textbox112("Radix sorting sorts a list by sorting one digit at a time in a number. <span>LINK</span>",{
+        externalSiteButton.on("click", function() {
+            removeAndEnable(moreInfoBox);
+            })
+        var moreInfoBox = ex.textbox112("Radix sorting sorts a list by sorting one digit at a time in a number. <span>OK</span> <span>LINK</span>",{
             stay: true
         }, undefined, ex.width() / 2);
         ex.insertButtonTextbox112(moreInfoBox, externalSiteButton, "LINK");
-        correctBox.remove();})
+        ex.insertButtonTextbox112(moreInfoBox, continueButton, "OK");
+        correctBox.remove();
+        })
     console.log(moreButton);
     var correctBox = ex.textbox112("Let's Radix Sort this list by sorting these numbers by each digit <span>$BUTTON1$</span> <span>MORE</span>",
     {
@@ -798,21 +825,9 @@ function runPracticeMode (ex) {
     console.log(moreButton._elementReferenceID);
     console.log(correctBox);
 
-    if (button2._elementReferenceID == moreButton._elementReferenceID){
-        console.log("here");
-        while (button2._elementReferenceID == moreButton._elementReferenceID){
-            button2.remove();
-            
-        }
-        console.log(button2._elementReferenceID);
-        console.log(moreButton._elementReferenceID);
-        ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
-        ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
-    }
-    else{
-        ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
-        ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
-    }
+    ex.insertButtonTextbox112(correctBox, button2, "$BUTTON1$");
+    ex.insertButtonTextbox112(correctBox, moreButton, "MORE");
+    draggableList.disable(workingIndex);
 
     
     /***************************************************************************
@@ -824,6 +839,13 @@ function runPracticeMode (ex) {
         bindButtons();
         setUp();
         drawAll();
+    }
+    
+    function removeAndEnable(elem112){
+        elem112.remove();
+        draggableList.enable(workingIndex);
+        drawAll();
+        
     }
 
     run();
