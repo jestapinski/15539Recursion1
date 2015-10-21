@@ -187,7 +187,28 @@ function runPracticeMode (ex) {
             draggableList.enable(workingIndex);
         } else {
             if (currentIteration == 0){
-               var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. Notice some of the list elements do not have a red digit, where should we put them? Hint: what is the tens digit of 3? <span>BTNA</span>",
+               var hintButton = ex.createButton(0, 0, "Hint!");
+               hintButton.on("click", function(){
+                   correctBox.remove();
+                   var hintBox = ex.textbox112("What is the ten's digit of 3? <span>OK</span>", {
+                       stay: true,
+                       color: "blue"
+                   });
+                   var okButton = ex.createButton(0, 0, "OK")
+                   okButton.on("click", function(){
+                       hintBox.remove();
+                       moveBack(draggableList, bucketSpots, bucketOrdering);
+                       emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+                       draggableList.setEmptySpots(emptySpots);
+                       workingIndex = 0;
+                       draggableList.enable(workingIndex);
+                       digitIndex++;
+                       draggableList.setDigitIndex(digitIndex);
+                       currentIteration++;
+                   })
+                   ex.insertButtonTextbox112(hintBox, okButton, "OK");
+               })
+               var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. <span>hint</span> <span>BTNA</span>",
                     {
                         stay: true,
                         color: "green"
@@ -205,6 +226,7 @@ function runPracticeMode (ex) {
                     correctBox.remove();
                 });         
                 ex.insertButtonTextbox112(correctBox, button1, "BTNA");
+                ex.insertButtonTextbox112(correctBox, hintButton, "hint");
            }
            else if (currentIteration < numberOfIterations-1){
                var correctBox = ex.textbox112("Great job! Now we will be sorting by the next digit. <span>BTNA</span>",
@@ -254,6 +276,10 @@ function runPracticeMode (ex) {
     // }
 
     var failureFn = function (i, bucket) {
+        console.log(emptySpots[bucket][0]);
+        var margin = 20;
+        var xPoint = bucketSpots[bucket][0] + emptySpots[bucket][2] + margin
+        var yPoint = bucketSpots[bucket][1]
         console.log("I");
         console.log(bucket);
         attempts++;
@@ -270,15 +296,15 @@ function runPracticeMode (ex) {
             })
             var newBox = ex.textbox112("Where should numbers without a red digit go? <span>OK</span>", {
                 stay: true
-            }, undefined, bucketSpots[bucket][0] + bucketSpots[bucket][2] + ex.width() / 4)
+            }, undefined, xPoint, yPoint)
             correctBox.remove();
             ex.insertButtonTextbox112(newBox, newButton, "OK");
         })
-        var correctBox = ex.textbox112("That's not right, try looking at the red digit. <span>BTNB</span> <span>BTNA</span>",
+        var correctBox = ex.textbox112("That's not right, look at the digit being sorted. <span>BTNB</span> <span>BTNA</span>",
                 {
                     stay: true,
                     color: "red"
-                }, undefined, bucketSpots[bucket][0] + bucketSpots[bucket][2] + ex.width() / 4);
+                }, undefined, xPoint, yPoint);
         console.log(emptySpots[bucket]);             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
         ex.insertButtonTextbox112(correctBox, hintButton, "BTNB");
@@ -297,7 +323,7 @@ function runPracticeMode (ex) {
                     var positiveBox = ex.textbox112("Correct! Now apply this on the list we are sorting! <span>OK</span>",{
                         stay: true,
                         color: "green"
-                    })
+                    }, undefined, xPoint, yPoint);
                     ex.insertButtonTextbox112(positiveBox, goodButton, "OK");
                     wrongBox1.remove();
                 }
@@ -308,7 +334,7 @@ function runPracticeMode (ex) {
                     {
                         stay: true,
                         color: "red"
-                    }); 
+                    }, undefined, xPoint, yPoint); 
         // var button1 = ex.createButton(0, 0, "Guess!");
         // button1.on("click", function() {
         //     console.log(input1.text());
@@ -589,12 +615,34 @@ function runPracticeMode (ex) {
         draggableList.draw();
         //ex.graphics.ctx.fillText = ("hello",ex.width()/2,ex.height()/2);
      }
+     
+     //Eliminate Hardcoding
+     function drawHintButton(){
+         if (currentIteration > 0){
+             var coolHintButton = ex.createButton(ex.width() - 65, 5, "Hint!");
+             coolHintButton.on("click", function(){
+                 draggableList.disable(workingIndex);
+                 drawAll();
+                 var hintBox = ex.textbox112("What is the ten's digit of 3? <span>OK</span>", {
+                       stay: true,
+                       color: "blue"
+                 })
+                 var confirmButton = ex.createButton(0, 0, "OK!");
+                 confirmButton.on("click", function(){
+                     removeAndEnable(hintBox);
+                 })
+                 ex.insertButtonTextbox112(hintBox, confirmButton, "OK");
+             
+         })
+     }
+     }
 
      function drawAll() {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawBuckets();
         drawList();
         drawStepsAndIterations();
+        drawHintButton();
      }
 
     /***************************************************************************

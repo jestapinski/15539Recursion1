@@ -2713,17 +2713,17 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 fontSize: (ex.width()/ex.height() * 18)
             });
 
-            var $closeButton = $("<button class='close'></button>")
-                                .attr("type", "button")
-                                .attr("aria-label", "Close")
-                                .html("<span aria-hidden='true'>×</span>");
-            $closeButton.on("click", function() {
-                $textbox112.remove();
-            });
+            // var $closeButton = $("<button class='close'></button>")
+            //                     .attr("type", "button")
+            //                     .attr("aria-label", "Close")
+            //                     .html("<span aria-hidden='true'>×</span>");
+            // $closeButton.on("click", function() {
+            //     $textbox112.remove();
+            // });
 
             // Add message, then put button at the beginning of div
             $textbox112.html(message);
-            $textbox112.prepend($closeButton);
+            // $textbox112.prepend($closeButton);
             $_container.append($textbox112);
 
             var element = new Element112($textbox112[0], "alert");
