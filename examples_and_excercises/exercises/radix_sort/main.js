@@ -1,7 +1,7 @@
 var main = function(ex) {
 
-    ex.data.meta.mode = "practice"; 
-    // ex.data.meta.mode = "quiz-immediate"; 
+    // ex.data.meta.mode = "practice"; 
+    ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -11,12 +11,34 @@ var main = function(ex) {
 
 };
 
-function createRandomIntegerList(listLength, maxNumberOfDigits){
+function createStartList(listLength, maxNumberOfDigits){
     var list = [];
+    var numOfDigitsList = [];
     for (var i = 0; i < listLength; i++) {
-        var numOfDigits = getRandomInt(1, maxNumberOfDigits);
+        numOfDigitsList[i] = getRandomInt(1, maxNumberOfDigits);
+    }
+    // Make sure there is at least one element with every number of digits
+    var doesListHaveAllDigitNumbers = function (L, maxDigits) {
+        for (var j = 1; j <= maxNumberOfDigits; j++) {
+            if (numOfDigitsList.indexOf(j) == -1) {
+                return false;
+            }
+        }
+        return true;
+    };
+    while (doesListHaveAllDigitNumbers(numOfDigitsList, maxNumberOfDigits) == false) {
+        var i = getRandomInt(0, listLength-1);
+        numOfDigitsList[i] = getRandomInt(1, maxNumberOfDigits);
+    }
+    //Create the actual list
+    for (var i = 0; i < listLength; i++) {
+        var numOfDigits = numOfDigitsList[i];
         //Generate a random number with numOfDigits digits
-        list[i] = getRandomInt(Math.pow(10, numOfDigits-1), Math.pow(10, numOfDigits)-1);
+        var rand = getRandomInt(Math.pow(10, numOfDigits-1), Math.pow(10, numOfDigits)-1);
+        while (list.indexOf(rand) != -1) { // Avoid duplicate elements
+            rand = getRandomInt(Math.pow(10, numOfDigits-1), Math.pow(10, numOfDigits)-1);
+        }
+        list[i] = rand;
     }
     return list;
 }
@@ -67,13 +89,20 @@ function getEmptySpots(bucketSpots, bucketOrdering) {
     return emptySpots;
 }
 
-function moveBack (draggableList, bucketSpots, bucketOrdering) {
-    var newOrder = [];
+function moveBack (draggableList, bucketSpots, bucketOrdering, newOrder) {
+    //If user does not pass in an order, order it by what bucket the elements are in
+    if (newOrder == undefined) {
+        newOrder = [];
+        for (var i = 0; i < bucketOrdering.length; i++) {
+            var bucketLabel = bucketOrdering[i];
+            for (var j = 0; j < bucketSpots[bucketLabel][4].length; j++) {
+                newOrder.push(bucketSpots[bucketLabel][4][j]);
+            }
+            bucketSpots[bucketLabel][4] = [];
+        }
+    }
     for (var i = 0; i < bucketOrdering.length; i++) {
         var bucketLabel = bucketOrdering[i];
-        for (var j = 0; j < bucketSpots[bucketLabel][4].length; j++) {
-            newOrder.push(bucketSpots[bucketLabel][4][j]);
-        }
         bucketSpots[bucketLabel][4] = [];
     }
     draggableList.moveElementsBack(newOrder);
@@ -165,7 +194,7 @@ function runPracticeMode (ex) {
 
     //Create the actual list
     var maxNumberOfDigits = 3;
-    var startList = createRandomIntegerList(listLength, maxNumberOfDigits);
+    var startList = createStartList(listLength, maxNumberOfDigits);
     var correctList = LSDDigitSort(startList, digitIndex);
 
     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect
@@ -908,18 +937,13 @@ function runQuizMode (ex) {
     var margin = 30;
 
     //Length of list
-    var listLength = 7;
+    var listLength = 8;
 
     //Width/Heigh of list elements
-    //var elementW = (ex.width()/2-margin)/(listLength+1);
-    // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
-    // var elementH = elementW/2;
     var elementH = (3*ex.height()/4 - 2*margin)/listLength;
     var elementW = (5*ex.width()/6)/(listLength+2);
 
     //Top Left corner of the list
-    // var x0 = ex.width()/2 - elementW*listLength/2;
-    // var y0 = margin;
     var x0 = margin; 
     var y0 = ex.height()/2 - elementH*listLength/2;
 
@@ -931,8 +955,8 @@ function runQuizMode (ex) {
     var disabledColor = "LightGray";
 
     //Create the actual list
-    var maxNumberOfDigits = 3;
-    var startList = createRandomIntegerList(listLength, maxNumberOfDigits);
+    var maxNumberOfDigits = 4;
+    var startList = createStartList(listLength, maxNumberOfDigits);
     var maxNum = 0;
     for (var i = 0; i < listLength; i++) {
         if (startList[i] > maxNum) {
@@ -940,20 +964,40 @@ function runQuizMode (ex) {
         }
     }
     var numOfDigits = Math.floor(Math.log10(maxNum))+1;
-    var correctList;
 
     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect
     var scaleFactor = 1.25; //The height of a char is ~1.25 times the width
     var fontSize = Math.min(elementH*3/4, elementW*scaleFactor/maxNumberOfDigits);
 
+    //Set the standard position of isntructions
+    var instrW = ex.width()*2/5;
+    var instrX = ex.width()/2;
+
+    //Set textbox112 color scheme
+    var instrColor = "yellow";
+    var questionsColor = "blue";
+    var correctAnsColor = "green";
+    var incorrectAnsColor = "red";
+
+    //Import the strings
+    var strings = getStrings();
+
+    //The users score
+    var score = 0.0;
+    var possibleScore = 22;
+    var hasCurrentElementFailed = false;
+
     //Functions to be called when a list element clicks into a bucket
     var successFn = function (i, bucket) {
         console.log(i);
         console.log(bucket);
+        console.log("workingIndex:",workingIndex);
         draggableList.disable(workingIndex);
         maxIndex = workingIndex;
         workingIndex++;
-        console.log("workingIndex:",workingIndex);
+        if (hasCurrentElementFailed == false) { score = score + 1.0; }
+        hasCurrentElementFailed = false;
+        console.log(score);
         bucketSpots[bucket][4].push(i);
         // updateList();
         if(workingIndex < listLength) {
@@ -967,32 +1011,8 @@ function runQuizMode (ex) {
     };
 
     var failureFn = function (i, bucket) {
-        console.log("I");
-        attempts++;
-        var button1 = ex.createButton(0, 0, "Guess!");
-        var num = getRandomInt(100, 999);
-        button1.on("click", function() {
-            console.log(input1.text());
-            console.log((Math.floor(num/10))%10);
-            if (parseInt(input1.text()) == Math.floor(num/10)%10){
-                ex.textbox112("Correct! Now apply this idea on the list we are sorting!",{
-                    stay: true,
-                    color: "green"
-                })
-                wrongBox1.remove();
-            }
-            });
-        var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-        var text = "That's not quite right, we are looking at the second digit here, what is the second digit of ".concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
-        var wrongBox1 = ex.textbox112(text,
-                {
-                    stay: true,
-                    color: "red"
-                });             
-        ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
-        ex.insertTextAreaTextbox112(wrongBox1, input1);        
-        
-            //     console.log(x);
+        hasCurrentElementFailed = true;
+        createIncorrectAnsMessage(i, bucket);
     }
 
     //for integers only
@@ -1012,24 +1032,17 @@ function runQuizMode (ex) {
     var draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
 
-    //index being move/click
+    //index that is currently enabled
     var workingIndex = 0;
     //highest index that has been moved so far
     var maxIndex = 0;
     var numberOfIterations = Math.floor(Math.log10(getMaxOfArray(startList)))+1;
     var currentIteration = 0;
-    var correctList = LSDDigitSort(startList, digitIndex);
-    var attempts = 0;
 
     var recentBucket = 0;
     var correctBucket = false;
     var bucketColor = "#CEE8F0";
 
-    //Question variables
-    var instrNum = 0;
-    var instrOn = false;
-
-    var instrMenu = ex.createButton(ex.width() - 3.5*margin, 0.5*margin, "Instruction");
     /***************************************************************************
      * Draw Functions
      **************************************************************************/
@@ -1060,142 +1073,31 @@ function runQuizMode (ex) {
         }
      }
 
-     function drawStepsAndIterations(){
-        var stepFont = 20;
-        font = "Arial";
-        ex.graphics.ctx.fillStyle = "black";
-        ex.graphics.ctx.font = stepFont + "px " + font;
-        ex.graphics.ctx.textAlign = "left";
-        ex.graphics.ctx.textBaseline = "bottom";
-        ex.graphics.ctx.fillText("Step: "+maxIndex,margin,1.5*margin);
-        ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,1.5*margin+stepFont);
-     }
+     // function drawStepsAndIterations(){
+     //    var stepFont = 20;
+     //    font = "Arial";
+     //    ex.graphics.ctx.fillStyle = "black";
+     //    ex.graphics.ctx.font = stepFont + "px " + font;
+     //    ex.graphics.ctx.textAlign = "left";
+     //    ex.graphics.ctx.textBaseline = "bottom";
+     //    ex.graphics.ctx.fillText("Step: "+maxIndex,margin,1.5*margin);
+     //    ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,1.5*margin+stepFont);
+     // }
 
      function drawList(){
         draggableList.draw();
-        //ex.graphics.ctx.fillText = ("hello",ex.width()/2,ex.height()/2);
      }
-
-
-     function drawQuestionBox(question,correctAns){
-         console.log("HEREEEEEEEEEE");
-        var questionText = question + "<span>$TEXTAREA$</span> <span>BTNA</span>";
-        console.log(questionText);
-        var button = ex.createButton(0, 0, "Submit");
-        var input = ex.createInputText(0,0,"?", {inputSize: 2});
-        var questionBox = ex.textbox112(questionText,{stay: true,});
-        button.on("click", function(){
-            verify(input.text(),correctAns,instrNum);
-            questionBox.remove();
-        });
-        ex.insertButtonTextbox112(questionBox, button, "BTNA"); 
-        ex.insertTextAreaTextbox112(questionBox, input);  
-     }
-
-     function drawInstructionBox(text){
-        var instruction  = text + "<span>BTNB</span>";
-        var button = ex.createButton(0, 0, "Ok!");
-
-        var instructionBox = ex.textbox112(instruction,{stay: true,});
-        button.on("click", function(){
-            instructionBox.remove();
-            if(instrNum == 0) {
-                instrOn = true;//this is used instead since questionBox is currently buggy
-                instrNum++;
-            } else if(instrNum == 2){
-                startList = partialRadixSort(startList,currentIteration+1);
-                instrNum++;
-                currentIteration++;
-                digitIndex++;
-                //instrOn = true;
-                nextStep();
-            }
-            drawInstructions();
-        });
-
-        ex.insertButtonTextbox112(instructionBox, button, "BTNB"); 
-
-        console.log("drawAlert");
-     }
-
-     function drawInstructions(){
-        if(instrOn){
-            var instrText = "";
-            var answer = "";
-            switch(instrNum){
-                case 0:
-                    instrText = "Here, we have a randomly sorted list. Plese put the element in the correct bucket.";
-                    drawInstructionBox(instrText);
-                    instrOn = false;
-                    break;
-                case 1:
-                var button1 = ex.createButton(0, 0, "Guess!");
-                var input1 = ex.createInputText(0,0,"?", {inputSize: 1});
-                var wrongBox1 = ex.textbox112("How many iterations would it take to sort this list? <span>$TEXTAREA$</span> <span>BTNA</span>",
-                            {
-                                stay: true,
-                                color: "red"
-                            });
-                button1.on("click", function() {
-                    console.log(input1.text());
-                    console.log(numOfDigits);
-                    if (parseInt(input1.text()) == numOfDigits){
-                        ex.textbox112("Correct! Now sort this list, starting with the one's digit.",{
-                            stay: true,
-                            color: "green"
-                        });
-                        wrongBox1.remove();
-                    }
-                    });             
-                    ex.insertButtonTextbox112(wrongBox1, button1, "BTNA");
-                    ex.insertTextAreaTextbox112(wrongBox1, input1); 
-                    // instrText = "How many iterations would it take to sort this list?";
-                    // answer = maxIndex;
-                    // drawInstructionBox(instrText);
-                    // // drawQuestionBox(instrText,answer);
-                    instrOn = false;
-                    break;
-                case 2:
-                    var element = 0; //get some random elem from list
-                    correctAns = 0; //get the correct index
-                    instrText = "What will the index of " + element + " be in the new list?"
-                    console.log("case" + instrNum);
-                    drawInstructionBox(instrText);
-                    //drawQuestionBox(instrText,correctAns);
-                    instrOn = false;
-                    break;
-                case 3:
-                    instrText = "The list is now sorted up to the " + Math.pow(10,currentIteration) + "th index. Now, it's your turn to do the rest!"
-                    drawInstructionBox(instrText);
-                    instrOn = false;
-                    break;
-                
-            }
-        }
-    }
 
      function drawAll() {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawList();
         drawBuckets();
-        drawStepsAndIterations();
-        drawInstructions();
+        // drawStepsAndIterations();
      }
 
     /***************************************************************************
      * Functions for Submitting the Current List
      **************************************************************************/
-
-    // function generateQuestion(){
-    //     var testIteration = getRandomInt(0,numberOfIterations);
-    //     currentIteration = testIteration;
-    //     questionText = "Fill in missing text and sort the list. Remember that you don't have to sort a sorted list!";
-    //     startList = partialRadixSort(startList,testIteration);
-    //     digitIndex = testIteration;
-    //     correctList = LSDDigitSort(startList, digitIndex);
-    //     draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
-    //                                              maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
-    // }
 
     function verify(input,answer,instr){
         if(input != answer){
@@ -1253,49 +1155,36 @@ function runQuizMode (ex) {
         ex.chromeElements.displayCAButton.disable();
     }
     function submit(){
-        var newList = createListFromBucket();
-        ex.data.newList = newList;
-        if(isCorrect()){
-            //Bug, cannot put two buttons in one element
-            var correctBox = ex.textbox112("Correct! <span>BTNA</span>",
-                {
-                    stay: true
-                });
-            button1 = ex.createButton(0, 0, "Next");
-            button1.on("click", function() {
-                correctBox.remove();
-                //next question
-                instrOn = true;
-                instrNum++;
-                drawInstructions();
-            })
-            ex.insertButtonTextbox112(correctBox, button1,"BTNA");
-            //correctAnsContinue();
-            //ex.showFeedBack("Correct!");
-        } else {
-           ex.alert("Wrong answer!");
-        }
-        //console.log(newList);
+        endOfOneIteration();
         disableButtons();
     }   
 
-    function nextStep(){
-        console.log(draggableList);
-        instrOn = true;
-        startList = createListFromBucket();
-        moveBack(draggableList, bucketSpots, bucketOrdering);
-        workingIndex = 0;
-        draggableList.enable(workingIndex);
-        digitIndex++;
-        correctList = LSDDigitSort(startList, digitIndex);
-        console.log("correct:" + correctList);
-        draggableList.setDigitIndex(digitIndex);
-        currentIteration++;
-        console.log("iter" + currentIteration);
-        emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
-        draggableList.setEmptySpots(emptySpots);
-        drawAll();
-        console.log(instrNum);
+    function endOfOneIteration () {
+        //Find a bucket with more than one element, if it exists
+        var elementI = undefined;
+        for (var spot in bucketSpots) {
+            if (bucketSpots[spot][4].length > 1) {
+                elementI = bucketSpots[spot][4][getRandomInt(0, bucketSpots[spot][4].length-1)];
+            }
+        }
+        if (elementI == undefined) {
+            elementI = getRandomInt(0, listLength-1);
+        }
+        var element = draggableList.elementList[elementI];
+        var correctI = 0;
+        for (var i = 0; i < bucketOrdering.length; i++) {
+            var bucketLabel = bucketOrdering[i];
+            var didBreak = false;
+            for (var j = 0; j < bucketSpots[bucketLabel][4].length; j++) {
+                if (elementI == bucketSpots[bucketLabel][4][j]) {
+                    didBreak = true;
+                    break;
+                }
+                correctI++;
+            }
+            if (didBreak) { break; }
+        }
+        createAfterOneIterationQ(element, correctI);
     }
 
     function restart(){
@@ -1318,21 +1207,247 @@ function runQuizMode (ex) {
         ex.graphics.on("mousedown", draggableList.mousedown);
         ex.on("keydown", draggableList.keydown);
         ex.chromeElements.submitButton.on("click", submit);
-        // nextButton.on("click", updateBucket);
         ex.chromeElements.resetButton.on("click",restart);
-        instrMenu.on("click",function(){
-            instrOn = true;
-            drawInstructions();
-            instrOn = false;
-        });
         //ex.chromeElements.undoButton.on("click",undo);
     }
-     function setUp(){
-        ex.chromeElements.submitButton.disable();
-        instrOn = true;
-        // nextButton.disable();
+
+    function afterCloseInstruction () {
+        ex.graphics.off("mousedown");
+        ex.off("keydown");
+        ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.on("keydown", draggableList.keydown);
     }
 
+    function beforeShowInstruction () {
+        ex.graphics.off("mousedown");
+        ex.off("keydown");
+    }
+
+     function setUp(){
+        ex.chromeElements.submitButton.disable();
+    }
+
+    /***************************************************************************
+     * Functions to draw Instructions
+     **************************************************************************/  
+
+     function createStartInstruction () {
+        beforeShowInstruction();
+        var text = strings.quizIntro();
+        var button = ex.createButton(0, 0, strings.quizOkButtonText());
+        var introBox = ex.textbox112(text,
+                {
+                    stay: true,
+                    color: instrColor
+                }, instrW, instrX);
+        button.on("click", function () {
+            introBox.remove();
+            afterCloseInstruction();
+            createIterationQ();
+        });
+        ex.insertButtonTextbox112(introBox, button, "BTNA");
+     }
+
+     function createIterationQ () {
+        beforeShowInstruction();
+        var button = ex.createButton(0, 0, strings.quizSubmitButtonText());
+        var input = ex.createInputText(0,0,"?", {inputSize: 1});
+        var text = strings.quizNumIteractionQ();
+        var iterationQ = ex.textbox112(text,
+                    {
+                        stay: true,
+                        color: questionsColor
+                    }, instrW, instrX);
+        button.on("click", function() {
+            console.log(input.text());
+            console.log(numOfDigits);
+            if (parseInt(input.text()) == numOfDigits){
+                score = score + listLength/4;
+                console.log(score);
+                var correctText = strings.quizNumIterationCorrect();
+                var correctButton = ex.createButton(0, 0, strings.quizOkButtonText());
+                var correctBox = ex.textbox112(correctText,
+                        {
+                            stay: true,
+                            color: correctAnsColor
+                        }, instrW, instrX);
+                correctButton.on("click", function () {
+                    correctBox.remove();
+                    afterCloseInstruction();
+                });
+                ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                iterationQ.remove();
+            } else {
+                iterationQ.remove();
+                var incorrectText = strings.quizNumIterationIncorrect(maxNum);
+                var incorrectButton = ex.createButton(0, 0, strings.quizOkButtonText());
+                var incorrectBox = ex.textbox112(incorrectText,
+                        {
+                            stay: true,
+                            color: incorrectAnsColor
+                        }, instrW, instrX);
+                incorrectButton.on("click", function () {
+                    incorrectBox.remove();
+                    afterCloseInstruction();
+                });
+                ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+            }
+            });             
+        ex.insertButtonTextbox112(iterationQ, button, "BTNA");
+        ex.insertTextAreaTextbox112(iterationQ, input); 
+    }
+
+    function createIncorrectAnsMessage (i, bucket) {
+        beforeShowInstruction();
+        var submitButton = ex.createButton(0, 0, strings.quizSubmitButtonText());
+        var elem = draggableList.elementList[i];
+        var numOfDigitsInElem = Math.floor(Math.log10(elem))+1;
+        // Generate a number with the same number of digits as the elem that is currently being placed
+        var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        submitButton.on("click", function() {
+            console.log(input.text());
+            console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
+            if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
+                score = score+0.5;
+                console.log(score);
+                var button = ex.createButton(0, 0, strings.quizOkButtonText());
+                var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
+                    stay: true,
+                    color: correctAnsColor
+                }, instrW, instrX);
+                button.on("click", function () { 
+                    correctAnsBox.remove();
+                    afterCloseInstruction();
+                });
+                ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+                wrongAnsBox.remove();
+                afterCloseInstruction();
+            } else {
+                var button = ex.createButton(0, 0, strings.quizOkButtonText());
+                var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);
+                button.on("click", function () { 
+                    wrongAnsBox2.remove();
+                    afterCloseInstruction();
+                });
+                ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+                wrongAnsBox.remove();
+            }
+        });
+        var input = ex.createInputText(0,0,"?", {inputSize: 1});
+        var text = strings.quizIncorrectAns(num, digitIndex, draggableList.elementList[i]);
+        var wrongAnsBox = ex.textbox112(text,
+                {
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);             
+        ex.insertButtonTextbox112(wrongAnsBox, submitButton, "BTNA");
+        ex.insertTextAreaTextbox112(wrongAnsBox, input);
+    }
+
+    function createAfterOneIterationQ (element, correctI) {
+        beforeShowInstruction();
+        var button = ex.createButton(0, 0, strings.quizSubmitButtonText());
+        var input = ex.createInputText(0,0,"?", {inputSize: 1});
+        var text = strings.quizAfterOneIteration(element, correctI);
+        var iterationQ = ex.textbox112(text,
+                    {
+                        stay: true,
+                        color: questionsColor
+                    }, instrW, instrX);
+        button.on("click", function() {
+            console.log(input.text());
+            console.log(numOfDigits);
+            if (input.text() != "") {
+                if (parseInt(input.text()) == correctI){
+                    score = score+listLength/4;
+                    console.log(score);
+                    var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
+                    var correctButton = ex.createButton(0, 0, strings.quizNextButtonText());
+                    var correctBox = ex.textbox112(correctText,
+                            {
+                                stay: true,
+                                color: correctAnsColor
+                            }, instrW, instrX);
+                    correctButton.on("click", function () {
+                        correctBox.remove();
+                        if (currentIteration == 0) {
+                            createNextIterationInstruction();
+                        } else { //End of quiz
+                            var percent = score/possibleScore*100;
+                            var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                            ex.showFeedback(feedback);
+                        }
+                    });
+                    ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                    iterationQ.remove();
+                } else {
+                    iterationQ.remove();
+                    var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
+                    var incorrectButton = ex.createButton(0, 0, strings.quizNextButtonText());
+                    var incorrectBox = ex.textbox112(incorrectText,
+                            {
+                                stay: true,
+                                color: incorrectAnsColor
+                            }, instrW, instrX);
+                    incorrectButton.on("click", function () {
+                        incorrectBox.remove();   
+                        console.log(currentIteration);
+                        if (currentIteration == 0) {
+                            createNextIterationInstruction();
+                        } else { //End of quiz
+                            var percent = score/possibleScore*100;
+                            var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                            ex.showFeedback(feedback);
+                        }
+                    });
+                    ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                }
+            }
+            });             
+        ex.insertButtonTextbox112(iterationQ, button, "BTNA");
+        ex.insertTextAreaTextbox112(iterationQ, input); 
+    }
+
+    function createNextIterationInstruction () {
+        beforeShowInstruction();
+        var nextDigitI = 2;
+        var text = strings.quizNextIteration(nextDigitI);
+        var button = ex.createButton(0, 0, strings.quizOkButtonText());
+        var nextIterationBox = ex.textbox112(text,
+                {
+                    stay: true,
+                    color: instrColor
+                }, instrW, instrX);
+        button.on("click", function () {
+            var partiallySortedList = startList;
+            for (var i = 0; i < nextDigitI; i++) {
+                console.log(partiallySortedList);
+                partiallySortedList = LSDDigitSort(partiallySortedList, i);
+            }
+            var newOrder = [];
+            console.log(startList);
+            console.log(draggableList.elementList);
+            for (var i = 0; i < startList.length; i++) {
+                newOrder[i] = startList.indexOf(partiallySortedList[i]);
+            }
+            console.log(newOrder);
+            moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
+            emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+            draggableList.setEmptySpots(emptySpots);
+            workingIndex = 0;
+            draggableList.enable(workingIndex);
+            digitIndex = nextDigitI;
+            draggableList.setDigitIndex(digitIndex);
+            currentIteration = nextDigitI;
+            console.log(currentIteration);
+            nextIterationBox.remove();
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
+    }
 
     /***************************************************************************
      * Main Game Code
@@ -1340,312 +1455,11 @@ function runQuizMode (ex) {
 
     function run(){
         loadSavedData();
-        //generateQuestion();
         bindButtons();
         setUp();
-        //drawQuestion();
+        createStartInstruction();
         drawAll();
     }
 
     run();
 }
-// function runQuizMode(ex) {
-//      /***************************************************************************
-//      * Initialize List
-//      **************************************************************************/
-
-//     //Top left corner of whole list
-//     var margin = 30;
-//     var spacing = Math.min(ex.width(),ex.height())/20;
-//     console.log(spacing);
-
-//     //for integers only
-//     var bucketNum = 10;
-//     var listLength = 7;
-
-//     var x0 = ex.width()/4;
-//     var y0 = margin;
-//     var bucketX = margin;
-//     var bucketY = ex.height()/4;
-
-//     //Width/Heigh of list elements
-//     //var elementW = (ex.width()/2-margin)/(listLength+1);
-//     var elementW = (3*ex.width()/4 - 2*margin)/listLength;
-//     var elementH = (3*ex.height()/4 - 2*margin - ((bucketNum/2)-1)*spacing)/(bucketNum/2);
-
-//     //Set color scheme of list element (otpional)
-//     var enabledColor = "LightSalmon";
-//     var disabledColor = "LightGray";
-//     var bucketColor = "#CEE8F0";
-
-//     //Digit Index - 0 is the one's digit, 1 is the 10's digit, etc.
-//     var digitIndex = 0;
-
-//     //Create the actual list
-//     var maxNumberOfDigits = 3;
-//     var startList = randList(maxNumberOfDigits);
-
-
-//     //index being move/click
-//     var workingIndex = 0;
-//     //highest index that has been moved so far
-//     var maxIndex = 0;
-//     var currentIteration = 0;
-//     var attempts = 0;
-
-
-//     var recentBucket = 0;
-//     var correctBucket = false;
-
-//     // var nextButton = ex.createButton(margin,1.5*margin,"Next",{
-//     //         color: "LightBlue",
-//     // });
-
-//     //var stepText = ex.createParagraph(ex.width()/8,margin,"Step: ",{ size: "large"});
-
-//     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect
-//     var scaleFactor = 1.25; //The height of a char is ~1.25 times the width
-//     var fontSize = Math.min(elementH*3/4, elementW*scaleFactor/maxNumberOfDigits);
-//     var draggableList = createDraggableList();
-
-//     function randList(maxNumberOfDigits){
-//         var list = [];
-//         for (var i = 0; i < listLength; i++) {
-//             var numOfDigits = getRandomInt(1, maxNumberOfDigits);
-//             //Generate a random number with numOfDigits digits
-//             list[i] = getRandomInt(Math.pow(10, numOfDigits-1), Math.pow(10, numOfDigits)-1);
-//         }
-//         return list
-//     }
-
-
-//     //Create the draggable list elements for the list
-//     function createDraggableList(){
-//         var list = []
-//         for (var i = 0; i < listLength; i++) {
-//             var x = x0 + i*elementW;
-//             var text = String(startList[i]);
-//             list[i] = createDraggableListElement(ex.graphics.ctx, [x,y0,elementW,elementH], 
-//                 text, digitIndex, {}, enabledColor, disabledColor, fontSize);
-//             //Disable all elements
-//             list[i].disable();
-//         }
-//         return list;
-//     }
-
-//     /***************************************************************************
-//      * Misc Helper Functions
-//      **************************************************************************/
-
-//     //from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-//     function getRandomInt(min, max) {
-//         return Math.floor(Math.random() * (max - min + 1)) + min;
-//     }
-
-
-//     /***************************************************************************
-//      * Create Question
-//      **************************************************************************/
-//      text = ex.data.assesments.comparingSorts.question;
-//      text = text.replace(ex.data.assesments.comparingSorts.variable, ex.data.assesments.comparingSorts.choices[getRandomInt(0, ex.data.assesments.comparingSorts.choices.length-1)]);
-//      var x = ex.width()/10;
-//      var y = ex.height()/5;
-//      question = ex.createParagraph(x,y,text, {
-//                                                 size: "large",
-//                                                 transition: "fade",
-//                                                 width: "100%"
-//                                                });
-
-//     /***************************************************************************
-//      * Create Answers
-//      **************************************************************************/
-//      var alphaChar = "abcdefghijklmnopqrstuvwxyz";
-//      var indexOfSol = getRandomInt(0, ex.data.assesments.comparingSorts.numOfChoices-1);
-//      var text;
-//      var answerList = [];
-//      x = ex.width()/10;
-//      y = ex.height()/3;
-//      var dy = ex.height()/7;
-//      for (var i = 0; i < ex.data.assesments.comparingSorts.numOfChoices; i++) {
-//         if (i == indexOfSol) {
-//             text = alphaChar.charAt(i).concat(". ").concat(ex.data.assesments.comparingSorts.answerChoices[ex.data.assesments.comparingSorts.correctAnsIndex]);
-//         } else {
-//             console.log(ex.data.assesments.comparingSorts);
-//             var index = getRandomInt(0, ex.data.assesments.comparingSorts.answerChoices.length-1);
-//             while (index == ex.data.assesments.comparingSorts.correctAnsIndex) {
-//                 index = getRandomInt(0, ex.data.assesments.comparingSorts.answerChoices.length-1);
-//             }
-//             text = alphaChar.charAt(i).concat(". ").concat(ex.data.assesments.comparingSorts.answerChoices[index]);
-//         }
-
-//         function createModifiedParagraph (i) {
-//             var paragraph = ex.createParagraph(x,y+dy*i,text, {
-//                                                 size: "large",
-//                                                 transition: "fade"
-//                                                });
-//             var newButton = ex.createButton(x - 70, y+dy*i, String.fromCharCode(65 + i));
-//             paragraph.isCorrect = (i == indexOfSol);
-//             newButton.on("click", function (event) {
-//                 if (paragraph.isCorrect) {
-//                     var newBox112 = ex.textbox112("Correct Answer! <span>$BUTTON$</span>", {
-//                         color: "green",
-//                         stay: true
-//                     });
-//                     var button539 = ex.createButton(0, 0, "Next!").on("click", function(){
-//                         newBox112.remove();
-//                     })
-//                     ex.insertButtonTextbox112(newBox112, button539);
-//                 } else {
-//                     var newBox112 = ex.textbox112("Inorrect Answer! <span>$BUTTON$</span>", {
-//                         color: "red",
-//                         stay: true
-//                     });
-//                     var buttonKOZ = ex.createButton(0, 0, "Next!").on("click", function(){
-//                         newBox112.remove();
-//                     })
-//                     ex.insertButtonTextbox112(newBox112, buttonKOZ);
-//                 }
-//             })
-//         }
-
-//         answerList[i] = createModifiedParagraph (i);
-//      }
-
-//     /***************************************************************************
-//      * Handler Functions
-//      **************************************************************************/
-
-//      // //This ensures smooth motion for the element, to prevent it from jumping 
-//      // // to mouse location when you first click it.
-//      // var xOffset = 0;
-//      // var yOffset = 0;
-
-//     // function mousedown(event) {
-//     //     console.log("Mouse Down");
-//     //     var x = event.offsetX;
-//     //     var y = event.offsetY;
-//     //     for (var i = 0; i < draggableList.length; i++) {
-//     //         if (draggableList[i].isXYInElement(x,y)) {
-//     //             if (draggableList[i].isEnabled) {
-//     //                 xOffset = draggableList[i].x - x;
-//     //                 yOffset = draggableList[i].y - y;
-//     //                 draggableList[i].drag();
-//     //             }
-//     //         }
-//     //     }
-//     //     ex.graphics.on("mousemove", mousemove);
-//     //     ex.graphics.on("mouseup", mouseup);
-//     // }
-
-//     function mousemove(event) {
-//         console.log("Mouse Move");
-//         var x = event.offsetX;
-//         var y = event.offsetY;
-//         for (var i = 0; i < draggableList.length; i++) {
-//             if (draggableList[i].isBeingDragged) {
-//                 draggableList[i].move(x+xOffset,y+yOffset);
-//             }
-//         }
-//         drawAll();
-//     }
-
-//     function mouseup(event) {
-//         console.log("Mouse Up");
-//         var didDrop = false;
-//         var didSnap = false;
-//         bucketSearch(x,y);//get current bucket
-//         for (var i = 0; i < draggableList.length; i++) { 
-//             didSnap = draggableList[i].drop();
-//             if (didSnap === true) {
-//                 //Correct Bucket!
-//                 //Create the necessary feedback
-//                 bucketSearch(draggableList[i].x,draggableList[i].y);
-//                 didDrop = true;
-//                 correctBucket = true;
-//                 workingIndex = i
-//                 //alert("Correct Bucket!");
-//             }
-//             if (didSnap === false) {
-//                 //Wrong Bucket!
-//                 //Create the necessary feedback
-//                 bucketSearch(draggableList[i].x,draggableList[i].y);
-//                 didDrop = true;
-//                 correctBucket = false;
-//                 workingIndex = i
-//                 //bucketSpots[recentBucket][5].push(i);
-//                 var correctBox = ex.textbox112("Wrong Bucket! Let's look at the red digits and try again! <span>$BUTTON$</span>",
-//                 {
-//                     stay: true
-//                 });
-//                 button1 = ex.createButton(0, 0, "OK!");
-//                 button1.on("click", function() {
-//                     correctBox.remove();
-//                     restart();})
-//                 ex.insertButtonTextbox112(correctBox, button1);
-//                 // alert("Wrong Bucket!");
-//             }
-
-//         }
-
-//         if(didDrop){
-//             nextButton.enable();
-//             updateBucket();
-//             //logList();
-//         }
-
-//         drawAll();
-//         ex.graphics.off("mousemove", mousemove);
-//         ex.graphics.off("mouseup", mouseup);
-//     }
-
-//     /***************************************************************************
-//      * Draw Functions
-//      **************************************************************************/
-
-//      function drawList(){
-//         ex.graphics.ctx.strokeStyle = "black";
-//         ex.graphics.ctx.fillStyle = "LightGray";
-//         ex.graphics.ctx.fillRect(x0, y0, elementW*listLength,elementH);
-//         ex.graphics.ctx.strokeRect(x0, y0, elementW*listLength,elementH);
-//         for (var i = 0; i < listLength; i++) {
-//             draggableList[i].draw();
-//         }
-//         //ex.graphics.ctx.fillText = ("hello",ex.width()/2,ex.height()/2);
-//      }
-
-//      function drawAll() {
-//         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
-//         drawList();
-//      }
-
-
-//     function loadSavedData(){
-//         if(ex.data.attempts) attempts = ex.data.attempts
-//         console.log("attempts: ",attempts);
-//     }
-
-//     function bindButtons(){
-//         ex.graphics.on("mousedown", draggableList.mousedown);
-//         //ex.chromeElements.submitButton.on("click", submit);
-//         // nextButton.on("click", updateBucket);
-//         //ex.chromeElements.resetButton.on("click",restart);
-//     }
-//      function setUp(){
-//         ex.chromeElements.submitButton.disable();
-//         // nextButton.disable();
-//     }
-
-
-//     /***************************************************************************
-//      * Main Game Code
-//      **************************************************************************/
-
-//     function run(){
-//         loadSavedData();
-//         bindButtons();
-//         setUp();
-//         drawAll();
-//     }
-
-//     run();
-// }

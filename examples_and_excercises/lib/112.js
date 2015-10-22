@@ -1454,7 +1454,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 var id = UNIQUE_ID + Date.now().toString();
                 // Base 64 encoding
                 var b64 = window.btoa(id) + String(Math.floor(1000 * Math.random()));
-                console.log(b64);
+                // console.log(b64);
                 // String replace equals signs, only use last 10 digits
                 return (b64.replace(/=/g, "_")).slice(-10);
             })();
@@ -2708,7 +2708,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
                             .addClass("alert")
                             .width(width);
             $textbox112.css({
-                opacity: "1.0",
+                opacity: "0.8",
                 visibility: "visible",
                 fontSize: (ex.width()/ex.height() * 18)
             });

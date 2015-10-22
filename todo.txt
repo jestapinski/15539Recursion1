@@ -11,3 +11,4 @@ ToDo:
   to fix on the screen.
 - Save state
 - Bug: user can move an element to a bucket while they are being animated, and that messes it up.
+- make sure the elements of the lsit are unique

@@ -58,6 +58,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.move = function(x, y, animate) {
         var steps = 40;
         if (animate) {
+            console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
             var dx = (x - element.x)/steps;
             var dy = (y - element.y)/steps;
             var i = 1;
@@ -240,6 +241,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         console.log("snapFirstEnabledElementIntoSpot!");
         for (var i = 0; i < self.list.length; i++) {
             if (self.list[i].isEnabled) {
+                console.log("enabled Element Index".concat(String(i)));
                 var didSnap = self.list[i].snapIntoPlace(spot);
                 if (didSnap === true) {
                     self.successFn (i, self.list[i].currentBucket);
@@ -351,6 +353,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
             newElementList.push(self.elementList[newOrder[i]]);
         }
         self.list = newList;
+        self.elementList = newElementList;
         for (var j = 0; j < self.list.length; j++) {
             var y = self.y0+j*self.elementH;
             self.list[j].setStartPos(self.x0, y);

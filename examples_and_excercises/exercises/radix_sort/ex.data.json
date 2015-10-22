@@ -13,7 +13,7 @@
         "constructorName": "main",
         "menuDisplayName": "Radix Sort",
         "requires": {
-            "js":["draggableListElements.js"]
+            "js":["draggableListElements.js", "strings.js"]
         }
     },
     "assesments": {
