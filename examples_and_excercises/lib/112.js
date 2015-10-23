@@ -2699,16 +2699,17 @@ function define112Exercise(exerciseConstructor,wrapper) {
             return true;
         };
 
-        ex.textbox112 = function(message, options, width, left, top) {
+        ex.textbox112 = function(message, options, width, cx, cy, height, left, top) {
             // Default Arguments!
             if(typeof(width) == 'undefined') {width = ex.width()/3;}
-            if(typeof(left) == 'undefined') {left = ex.width() / 2 - width / 2;}
-            if(typeof(top) == 'undefined') {top = ex.height() / 4;}
+            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
+            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
+            if(typeof(height) == 'undefined') {height = width;}
             var $textbox112 = $("<div></div>")
                             .addClass("alert")
                             .width(width);
             $textbox112.css({
-                opacity: "0.8",
+                opacity: "0.9",
                 visibility: "visible",
                 fontSize: (ex.width()/ex.height() * 18)
             });
@@ -2728,6 +2729,8 @@ function define112Exercise(exerciseConstructor,wrapper) {
 
             var element = new Element112($textbox112[0], "alert");
             element.style(options);
+            if (typeof(left) == 'undefined') {left = cx - width / 2}
+            if (typeof(top) == 'undefined') {top = cy - height / 2}
             element.position(left, top);
 
             if (!options || options.stay != true) {

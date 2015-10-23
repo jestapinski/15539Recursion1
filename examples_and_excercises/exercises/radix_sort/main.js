@@ -1,7 +1,7 @@
 var main = function(ex) {
 
-    // ex.data.meta.mode = "practice"; 
-    ex.data.meta.mode = "quiz-immediate"; 
+    ex.data.meta.mode = "practice"; 
+    // ex.data.meta.mode = "quiz-immediate"; 
 
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -307,8 +307,8 @@ function runPracticeMode (ex) {
     var failureFn = function (i, bucket) {
         console.log(emptySpots[bucket][0]);
         var margin = 20;
-        var xPoint = bucketSpots[bucket][0] + emptySpots[bucket][2] + margin
-        var yPoint = bucketSpots[bucket][1]
+        var xPoint = bucketSpots[bucket][0] + emptySpots[bucket][2] + margin;
+        var yPoint = bucketSpots[bucket][1];
         console.log("I");
         console.log(bucket);
         attempts++;
@@ -325,7 +325,7 @@ function runPracticeMode (ex) {
             })
             var newBox = ex.textbox112("Where should numbers without a red digit go? <span>OK</span>", {
                 stay: true
-            }, undefined, xPoint, yPoint)
+            }, undefined, undefined, undefined, undefined, xPoint, yPoint)
             correctBox.remove();
             ex.insertButtonTextbox112(newBox, newButton, "OK");
         })
@@ -333,7 +333,8 @@ function runPracticeMode (ex) {
                 {
                     stay: true,
                     color: "red"
-                }, undefined, xPoint, yPoint);
+                }, undefined, undefined, undefined, undefined, xPoint, yPoint);
+                //Use left and top due to previous usage when drawing
         console.log(emptySpots[bucket]);             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");
         ex.insertButtonTextbox112(correctBox, hintButton, "BTNB");
@@ -897,7 +898,7 @@ function runPracticeMode (ex) {
     var correctBox = ex.textbox112("Let's Radix Sort this list by sorting these numbers by each digit <span>$BUTTON1$</span> <span>MORE</span>",
     {
       stay: true
-    }, undefined, ex.width() / 2);
+    });
     console.log(button2._elementReferenceID);
     console.log(moreButton._elementReferenceID);
     console.log(correctBox);
