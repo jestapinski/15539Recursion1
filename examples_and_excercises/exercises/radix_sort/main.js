@@ -325,7 +325,7 @@ function runPracticeMode (ex) {
             })
             var newBox = ex.textbox112("Where should numbers without a red digit go? <span>OK</span>", {
                 stay: true
-            }, undefined, undefined, undefined, undefined, xPoint, yPoint)
+            }, undefined,  xPoint, yPoint)
             correctBox.remove();
             ex.insertButtonTextbox112(newBox, newButton, "OK");
         })
@@ -333,7 +333,7 @@ function runPracticeMode (ex) {
                 {
                     stay: true,
                     color: "red"
-                }, undefined, undefined, undefined, undefined, xPoint, yPoint);
+                }, undefined, xPoint, yPoint);
                 //Use left and top due to previous usage when drawing
         console.log(emptySpots[bucket]);             
         ex.insertButtonTextbox112(correctBox, button1, "BTNA");

@@ -2699,7 +2699,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
             return true;
         };
 
-        ex.textbox112 = function(message, options, width, cx, cy, height, left, top) {
+        ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
             // Default Arguments!
             if(typeof(width) == 'undefined') {width = ex.width()/3;}
             if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
