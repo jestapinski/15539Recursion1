@@ -56,6 +56,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         element.startY = startY;
     }
     element.move = function(x, y, animate) {
+        element.currentBucket = undefined;
         var steps = 40;
         if (animate) {
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
@@ -64,15 +65,17 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
             var i = 1;
             var isAnimationFinished = false;
             var animateFn = function () {
-                if (i <= steps) {
-                    element.x = element.x + dx;
-                    element.y = element.y + dy;
-                    console.log(i);
-                    element.drawAllFn();
-                    i++;
-                    setTimeout(animateFn, 50);
-                } else {
-                    isAnimationFinished = true;
+                if (element.currentBucket == undefined) {
+                    if (i <= steps) {
+                        element.x = element.x + dx;
+                        element.y = element.y + dy;
+                        console.log(i);
+                        element.drawAllFn();
+                        i++;
+                        setTimeout(animateFn, 50);
+                    } else {
+                        isAnimationFinished = true;
+                    }
                 }
             };
             animateFn();
@@ -82,6 +85,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         }
     };
     element.moveBackToStartPos = function () {
+        element.currentBucket = undefined;
         element.x = element.startX;
         element.y = element.startY;
     };

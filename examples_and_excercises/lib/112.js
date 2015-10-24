@@ -421,7 +421,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 var confID = ex.data.meta.id;
 
                 //Hot fix for ex.data.meta.mode
-                ex.data.meta.mode = "quiz-immediate";
+                ex.data.meta.mode = "practice";
 
                 // Get system time and encode to b64 using .btoa()
                 var sysTime = Date.now().toString();
