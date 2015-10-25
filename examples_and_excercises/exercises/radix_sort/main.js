@@ -146,6 +146,14 @@ function LSDDigitSort(L, digitIndex){
 function runPracticeMode (ex) {
     
     /***************************************************************************
+     * Initialize instruction data
+     **************************************************************************/
+     
+    var currentInstruction = "createStartInstruction";
+    var instrI,bucket,numForInstr, indexForInstr, instrElem, currentI;
+    var instrValList = [instrI,bucket,numForInstr,indexForInstr,instrElem,currentI];
+    
+    /***************************************************************************
      * Initialize List & Buckets
      **************************************************************************/
 
@@ -159,15 +167,10 @@ function runPracticeMode (ex) {
 
 
     //Width/Heigh of list elements
-    //var elementW = (ex.width()/2-margin)/(listLength+1);
-    // var elementW = (3*ex.width()/4 - 2*margin)/listLength;
-    // var elementH = elementW/2;
     var elementH = (3*ex.height()/4 - 2*margin)/listLength;
     var elementW = (5*ex.width()/6)/(listLength+2);
 
     //Top Left corner of the list
-    // var x0 = ex.width()/2 - elementW*listLength/2;
-    // var y0 = margin;
     var x0 = margin; 
     var y0 = ex.height()/2 - elementH*listLength/2;
 
@@ -357,9 +360,10 @@ function runPracticeMode (ex) {
      * Functions to create Instruction boxes
      **************************************************************************/  
 
-     function createStartInstruction () {
+    function createStartInstruction () {
+        currentInstruction = "createStartInstruction";
         beforeShowInstruction();
-        var text = strings.practiceIntro();
+        var text = strings.practiceIntro(); // (1)
         var button = ex.createButton(0, 0, strings.okButtonText());
         var introBox = ex.textbox112(text,
                 {
@@ -368,17 +372,19 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             introBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
         });
         ex.insertButtonTextbox112(introBox, button, "BTNA");
      }
 
-     function createIterationQ () {
+    function createIterationQ () {
+        currentInstruction = "createIterationQ";
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
-        var text = strings.practiceNumIteractionQ();
+        var text = strings.practiceNumIteractionQ(); // (2)
         var iterationQ = ex.textbox112(text,
                     {
                         stay: true,
@@ -386,43 +392,57 @@ function runPracticeMode (ex) {
                     }, instrW, instrX);
         button.on("click", function() {
             iterationQ.remove();
+            currentInstruction = "";
             console.log(input.text());
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
-                var correctText = strings.practiceNumIterationCorrect();
-                var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-                var correctBox = ex.textbox112(correctText,
-                        {
-                            stay: true,
-                            color: correctAnsColor
-                        }, instrW, instrX);
-                correctButton.on("click", function () {
-                    correctBox.remove();
-                    createStartSortInstruction();
-                });
-                ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                createIterationQCorrect();
             } else {
-                var incorrectText = strings.practiceNumIterationIncorrect(getMaxOfArray(startList));
-                var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-                var incorrectBox = ex.textbox112(incorrectText,
-                        {
-                            stay: true,
-                            color: incorrectAnsColor
-                        }, instrW, instrX);
-                incorrectButton.on("click", function () {
-                    incorrectBox.remove();
-                    createStartSortInstruction();
-                });
-                ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                createIterationQIncorrect();
             }
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
     }
 
+    function createIterationQCorrect(){
+        currentInstruction = "createIterationQCorrect";
+        var correctText = strings.practiceNumIterationCorrect(); //(2) Correct
+        var correctButton = ex.createButton(0, 0, strings.nextButtonText());
+        var correctBox = ex.textbox112(correctText,
+                {
+                    stay: true,
+                    color: correctAnsColor
+                }, instrW, instrX);
+        correctButton.on("click", function () {
+            correctBox.remove();
+            currentInstruction = "";
+            createStartSortInstruction();
+        });
+        ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+    }
+
+    function createIterationQIncorrect(){
+        currentInstruction = "createIterationQIncorrect";
+        var incorrectText = strings.practiceNumIterationIncorrect(maxNum);//(2) Incorrect
+        var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
+        var incorrectBox = ex.textbox112(incorrectText,
+                {
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);
+        incorrectButton.on("click", function () {
+            incorrectBox.remove();
+            currentInstruction = "";
+            createStartSortInstruction();
+        });
+        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+    }
+
     function createStartSortInstruction () {
+        currentInstruction = "createStartSortInstruction";
         beforeShowInstruction();
-        var text = strings.practiceStartSort();
+        var text = strings.practiceStartSort(); //  (3)
         var button = ex.createButton(0, 0, strings.okButtonText());
         var startBox = ex.textbox112(text,
                 {
@@ -431,15 +451,24 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             startBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
         });
         ex.insertButtonTextbox112(startBox, button, "BTNA");
     }
 
     function createHint1Message (i, bucket) {
+        currentInstruction = "createHint1Message";
+        instrValList[0] = i;
+        instrValList[1] = bucket;
         beforeShowInstruction();
         var elem = draggableList.elementList[i];
-        var text = strings.practiceHint1(digitIndex, elem);
+        var text = strings.practiceHint1(digitIndex, elem); //hint1
+        console.log("text"+ strings.okButtonText());
+        console.log(ex);
+        console.log("i" + i);
+        console.log("bucket" + bucket);
+
         var button = ex.createButton(0, 0, strings.okButtonText());
         var hintBox = ex.textbox112(text,
                 {
@@ -448,14 +477,18 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             hintBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
         });
         ex.insertButtonTextbox112(hintBox, button, "BTNA");
     }
 
     function createCorrectAnsMessage (i, bucket) {
+        currentInstruction = "createCorrectAnsMessage";
+        instrValList[0] = i;
+        instrValList[1] = bucket;
         beforeShowInstruction();
-        var text = strings.practiceCorrectAns(digitIndex);
+        var text = strings.practiceCorrectAns(digitIndex); //correct sorting
         var button = ex.createButton(0, 0, strings.okButtonText());
         var correctAnsBox = ex.textbox112(text,
                 {
@@ -464,6 +497,7 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             correctAnsBox.remove();
+            currentInstruction = "";
             elementPlacedInCorrectBucket(i, bucket);
             afterCloseInstruction();
         });
@@ -471,6 +505,9 @@ function runPracticeMode (ex) {
     }
 
     function createIncorrectAnsMessage (i, bucket) {
+        currentInstruction = "createIncorrectAnsMessage";
+        instrValList[0] = i;
+        instrValList[1] = bucket;
         beforeShowInstruction();
         var submitButton = ex.createButton(0, 0, strings.submitButtonText());
         var elem = draggableList.elementList[i];
@@ -481,34 +518,18 @@ function runPracticeMode (ex) {
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var correctAnsBox = ex.textbox112(strings.practiceIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: correctAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    correctAnsBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+                createIncorrectAnsCorrect(num,i);
                 wrongAnsBox.remove();
+                currentInstruction = "";
                 afterCloseInstruction();
             } else {
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var wrongAnsBox2 = ex.textbox112(strings.practiceIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: incorrectAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    wrongAnsBox2.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+                createIncorrectAnsIncorrect(num,i);
                 wrongAnsBox.remove();
+                currentInstruction = "";
             }
         });
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
-        var text = strings.practiceIncorrectAns(num, digitIndex, draggableList.elementList[i]);
+        var text = strings.practiceIncorrectAns(num, digitIndex, draggableList.elementList[i]);//IncorrectAnsAfterHint
         var wrongAnsBox = ex.textbox112(text,
                 {
                     stay: true,
@@ -518,7 +539,44 @@ function runPracticeMode (ex) {
         ex.insertTextAreaTextbox112(wrongAnsBox, input);
     }
 
+    function createIncorrectAnsCorrect(num,i){
+        currentInstruction = "createIncorrectAnsCorrect";
+        instrValList[2] = num;
+        instrValList[3] = i;
+        var button = ex.createButton(0, 0, strings.okButtonText());
+        var correctAnsBox = ex.textbox112(strings.practiceIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
+            stay: true,
+            color: correctAnsColor
+        }, instrW, instrX);
+        button.on("click", function () { 
+            correctAnsBox.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+    }
+
+    function createIncorrectAnsIncorrect(num,i){
+        currentInstruction = "createIncorrectAnsIncorrect";
+        instrValList[2] = num;
+        instrValList[3] = i;
+        var button = ex.createButton(0, 0, strings.okButtonText());
+        var wrongAnsBox2 = ex.textbox112(strings.practiceIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
+            stay: true,
+            color: incorrectAnsColor
+        }, instrW, instrX);
+        button.on("click", function () { 
+            wrongAnsBox2.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+    }
+
     function createAfterOneIterationQ (element, correctI) {
+        currentInstruction = "createAfterOneIterationQ";
+        instrValList[4] = element;
+        instrValList[5] = correctI;
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -533,42 +591,13 @@ function runPracticeMode (ex) {
             console.log(numOfDigits);
             if (input.text() != "") {
                 if (parseInt(input.text()) == correctI){
-                    var correctText = strings.practiceAfterOneIterationCorrect(element, correctI);
-                    var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var correctBox = ex.textbox112(correctText,
-                            {
-                                stay: true,
-                                color: correctAnsColor
-                            }, instrW, instrX);
-                    correctButton.on("click", function () {
-                        correctBox.remove();
-                        if (currentIteration <= numberOfIterations) {
-                            createNextIterationInstruction();
-                        } else { //End of sort
-                            createEndOfSortMessage();
-                        }
-                    });
-                    ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                    createAfterOneIterationCorrect(element,correctI);
                     iterationQ.remove();
+                    currentInstruction = "";
                 } else {
                     iterationQ.remove();
-                    var incorrectText = strings.practiceAfterOneIterationIncorrect(element, correctI);
-                    var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var incorrectBox = ex.textbox112(incorrectText,
-                            {
-                                stay: true,
-                                color: incorrectAnsColor
-                            }, instrW, instrX);
-                    incorrectButton.on("click", function () {
-                        incorrectBox.remove();   
-                        console.log(currentIteration);
-                        if (currentIteration < numberOfIterations) {
-                            createNextIterationInstruction();
-                        } else { //End of sort
-                            createEndOfSortMessage();
-                        }
-                    });
-                    ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                    currentInstruction = "";
+                    createAfterOneIterationIncorrect(element,correctI);
                 }
             }
             });             
@@ -576,7 +605,55 @@ function runPracticeMode (ex) {
         ex.insertTextAreaTextbox112(iterationQ, input); 
     }
 
+    function createAfterOneIterationCorrect(element,correctI){
+        currentInstruction = "createAfterOneIterationCorrect";
+        instrValList[4] = element;
+        instrValList[5] = correctI;
+        var correctText = strings.practiceAfterOneIterationCorrect(element, correctI);
+        var correctButton = ex.createButton(0, 0, strings.nextButtonText());
+        var correctBox = ex.textbox112(correctText,
+                {
+                    stay: true,
+                    color: correctAnsColor
+                }, instrW, instrX);
+        correctButton.on("click", function () {
+            correctBox.remove();
+            currentInstruction = "";
+            if (currentIteration <= numberOfIterations) {
+                createNextIterationInstruction();
+            } else { //End of sort
+                createEndOfSortMessage();
+            }
+        });
+        ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+    }
+
+    function createAfterOneIterationIncorrect(element,correctI){
+        currentInstruction = "createAfterOneIterationIncorrect";
+        instrValList[4] = element;
+        instrValList[5] = correctI;
+        var incorrectText = strings.practiceAfterOneIterationIncorrect(element, correctI);
+        var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
+        var incorrectBox = ex.textbox112(incorrectText,
+                {
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);
+        incorrectButton.on("click", function () {
+            incorrectBox.remove();   
+            currentInstruction = "";
+            console.log(currentIteration);
+            if (currentIteration < numberOfIterations) {
+                createNextIterationInstruction();
+            } else { //End of sort
+                createEndOfSortMessage();
+            }
+        });
+        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+    }
+
     function createNextIterationInstruction () {
+        currentInstruction = "createNextIterationInstruction";
         beforeShowInstruction();
         var text = strings.practiceNextIteration(digitIndex+1);
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -596,6 +673,7 @@ function runPracticeMode (ex) {
             currentIteration++;
             console.log(currentIteration);
             nextIterationBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
@@ -603,6 +681,7 @@ function runPracticeMode (ex) {
 
     function createEndOfSortMessage () {
         //Move elements back
+        currentInstruction = "createEndOfSortMessage";
         moveBack(draggableList, bucketSpots, bucketOrdering);
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
         draggableList.setEmptySpots(emptySpots);
@@ -625,12 +704,14 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);
         buttonTakeQuiz.on("click", function () {
             endOfSortBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
             ex.data.finishedPractice = true;
             main(ex);
         });
         buttonPracticeMore.on("click", function () {
             endOfSortBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
             main(ex);
         });
@@ -658,6 +739,52 @@ function runPracticeMode (ex) {
         // ex.chromeElements.newButton.disable();
         ex.chromeElements.resetButton.disable();
     }
+    
+    function saveData(){
+        if(typeof ex.data.run == 'undefined') ex.data.run = {};
+        ex.data.run.startList = JSON.stringify(startList);
+        ex.data.run.strings = JSON.stringify(strings);
+        ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
+        ex.data.run.emptySpots = JSON.stringify(emptySpots);
+        //draggablelist data
+        ex.data.run.elementList = JSON.stringify(draggableList.elementList);
+        ex.data.run.elementList = JSON.stringify(draggableList.list);
+        ex.data.run.workingIndex = workingIndex;
+        ex.data.run.maxIndex = maxIndex;
+        ex.data.run.currentIteration = currentIteration;
+        ex.data.run.attempts = attempts;
+        ex.data.run.currentInstruction = currentInstruction;
+        ex.data.run.instrValList = JSON.stringify(instrValList);
+            console.log(ex.data.run.draggableList);
+    }
+
+    function loadData(){
+        if(typeof ex.data.run != 'undefined'){
+            startList = JSON.parse(ex.data.run.startList);
+            //strings = JSON.parse(ex.data.run.strings);
+            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
+            emptySpots = JSON.parse(ex.data.run.emptySpots);
+            workingIndex = ex.data.run.workingIndex;
+            maxIndex = ex.data.run.maxIndex;
+            currentIteration = ex.data.run.currentIteration;
+            attempts = ex.data.run.attempts;
+            //draggabeList data
+            elementList = JSON.parse(ex.data.run.elementList);
+            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+                                                 maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+            for (var i = 0; i < elementList.length; i++) {
+                var elem = elementList[i];
+                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
+                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
+                if (i != workingIndex) {
+                    draggableList.list[i].disable();
+                }
+
+            }
+            currentInstruction = ex.data.run.currentInstruction;
+            instrValList = JSON.parse(ex.data.run.instrValList);
+        }
+    }
 
     function afterCloseInstruction () {
         ex.graphics.off("mousedown");
@@ -670,13 +797,63 @@ function runPracticeMode (ex) {
         ex.graphics.off("mousedown");
         ex.off("keydown");
     }
-
+    
+    function runInstruction(){
+        switch(currentInstruction){
+            case "createStartInstruction":
+                createStartInstruction();
+                break;
+            case "createIterationQ":
+                createIterationQ();
+                break;
+            case "createIterationQCorrect":
+                createIterationQCorrect();
+                break;
+            case "createIterationQIncorrect":
+                createIterationQIncorrect();
+                break;
+            case "createStartSortInstruction":
+                createStartSortInstruction();
+                break;
+            case "createHint1Message":
+                createHint1Message(instrValList[0],instrValList[1]);
+                break;
+            case "createCorrectAnsMessage":
+                createCorrectAnsMessage(instrValList[0],instrValList[1]);
+                break;
+            case "createIncorrectAnsMessage":
+                createIncorrectAnsMessage(instrValList[0],instrValList[1]);
+                break;
+            case "createIncorrectAnsCorrect":
+                createIncorrectAnsCorrect(instrValList[2],instrValList[3]);
+                break;
+            case "createIncorrectAnsIncorrect":
+                createIncorrectAnsIncorrect(instrValList[2],instrValList[3]);
+                break;
+            case "createAfterOneIterationQ":
+                createAfterOneIterationQ(instrValList[4],instrValList[5]);
+                break;
+            case "createAfterOneIterationCorrect":
+                createAfterOneIterationCorrect(instrValList[4],instrValList[5]);
+                break;
+            case "createAfterOneIterationIncorrect":
+                createAfterOneIterationIncorrect(instrValList[4],instrValList[5]);
+                break;
+            case "createNextIterationInstruction":
+                createNextIterationInstruction();
+                break;
+            case "createEndOfSortMessage":
+                createEndOfSortMessage();
+                break; 
+        } 
+    }
+    
     function run(){
-        // loadSavedData();
+        loadData();
         bindButtons();
         setUp();
         drawAll();
-        createStartInstruction();
+        runInstruction();
     }
     
     // function removeAndEnable(elem112){
