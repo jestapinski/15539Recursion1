@@ -1219,7 +1219,8 @@ function runQuizDelayMode (ex) {
 
     var failureFn = function (i, bucket) {
         hasCurrentElementFailed = true;
-        createIncorrectAnsMessage(i, bucket);
+        elementPlacedInCorrectBucket(i, bucket);
+        // createIncorrectAnsMessage(i, bucket);
     }
 
     //for integers only
@@ -1403,33 +1404,11 @@ function runQuizDelayMode (ex) {
             if (parseInt(input.text()) == numOfDigits){
                 score = score + listLength/4;
                 console.log(score);
-                var correctText = strings.quizNumIterationCorrect();
-                var correctButton = ex.createButton(0, 0, strings.okButtonText());
-                var correctBox = ex.textbox112(correctText,
-                        {
-                            stay: true,
-                            color: correctAnsColor
-                        }, instrW, instrX);
-                correctButton.on("click", function () {
-                    correctBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                afterCloseInstruction();
                 iterationQ.remove();
             } else {
                 iterationQ.remove();
-                var incorrectText = strings.quizNumIterationIncorrect(getMaxOfArray(startList));
-                var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
-                var incorrectBox = ex.textbox112(incorrectText,
-                        {
-                            stay: true,
-                            color: incorrectAnsColor
-                        }, instrW, instrX);
-                incorrectButton.on("click", function () {
-                    incorrectBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                afterCloseInstruction();
             }
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
@@ -1449,18 +1428,8 @@ function runQuizDelayMode (ex) {
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
                 score = score+0.5;
                 console.log(score);
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: correctAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    correctAnsBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
-                wrongAnsBox.remove();
                 afterCloseInstruction();
+                wrongAnsBox.remove();
             } else {
                 var button = ex.createButton(0, 0, strings.okButtonText());
                 var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
@@ -1500,52 +1469,36 @@ function runQuizDelayMode (ex) {
             console.log(input.text());
             console.log(numOfDigits);
             if (input.text() != "") {
+                console.log("here");
                 if (parseInt(input.text()) == correctI){
                     score = score+listLength/4;
                     console.log(score);
-                    var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
-                    var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var correctBox = ex.textbox112(correctText,
-                            {
-                                stay: true,
-                                color: correctAnsColor
-                            }, instrW, instrX);
-                    correctButton.on("click", function () {
-                        correctBox.remove();
+                    console.log(currentIteration);
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
-                            var percent = score/possibleScore*100;
+                            var percent = Math.round(score/possibleScore*100);
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
                         }
-                    });
-                    ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                        iterationQ.remove();
+                    }
+
+                else {
+                    console.log(currentIteration);
                     iterationQ.remove();
-                } else {
-                    iterationQ.remove();
-                    var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
-                    var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var incorrectBox = ex.textbox112(incorrectText,
-                            {
-                                stay: true,
-                                color: incorrectAnsColor
-                            }, instrW, instrX);
-                    incorrectButton.on("click", function () {
-                        incorrectBox.remove();   
                         console.log(currentIteration);
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
-                            var percent = score/possibleScore*100;
+                            var percent = Math.round(score/possibleScore*100);
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
                         }
-                    });
-                    ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                    }
                 }
-            }
-            });             
+        }
+        )            
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
     }
