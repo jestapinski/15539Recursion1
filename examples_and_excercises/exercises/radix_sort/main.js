@@ -8,7 +8,9 @@ function main (ex) {
     } else {
         ex.data.meta.mode = "practice"; 
     }
-    ex.data.meta.mode = "quiz-delay";
+
+    // ex.data.meta.mode = "quiz-delay";
+    
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
     } else if (ex.data.meta.mode == "quiz-immediate") {
