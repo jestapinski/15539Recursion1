@@ -21,7 +21,7 @@ function main (ex) {
 };
 
 /*******************************************************************************
- * Functions to the lsit and its elements
+ * Functions to the list and its elements
  ******************************************************************************/
 
 function createStartList(listLength, maxNumberOfDigits){
@@ -144,6 +144,15 @@ function LSDDigitSort(L, digitIndex){
  ******************************************************************************/
 
 function runPracticeMode (ex) {
+    
+    ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
+            var identifier = "$TEXTAREA$";
+            ex.insertDropdown(TextboxElement, identifier, textarea);
+    }
+
+    ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
+            ex.insertDropdown(TextboxElement, identifier, button);
+        };
     
     /***************************************************************************
      * Initialize instruction data
@@ -867,6 +876,15 @@ function runPracticeMode (ex) {
 }
 
 function runQuizMode (ex) {
+    
+    ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
+            var identifier = "$TEXTAREA$";
+            ex.insertDropdown(TextboxElement, identifier, textarea);
+    }
+
+    ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
+            ex.insertDropdown(TextboxElement, identifier, button);
+        };
 
     /***************************************************************************
      * Initialize List & Buckets
@@ -1333,6 +1351,15 @@ function runQuizMode (ex) {
 }
 
 function runQuizDelayMode (ex) {
+    
+     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
+            var identifier = "$TEXTAREA$";
+            ex.insertDropdown(TextboxElement, identifier, textarea);
+    }
+
+    ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
+            ex.insertDropdown(TextboxElement, identifier, button);
+        };
 
     /***************************************************************************
      * Initialize List & Buckets
