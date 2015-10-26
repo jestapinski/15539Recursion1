@@ -8,8 +8,8 @@ function main (ex) {
     } else {
         ex.data.meta.mode = "practice"; 
     }
-
-    // ex.data.meta.mode = "quiz-delay";
+    // ex.data.meta.mode = "practice";
+    // ex.data.meta.mode = "quiz-immediate";
     
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -18,6 +18,7 @@ function main (ex) {
     } else if (ex.data.meta.mode == "quiz-delay") {
         runQuizDelayMode(ex);
     }
+
 };
 
 /*******************************************************************************
@@ -193,6 +194,7 @@ function runPracticeMode (ex) {
     //Create the actual list
     var maxNumberOfDigits = 3;
     var startList = createStartList(listLength, maxNumberOfDigits);
+    var maxNum = getMaxOfArray(startList);
     var numOfDigits = Math.floor(Math.log10(getMaxOfArray(startList)))+1;
 
     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect

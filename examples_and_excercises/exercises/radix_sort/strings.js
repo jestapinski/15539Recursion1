@@ -57,7 +57,7 @@ var getStrings = function () {
     };
     obj.practiceIncorrectAns = function (num, digitI, number) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
-        return "yay";
+        var digitDescription = {0:"rightmost digit", 1:"first digit from the right", 2:"second digit from the right", 3:"third digit from the right", 4:"fourth digit from the right"};
         return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(" digit, which is the ".concat(digitDescription[digitI]).concat(".  For example, what is the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>")));
     };
     obj.practiceIncorrectAnsCorrect = function (num, digitI, number) {
