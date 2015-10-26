@@ -732,10 +732,6 @@ function runPracticeMode (ex) {
      * Main Game Code
      **************************************************************************/
 
-    // function loadSavedData(){
-    //     if(ex.data.attempts) attempts = ex.data.attempts
-    // }
-
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
         ex.on("keydown", draggableList.keydown);
@@ -747,6 +743,7 @@ function runPracticeMode (ex) {
         ex.chromeElements.redoButton.disable();
         // ex.chromeElements.newButton.disable();
         ex.chromeElements.resetButton.disable();
+        ex.unload(saveData);
     }
     
     function saveData(){
@@ -764,13 +761,11 @@ function runPracticeMode (ex) {
         ex.data.run.attempts = attempts;
         ex.data.run.currentInstruction = currentInstruction;
         ex.data.run.instrValList = JSON.stringify(instrValList);
-            console.log(ex.data.run.draggableList);
     }
 
     function loadData(){
         if(typeof ex.data.run != 'undefined'){
             startList = JSON.parse(ex.data.run.startList);
-            //strings = JSON.parse(ex.data.run.strings);
             bucketSpots = JSON.parse(ex.data.run.bucketSpots);
             emptySpots = JSON.parse(ex.data.run.emptySpots);
             workingIndex = ex.data.run.workingIndex;
@@ -885,7 +880,14 @@ function runQuizMode (ex) {
     ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
             ex.insertDropdown(TextboxElement, identifier, button);
         };
-
+    /***************************************************************************
+     * Initialize instructions
+     **************************************************************************/
+     
+    var currentInstruction = "createStartInstruction";
+    var instrI,bucket,numForInstr, indexForInstr, instrElem, currentI;
+    var instrValList = [instrI,bucket,numForInstr,instrElem,currentI];
+    
     /***************************************************************************
      * Initialize List & Buckets
      **************************************************************************/
@@ -937,6 +939,7 @@ function runQuizMode (ex) {
     var score = 0.0;
     var possibleScore = 22;
     var hasCurrentElementFailed = false;
+    var canSubmit = false;
 
     //Functions to be called when a list element clicks into a bucket
     var successFn = function (i, bucket) {
@@ -1091,7 +1094,8 @@ function runQuizMode (ex) {
      * Functions to draw Instructions
      **************************************************************************/  
 
-     function createStartInstruction () {
+    function createStartInstruction () {
+        currentInstruction = "createStartInstruction";
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1102,13 +1106,15 @@ function runQuizMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             introBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
         });
         ex.insertButtonTextbox112(introBox, button, "BTNA");
      }
 
-     function createIterationQ () {
+    function createIterationQ () {
+        currentInstruction = "createIterationQ";
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1122,77 +1128,73 @@ function runQuizMode (ex) {
             console.log(input.text());
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
-                score = score + listLength/4;
-                console.log(score);
-                var correctText = strings.quizNumIterationCorrect();
-                var correctButton = ex.createButton(0, 0, strings.okButtonText());
-                var correctBox = ex.textbox112(correctText,
-                        {
-                            stay: true,
-                            color: correctAnsColor
-                        }, instrW, instrX);
-                correctButton.on("click", function () {
-                    correctBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                createQuizNumIterationCorrect();
                 iterationQ.remove();
             } else {
                 iterationQ.remove();
-                var incorrectText = strings.quizNumIterationIncorrect(getMaxOfArray(startList));
-                var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
-                var incorrectBox = ex.textbox112(incorrectText,
-                        {
-                            stay: true,
-                            color: incorrectAnsColor
-                        }, instrW, instrX);
-                incorrectButton.on("click", function () {
-                    incorrectBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                createQuizNumIterationIncorrect();
             }
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
     }
 
+    function createQuizNumIterationCorrect(){
+        currentInstruction = "createQuizNumIterationCorrect";
+        score = score + listLength/4;
+        console.log(score);
+        var correctText = strings.quizNumIterationCorrect();
+        var correctButton = ex.createButton(0, 0, strings.okButtonText());
+        var correctBox = ex.textbox112(correctText,
+                {
+                    stay: true,
+                    color: correctAnsColor
+                }, instrW, instrX);
+        correctButton.on("click", function () {
+            correctBox.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+    }
+
+    function createQuizNumIterationIncorrect(){
+        currentInstruction = "createQuizNumIterationIncorrect";
+        var incorrectText = strings.quizNumIterationIncorrect(maxNum);
+        var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
+        var incorrectBox = ex.textbox112(incorrectText,
+                {
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);
+        incorrectButton.on("click", function () {
+            incorrectBox.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+    }
+
     function createIncorrectAnsMessage (i, bucket) {
+        currentInstruction = "createIncorrectAnsMessage"
         beforeShowInstruction();
         var submitButton = ex.createButton(0, 0, strings.submitButtonText());
         var elem = draggableList.elementList[i];
         var numOfDigitsInElem = Math.floor(Math.log10(elem))+1;
         // Generate a number with the same number of digits as the elem that is currently being placed
         var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        instrValList[0] = i;
+        instrValList[1] = bucket;
+        instrValList[2] = num;
         submitButton.on("click", function() {
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
-                score = score+0.5;
-                console.log(score);
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: correctAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    correctAnsBox.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+                createQuizIncorrectAnsCorrect(num,i);
                 wrongAnsBox.remove();
                 afterCloseInstruction();
             } else {
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: incorrectAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    wrongAnsBox2.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+                createQuizIncorrectAnsIncorrect(num,i);
                 wrongAnsBox.remove();
             }
         });
@@ -1207,7 +1209,42 @@ function runQuizMode (ex) {
         ex.insertTextAreaTextbox112(wrongAnsBox, input);
     }
 
+    function createQuizIncorrectAnsCorrect(num,i){
+        currentInstruction = "createQuizIncorrectAnsCorrect";
+        score = score+0.5;
+        console.log(score);
+        var button = ex.createButton(0, 0, strings.okButtonText());
+        var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
+            stay: true,
+            color: correctAnsColor
+        }, instrW, instrX);
+        button.on("click", function () { 
+            correctAnsBox.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+    }
+
+    function createQuizIncorrectAnsIncorrect(num,i){
+        currentInstruction = "createQuizIncorrectAnsIncorrect";
+        var button = ex.createButton(0, 0, strings.okButtonText());
+        var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
+            stay: true,
+            color: incorrectAnsColor
+        }, instrW, instrX);
+        button.on("click", function () { 
+            wrongAnsBox2.remove();
+            currentInstruction = "";
+            afterCloseInstruction();
+        });
+        ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+    }
+
     function createAfterOneIterationQ (element, correctI) {
+        currentInstruction = "createAfterOneIterationQ";
+        instrValList[3] = element;
+        instrValList[4] = correctI;
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1222,56 +1259,70 @@ function runQuizMode (ex) {
             console.log(numOfDigits);
             if (input.text() != "") {
                 if (parseInt(input.text()) == correctI){
-                    score = score+listLength/4;
-                    console.log(score);
-                    var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
-                    var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var correctBox = ex.textbox112(correctText,
-                            {
-                                stay: true,
-                                color: correctAnsColor
-                            }, instrW, instrX);
-                    correctButton.on("click", function () {
-                        correctBox.remove();
-                        if (currentIteration == 0) {
-                            createNextIterationInstruction();
-                        } else { //End of quiz
-                            var percent = score/possibleScore*100;
-                            var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
-                            ex.showFeedback(feedback);
-                        }
-                    });
-                    ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+                    createQuizAfterOneIterationCorrect(element,correctI);
                     iterationQ.remove();
                 } else {
                     iterationQ.remove();
-                    var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
-                    var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-                    var incorrectBox = ex.textbox112(incorrectText,
-                            {
-                                stay: true,
-                                color: incorrectAnsColor
-                            }, instrW, instrX);
-                    incorrectButton.on("click", function () {
-                        incorrectBox.remove();   
-                        console.log(currentIteration);
-                        if (currentIteration == 0) {
-                            createNextIterationInstruction();
-                        } else { //End of quiz
-                            var percent = score/possibleScore*100;
-                            var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
-                            ex.showFeedback(feedback);
-                        }
-                    });
-                    ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+                    createQuizAfterOneIterationIncorrect(element,correctI);
                 }
             }
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        console.log(score);
+    }
+
+    function createQuizAfterOneIterationCorrect (element,correctI){
+        currentInstruction = "createQuizAfterOneIterationCorrect";
+        score = score+listLength/4;
+        console.log(score);
+        var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
+        var correctButton = ex.createButton(0, 0, strings.nextButtonText());
+        var correctBox = ex.textbox112(correctText,
+                {
+                    stay: true,
+                    color: correctAnsColor
+                }, instrW, instrX);
+        correctButton.on("click", function () {
+            correctBox.remove();
+            currentInstruction = "";
+            if (currentIteration == 0) {
+                createNextIterationInstruction();
+            } else { //End of quiz
+                var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                ex.showFeedback(feedback);
+            }
+        });
+        ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+}
+
+    function createQuizAfterOneIterationIncorrect (element,correctI){
+        currentInstruction = "createQuizAfterOneIterationIncorrect";
+        var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
+        var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
+        var incorrectBox = ex.textbox112(incorrectText,
+                {
+                    stay: true,
+                    color: incorrectAnsColor
+                }, instrW, instrX);
+        incorrectButton.on("click", function () {
+            incorrectBox.remove();   
+            currentInstruction = "";
+            console.log(currentIteration);
+            if (currentIteration == 0) {
+                createNextIterationInstruction();
+            } else { //End of quiz
+                var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                ex.showFeedback(feedback);
+            }
+        });
+        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
     }
 
     function createNextIterationInstruction () {
+        currentInstruction = "createNextIterationInstruction";
         beforeShowInstruction();
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
@@ -1304,14 +1355,69 @@ function runQuizMode (ex) {
             currentIteration = nextDigitI;
             console.log(currentIteration);
             nextIterationBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
     }
-
+    
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
+    function saveData(){
+        if(typeof ex.data.run == 'undefined') ex.data.run = {};
+            ex.data.run.startList = JSON.stringify(startList);
+            ex.data.run.strings = JSON.stringify(strings);
+            ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
+            ex.data.run.emptySpots = JSON.stringify(emptySpots);
+            //draggablelist data
+            ex.data.run.elementList = JSON.stringify(draggableList.elementList);
+            ex.data.run.elementList = JSON.stringify(draggableList.list);
+            ex.data.run.workingIndex = workingIndex;
+            ex.data.run.maxIndex = maxIndex;
+            ex.data.run.digitIndex = digitIndex;
+            ex.data.run.currentIteration = currentIteration;
+            ex.data.run.currentInstruction = currentInstruction;
+            console.log("instr:" + currentInstruction);
+            ex.data.run.instrValList = JSON.stringify(instrValList);
+            //quiz mode only
+            ex.data.run.score = score;
+            ex.data.run.canSubmit = canSubmit;
+            ex.data.run.hasCurrentElementFailed = hasCurrentElementFailed;
+    }
+
+    function loadData(){
+        if(typeof ex.data.run != 'undefined'){
+            startList = JSON.parse(ex.data.run.startList);
+            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
+            emptySpots = JSON.parse(ex.data.run.emptySpots);
+            workingIndex = ex.data.run.workingIndex;
+            maxIndex = ex.data.run.maxIndex;
+            currentIteration = ex.data.run.currentIteration;
+            digitIndex = ex.data.run.digitIndex;
+            //reconstruct draggabeList data
+            elementList = JSON.parse(ex.data.run.elementList);
+            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+                                                 maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+            for (var i = 0; i < elementList.length; i++) {
+                var elem = elementList[i];
+                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
+                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
+                //Only enable the working element
+                if (i != workingIndex) {
+                    draggableList.list[i].disable();
+                }
+            }
+            currentInstruction = ex.data.run.currentInstruction;
+            instrValList = JSON.parse(ex.data.run.instrValList);
+            score = ex.data.run.score;
+            console.log("score" + score);
+            hasCurrentElementFailed = ex.data.run.hasCurrentElementFailed;
+            canSubmit = ex.data.run.canSubmit;
+            console.log("load: " + canSubmit);
+            if(canSubmit) ex.chromeElements.submitButton.enable();
+        }
+    }
 
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
@@ -1330,20 +1436,59 @@ function runQuizMode (ex) {
         ex.off("keydown");
     }
 
-     function setUp(){
-        ex.chromeElements.submitButton.disable();
+    function setUp(){
+        if(!canSubmit) ex.chromeElements.submitButton.disable();
         ex.chromeElements.displayCAButton.disable();
         ex.chromeElements.undoButton.disable();
         ex.chromeElements.redoButton.disable();
         ex.chromeElements.newButton.disable();
         ex.chromeElements.resetButton.disable();
+        ex.unload(saveData);
     }
-
+    
+    function runInstruction(){
+        switch(currentInstruction){
+            case "createStartInstruction":
+                createStartInstruction();
+                break;
+            case "createIterationQ":
+                createIterationQ();
+                break;
+            case "createQuizNumIterationCorrect":
+                createQuizNumIterationCorrect();
+                break;
+            case "createQuizNumIterationIncorrect":
+                createQuizNumIterationIncorrect();
+                break;
+            case "createIncorrectAnsMessage":
+                createIncorrectAnsMessage(instrValList[0],instrValList[1]);
+                break;
+            case "createQuizIncorrectAnsCorrect":
+                createQuizIncorrectAnsCorrect(instrValList[2],instrValList[0]);
+                break;
+            case "createQuizIncorrectAnsIncorrect":
+                createQuizIncorrectAnsIncorrect(instrValList[2],instrValList[0]);
+                break;
+            case "createAfterOneIterationQ":
+                createAfterOneIterationQ(instrValList[3],instrValList[4]);
+                break;
+            case "createQuizAfterOneIterationCorrect":
+                createQuizAfterOneIterationCorrect(instrValList[3],instrValList[4]);
+                break;
+            case "createQuizAfterOneIterationIncorrect":
+                createQuizAfterOneIterationIncorrect(instrValList[3],instrValList[4]);
+                break;
+            case "createNextIterationInstruction":
+                createNextIterationInstruction();
+                break;
+        } 
+    }
+    
     function run(){
-        // loadSavedData();
+        loadData();
         bindButtons();
         setUp();
-        createStartInstruction();
+        runInstruction();
         drawAll();
     }
 
