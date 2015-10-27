@@ -19,6 +19,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.isBeingDragged = false;
     element.currentBucket = undefined;
     element.drawAllFn = drawAllFn;
+    element.isInCorrectBucket = false;
 
     element.draw = function () {
         ctx.fillStyle = element.color;
@@ -57,6 +58,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     }
     element.move = function(x, y, animate) {
         element.currentBucket = undefined;
+        element.isInCorrectBucket = false;
         var steps = 40;
         if (animate) {
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
@@ -86,6 +88,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     };
     element.moveBackToStartPos = function () {
         element.currentBucket = undefined;
+        element.isInCorrectBucket = false;
         element.x = element.startX;
         element.y = element.startY;
     };
@@ -135,6 +138,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                 return element.snapIntoPlace(maxSpot);
             }
             element.currentBucket = undefined;
+            element.isInCorrectBucket = false;
             element.x = element.startX;
             element.y = element.startY;
         }
@@ -148,10 +152,12 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         //Check if this is the correct bucket
         if (element.digitIndex < element.text.length) {
             element.currentBucket = spot;
-            return (element.text.charAt(element.text.length-1-element.digitIndex) === spot);
+            element.isInCorrectBucket = (element.text.charAt(element.text.length-1-element.digitIndex) === spot);
+            return element.isInCorrectBucket;
         } else {
             element.currentBucket = spot;
-            return (spot === '0' || spot === 'a' || spot === 'A');
+            element.isInCorrectBucket = (spot === '0' || spot === 'a' || spot === 'A');
+            return element.isInCorrectBucket;
         }
     }
     element.disable = function () {
@@ -349,7 +355,10 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         }
     }
 
-    self.moveElementsBack = function (newOrder) {
+    self.moveElementsBack = function (newOrder, animate) {
+        if (animate == undefined) {
+            animate = true;
+        }
         var newList = [];
         var newElementList = [];
         for (var i = 0; i < newOrder.length; i++) {
@@ -361,7 +370,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         for (var j = 0; j < self.list.length; j++) {
             var y = self.y0+j*self.elementH;
             self.list[j].setStartPos(self.x0, y);
-            self.list[j].move(self.x0, y, true);
+            self.list[j].move(self.x0, y, animate);
         }
     }
 

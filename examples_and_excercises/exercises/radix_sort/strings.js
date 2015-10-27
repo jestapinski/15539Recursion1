@@ -130,7 +130,7 @@ var getStrings = function () {
     };
     obj.quizNextIteration = function (nextDigitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
-        return "We have now sorted the list up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit for you.  Now sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
+        return "We have now sorted the list up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit for you.  Now you sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
     };
     return obj;
 };

@@ -4,12 +4,12 @@ function main (ex) {
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
     if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
-        ex.data.meta.mode = "quiz-immediate"; 
+        ex.data.meta.mode = "quiz-delay"; 
     } else {
         ex.data.meta.mode = "practice"; 
     }
 
-    // ex.data.meta.mode = "quiz-delay";
+    ex.data.meta.mode = "quiz-delay";
     
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -56,7 +56,10 @@ function createStartList(listLength, maxNumberOfDigits){
     return list;
 }
 
-function moveBack (draggableList, bucketSpots, bucketOrdering, newOrder) {
+function moveBack (draggableList, bucketSpots, bucketOrdering, newOrder, animate) {
+    if (animate == undefined) {
+        animate = true;
+    }
     //If user does not pass in an order, order it by what bucket the elements are in
     if (newOrder == undefined) {
         newOrder = [];
@@ -72,7 +75,7 @@ function moveBack (draggableList, bucketSpots, bucketOrdering, newOrder) {
         var bucketLabel = bucketOrdering[i];
         bucketSpots[bucketLabel][4] = [];
     }
-    draggableList.moveElementsBack(newOrder);
+    draggableList.moveElementsBack(newOrder, animate);
 }
 
 /*******************************************************************************
@@ -287,17 +290,6 @@ function runPracticeMode (ex) {
             ex.graphics.ctx.fillText(spot,x+w/2,y+h/2);      
         }
      }
-     
-    function drawStepsAndIterations(){
-        var stepFont = 20;
-        font = "Arial";
-        ex.graphics.ctx.fillStyle = "black";
-        ex.graphics.ctx.font = stepFont + "px " + font;
-        ex.graphics.ctx.textAlign = "left";
-        ex.graphics.ctx.textBaseline = "bottom";
-        ex.graphics.ctx.fillText("Step: "+maxIndex,margin,2*margin);
-        ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,2*margin+stepFont);
-     }
 
      function drawList(){
         draggableList.draw();
@@ -307,7 +299,6 @@ function runPracticeMode (ex) {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawBuckets();
         drawList();
-        drawStepsAndIterations();
      }
 
     /***************************************************************************
@@ -433,7 +424,7 @@ function runPracticeMode (ex) {
 
     function createIterationQIncorrect(){
         currentInstruction = "createIterationQIncorrect";
-        var incorrectText = strings.practiceNumIterationIncorrect(maxNum);//(2) Incorrect
+        var incorrectText = strings.practiceNumIterationIncorrect(getMaxOfArray(startList));//(2) Incorrect
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
                 {
@@ -732,6 +723,29 @@ function runPracticeMode (ex) {
      * Main Game Code
      **************************************************************************/
 
+     function reset () {
+        draggableList.disable(workingIndex);
+        workingIndex = 0;
+        draggableList.enable(workingIndex);
+        //highest index that has been moved so far
+        maxIndex = 0;
+        numberOfIterations = numOfDigits;
+        currentIteration = 0;
+        attempts = 0;
+        newOrder = [];
+
+        for (var i = 0; i < startList.length; i++) {
+            newOrder[i] = startList.indexOf(draggableList.elementList[i]);
+        }
+
+        moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
+        bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+        emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+        currentInstruction = "createStartInstruction";
+        drawAll();
+        runInstruction();
+     }
+
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
         ex.on("keydown", draggableList.keydown);
@@ -741,8 +755,9 @@ function runPracticeMode (ex) {
         ex.chromeElements.displayCAButton.disable();
         ex.chromeElements.undoButton.disable();
         ex.chromeElements.redoButton.disable();
-        // ex.chromeElements.newButton.disable();
-        ex.chromeElements.resetButton.disable();
+        ex.chromeElements.resetButton.enable();
+        ex.chromeElements.resetButton.off("click");
+        ex.chromeElements.resetButton.on("click", reset);
         ex.unload(saveData);
     }
     
@@ -859,13 +874,6 @@ function runPracticeMode (ex) {
         drawAll();
         runInstruction();
     }
-    
-    // function removeAndEnable(elem112){
-    //     elem112.remove();
-    //     draggableList.enable(workingIndex);
-    //     drawAll();
-        
-    // }
 
     run();
 }
@@ -945,12 +953,16 @@ function runQuizMode (ex) {
     var successFn = function (i, bucket) {
         if (hasCurrentElementFailed == false) { score = score + 1.0; }
         hasCurrentElementFailed = false;
-        console.log(score);
+        console.log("score:",score);
         elementPlacedInCorrectBucket(i, bucket);
     };
 
     var failureFn = function (i, bucket) {
-        hasCurrentElementFailed = true;
+        if (hasCurrentElementFailed == false) {
+            hasCurrentElementFailed = true;
+        } else if (hasCurrentElementFailed == true) {
+            hasCurrentElementFailed = undefined; // Undefined means that they have failed once before, so are not eligible for additional partial credit
+        }
         createIncorrectAnsMessage(i, bucket);
     }
 
@@ -1012,17 +1024,6 @@ function runQuizMode (ex) {
         }
      }
 
-     // function drawStepsAndIterations(){
-     //    var stepFont = 20;
-     //    font = "Arial";
-     //    ex.graphics.ctx.fillStyle = "black";
-     //    ex.graphics.ctx.font = stepFont + "px " + font;
-     //    ex.graphics.ctx.textAlign = "left";
-     //    ex.graphics.ctx.textBaseline = "bottom";
-     //    ex.graphics.ctx.fillText("Step: "+maxIndex,margin,1.5*margin);
-     //    ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,1.5*margin+stepFont);
-     // }
-
      function drawList(){
         draggableList.draw();
      }
@@ -1031,7 +1032,6 @@ function runQuizMode (ex) {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawList();
         drawBuckets();
-        // drawStepsAndIterations();
      }
 
     /***************************************************************************
@@ -1142,7 +1142,7 @@ function runQuizMode (ex) {
     function createQuizNumIterationCorrect(){
         currentInstruction = "createQuizNumIterationCorrect";
         score = score + listLength/4;
-        console.log(score);
+        console.log("score:",score);
         var correctText = strings.quizNumIterationCorrect();
         var correctButton = ex.createButton(0, 0, strings.okButtonText());
         var correctBox = ex.textbox112(correctText,
@@ -1160,7 +1160,7 @@ function runQuizMode (ex) {
 
     function createQuizNumIterationIncorrect(){
         currentInstruction = "createQuizNumIterationIncorrect";
-        var incorrectText = strings.quizNumIterationIncorrect(maxNum);
+        var incorrectText = strings.quizNumIterationIncorrect(getMaxOfArray(startList));
         var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
                 {
@@ -1211,8 +1211,10 @@ function runQuizMode (ex) {
 
     function createQuizIncorrectAnsCorrect(num,i){
         currentInstruction = "createQuizIncorrectAnsCorrect";
-        score = score+0.5;
-        console.log(score);
+        if (hasCurrentElementFailed == undefined) {
+            score = score+0.5;
+        }
+        console.log("score:",score);
         var button = ex.createButton(0, 0, strings.okButtonText());
         var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
@@ -1269,13 +1271,13 @@ function runQuizMode (ex) {
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
-        console.log(score);
+        console.log("score:",score);
     }
 
     function createQuizAfterOneIterationCorrect (element,correctI){
         currentInstruction = "createQuizAfterOneIterationCorrect";
         score = score+listLength/4;
-        console.log(score);
+        console.log("score:",score);
         var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
         var correctBox = ex.textbox112(correctText,
@@ -1556,20 +1558,16 @@ function runQuizDelayMode (ex) {
     //The users score
     var score = 0.0;
     var possibleScore = 22;
-    var hasCurrentElementFailed = false;
 
     //Functions to be called when a list element clicks into a bucket
     var successFn = function (i, bucket) {
-        if (hasCurrentElementFailed == false) { score = score + 1.0; }
-        hasCurrentElementFailed = false;
-        console.log(score);
+        score = score + 1.0;
+        console.log("score:",score);
         elementPlacedInCorrectBucket(i, bucket);
     };
 
     var failureFn = function (i, bucket) {
-        hasCurrentElementFailed = true;
         elementPlacedInCorrectBucket(i, bucket);
-        // createIncorrectAnsMessage(i, bucket);
     }
 
     //for integers only
@@ -1634,17 +1632,6 @@ function runQuizDelayMode (ex) {
         }
      }
 
-     // function drawStepsAndIterations(){
-     //    var stepFont = 20;
-     //    font = "Arial";
-     //    ex.graphics.ctx.fillStyle = "black";
-     //    ex.graphics.ctx.font = stepFont + "px " + font;
-     //    ex.graphics.ctx.textAlign = "left";
-     //    ex.graphics.ctx.textBaseline = "bottom";
-     //    ex.graphics.ctx.fillText("Step: "+maxIndex,margin,1.5*margin);
-     //    ex.graphics.ctx.fillText("Iteration: " + currentIteration,margin,1.5*margin+stepFont);
-     // }
-
      function drawList(){
         draggableList.draw();
      }
@@ -1653,7 +1640,6 @@ function runQuizDelayMode (ex) {
         ex.graphics.ctx.clearRect(0,0,ex.width(),ex.height());
         drawList();
         drawBuckets();
-        // drawStepsAndIterations();
      }
 
     /***************************************************************************
@@ -1712,10 +1698,6 @@ function runQuizDelayMode (ex) {
         wasRedoButtonPressed = false;
     }
 
-    // function loadSavedData(){
-    //     if(ex.data.attempts) attempts = ex.data.attempts
-    // }
-
     /***************************************************************************
      * Functions to draw Instructions
      **************************************************************************/  
@@ -1752,56 +1734,16 @@ function runQuizDelayMode (ex) {
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
                 score = score + listLength/4;
-                console.log(score);
                 afterCloseInstruction();
                 iterationQ.remove();
             } else {
                 iterationQ.remove();
                 afterCloseInstruction();
             }
+            console.log("score:",score);
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
-    }
-
-    function createIncorrectAnsMessage (i, bucket) {
-        beforeShowInstruction();
-        var submitButton = ex.createButton(0, 0, strings.submitButtonText());
-        var elem = draggableList.elementList[i];
-        var numOfDigitsInElem = Math.floor(Math.log10(elem))+1;
-        // Generate a number with the same number of digits as the elem that is currently being placed
-        var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
-        submitButton.on("click", function() {
-            console.log(input.text());
-            console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
-            if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
-                score = score+0.5;
-                console.log(score);
-                afterCloseInstruction();
-                wrongAnsBox.remove();
-            } else {
-                var button = ex.createButton(0, 0, strings.okButtonText());
-                var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
-                    stay: true,
-                    color: incorrectAnsColor
-                }, instrW, instrX);
-                button.on("click", function () { 
-                    wrongAnsBox2.remove();
-                    afterCloseInstruction();
-                });
-                ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
-                wrongAnsBox.remove();
-            }
-        });
-        var input = ex.createInputText(0,0,"?", {inputSize: 1});
-        var text = strings.quizIncorrectAns(num, digitIndex, draggableList.elementList[i]);
-        var wrongAnsBox = ex.textbox112(text,
-                {
-                    stay: true,
-                    color: incorrectAnsColor
-                }, instrW, instrX);             
-        ex.insertButtonTextbox112(wrongAnsBox, submitButton, "BTNA");
-        ex.insertTextAreaTextbox112(wrongAnsBox, input);
     }
 
     function createAfterOneIterationQ (element, correctI) {
@@ -1821,7 +1763,6 @@ function runQuizDelayMode (ex) {
                 console.log("here");
                 if (parseInt(input.text()) == correctI){
                     score = score+listLength/4;
-                    console.log(score);
                     console.log(currentIteration);
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
@@ -1845,6 +1786,7 @@ function runQuizDelayMode (ex) {
                             ex.showFeedback(feedback);
                         }
                     }
+                    console.log("score:",score);
                 }
         }
         )            
@@ -1896,8 +1838,15 @@ function runQuizDelayMode (ex) {
 
      function undo () {
         if (workingIndex > 0) {
-            draggableList.disable(workingIndex);
+            if (workingIndex < startList.length) {
+                hasCurrentElementFailed = false;
+                draggableList.disable(workingIndex);
+            }
             workingIndex--;
+            if (draggableList.list[workingIndex].isInCorrectBucket) {
+                score = score - 1;
+            }
+            console.log("score:",score);
             draggableList.enable(workingIndex);
             maxIndex = workingIndex;
             var bucket = draggableList.list[workingIndex].currentBucket
@@ -1949,13 +1898,16 @@ function runQuizDelayMode (ex) {
 
      function setUp(){
         ex.chromeElements.submitButton.disable();
+        ex.chromeElements.submitButton.off("click");
         ex.chromeElements.submitButton.on("click", submit);
         ex.chromeElements.displayCAButton.disable();
         ex.chromeElements.newButton.disable();
         ex.chromeElements.resetButton.disable();
         ex.chromeElements.undoButton.enable();
+        ex.chromeElements.undoButton.off("click");
         ex.chromeElements.undoButton.on("click", undo);
         ex.chromeElements.redoButton.enable();
+        ex.chromeElements.redoButton.off("click");
         ex.chromeElements.redoButton.on("click", redo);
     }
 
