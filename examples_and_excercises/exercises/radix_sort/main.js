@@ -3,7 +3,7 @@ function main (ex) {
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
-    if (("finishedPractice" in ex.dataca) && (ex.data.finishedPractice)) {
+    if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
         ex.data.meta.mode = "quiz-delay"; 
     } else {
         ex.data.meta.mode = "practice"; 
