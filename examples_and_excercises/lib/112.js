@@ -2535,170 +2535,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
             return element;
         };
 
-        ex.insertDropdownTextbox112 = function(TextboxElement, Dropdown) {
-            var identifier = "$DROPDOWN$";
-            assertArgsLength(arguments,2,2);
-            assertTypes(arguments,["object","object"]);
-            // Get the DOM elements from _elementReferences
-            var $Code = $(_elementReferences[TextboxElement._elementReferenceID]);
-            var $Dropdown = $(_elementReferences[Dropdown._elementReferenceID]);
-
-            // Get the target span
-            // jQuery has no way to use `:contains()` to select the innermost
-            // matches... just using pure JS to do the span selection
-            var spans = $Code[0].getElementsByTagName("span");
-            var $targetSpan = undefined;
-            for (var i = 0; i < spans.length; i++) {
-                if (spans[i].innerHTML.indexOf(identifier) !== -1) {
-                    $targetSpan = $(spans[i]);
-                }
-            }
-            assert($targetSpan != [], "identifier not found.");
-
-            // Set dropdown classes
-            $Dropdown.find("button").addClass("dropdown-inline");
-            $Dropdown.find("ul").addClass("dropdown-inline");
-
-            // Remove absolute positioning
-            $Dropdown.removeAttr("style");
-
-            // Add dropdown to a new span
-            var $span = $("<span></span>");
-            $span.css({
-                display: "inline-block",
-                "vertical-align": "bottom",
-                "size": "large",
-                "color": "black"
-            });
-            $span.append($Dropdown);
-
-            // Insert dropdown
-            $span.insertBefore($targetSpan);
-
-            // Remove old
-            $targetSpan.remove();
-
-            // Fix overflow
-            $Code.css("overflow", "visible");
-        };
-
-    ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
-            // console.log(TextboxElement);
-            var identifier = "$TEXTAREA$";
-            assertArgsLength(arguments,2,2);
-            assertTypes(arguments,["object","object"]);
-            // Get the DOM elements from _elementReferences
-            var $Code = $(_elementReferences[TextboxElement._elementReferenceID]);
-            var $Dropdown = $(_elementReferences[textarea._elementReferenceID]);
-            console.log($Code);
-            console.log($Dropdown);
-            // Get the target span
-            // jQuery has no way to use `:contains()` to select the innermost
-            // matches... just using pure JS to do the span selection
-            console.log($Code[0]);
-            var spans = $Code[0].getElementsByTagName("span");
-            console.log(spans);
-            var $targetSpan = [];
-            for (var i = 0; i < spans.length; i++) {
-                console.log(spans[i]);
-                if (spans[i].innerHTML.indexOf(identifier) !== -1) {
-                    $targetSpan = $(spans[i]);
-                }
-            }
-            assert($targetSpan != [], "identifier not found.");
-
-            // Set dropdown classes
-            $Dropdown.find("button").addClass("dropdown-inline");
-            $Dropdown.find("ul").addClass("dropdown-inline");
-
-            // Remove absolute positioning
-            $Dropdown.removeAttr("style");
-
-            // Add dropdown to a new span
-            var $span = $("<text></text>");
-            $span.css({
-                display: "inline-block",
-                "vertical-align": "bottom",
-                "size": "large",
-                "color": "black"
-            });
-            $span.append($Dropdown);
-
-            // Insert dropdown
-            $span.insertBefore($targetSpan);
-
-            // Remove old
-            $targetSpan.remove();
-
-            // Fix overflow
-            $Code.css("overflow", "visible");
-        };
-
-        ex.insertButtonTextbox112 = function(TextboxElement, button, identifier) {
-            console.log(identifier);
-            assertArgsLength(arguments,3,3);
-            assertTypes(arguments,["object","object", "string"]);
-            // Get the DOM elements from _elementReferences
-            var $Code = $(_elementReferences[TextboxElement._elementReferenceID]);
-            console.log($Code);
-            console.log($Code.context.localName);
-            if ($Code.context.localName === "button") {
-                console.log("here");
-                return false;}
-            var $Dropdown = $(_elementReferences[button._elementReferenceID]);
-            // console.log($Dropdown);
-            // console.log($Code == $Dropdown);
-
-            // Get the target span
-            // jQuery has no way to use `:contains()` to select the innermost
-            // matches... just using pure JS to do the span selection
-            // while (spans !== []){
-            var spans = $Code[0].getElementsByTagName("span");
-            // }
-            // console.log(spans);
-            var $targetSpan = undefined;
-            // console.log("length");
-            var testSpans = "<span>HelpMe</span>";
-            // var testLen = loadXMLDoc(testSpans).getElementsByTagName("span");
-            // console.log(testLen.length);
-            console.log(spans.length);
-            for (var i = 0; i < spans.length; i++) {
-                spans[i].innerHTML.indexOf(identifier)
-                if (spans[i].innerHTML.indexOf(identifier) !== -1) {
-                    $targetSpan = $(spans[i]);
-                }
-            }
-            // console.log($targetSpan);
-            assert($targetSpan != [], "identifier not found.");
-
-            // Set dropdown classes
-            $Dropdown.find("button").addClass("dropdown-inline");
-            $Dropdown.find("ul").addClass("dropdown-inline");
-
-            // Remove absolute positioning
-            $Dropdown.removeAttr("style");
-
-            // Add dropdown to a new span
-            var $span = $("<btn></btn>");
-            $span.css({
-                display: "inline-block",
-                "vertical-align": "top",
-                "size": "large",
-                "color": "black"
-            });
-            $span.append($Dropdown);
-
-            // Insert dropdown
-            $span.insertBefore($targetSpan);
-
-            // Remove old
-            $targetSpan.remove();
-
-            // Fix overflow
-            $Code.css("overflow", "visible");
-            return true;
-        };
-
         ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
             // Default Arguments!
             if(typeof(width) == 'undefined') {width = ex.width()/3;}
@@ -2713,15 +2549,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 visibility: "visible",
                 fontSize: (width/height * 25)
             });
-
-            // var $closeButton = $("<button class='close'></button>")
-            //                     .attr("type", "button")
-            //                     .attr("aria-label", "Close")
-            //                     .html("<span aria-hidden='true'>×</span>");
-            // $closeButton.on("click", function() {
-            //     $textbox112.remove();
-            // });
-
             // Add message, then put button at the beginning of div
             $textbox112.html(message);
             // $textbox112.prepend($closeButton);
@@ -2739,7 +2566,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
                     this.remove();
                 });
             }
-
             return element;
         };
 
