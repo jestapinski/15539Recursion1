@@ -662,7 +662,7 @@ function runPracticeMode (ex) {
             incorrectBox.remove();   
             currentInstruction = "";
             console.log(currentIteration);
-            if (currentIteration < numberOfIterations) {
+            if (currentIteration <= numberOfIterations) {
                 createNextIterationInstruction();
             } else { //End of sort
                 createEndOfSortMessage();
