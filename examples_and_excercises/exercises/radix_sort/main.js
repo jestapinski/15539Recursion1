@@ -9,7 +9,7 @@ function main (ex) {
         ex.data.meta.mode = "practice"; 
     }
     // ex.data.meta.mode = "practice";
-    ex.data.meta.mode = "quiz-immediate";
+    // ex.data.meta.mode = "quiz-immediate";
     
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
