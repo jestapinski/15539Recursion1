@@ -8,8 +8,6 @@ function main (ex) {
     } else {
         ex.data.meta.mode = "practice"; 
     }
-
-    ex.data.meta.mode = "quiz-delay";
     
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -18,6 +16,7 @@ function main (ex) {
     } else if (ex.data.meta.mode == "quiz-delay") {
         runQuizDelayMode(ex);
     }
+
 };
 
 /*******************************************************************************
@@ -147,6 +146,25 @@ function LSDDigitSort(L, digitIndex){
  ******************************************************************************/
 
 function runPracticeMode (ex) {
+    ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
+            // Default Arguments!
+            if(typeof(width) == 'undefined') {width = ex.width()/3;}
+            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
+            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
+            if(typeof(height) == 'undefined') {height = width;}
+
+            var element = ex.alert(message, {
+                fontSize: (width/height * 25),
+                stay: true,
+                removeXButton: true
+            });
+            element.style(options);
+            if (typeof(left) == 'undefined') {left = cx - width / 2}
+            if (typeof(top) == 'undefined') {top = cy - height / 2}
+            element.position(left, top);
+
+            return element;
+        };
     
     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
             var identifier = "$TEXTAREA$";
@@ -196,6 +214,7 @@ function runPracticeMode (ex) {
     //Create the actual list
     var maxNumberOfDigits = 3;
     var startList = createStartList(listLength, maxNumberOfDigits);
+    var maxNum = getMaxOfArray(startList);
     var numOfDigits = Math.floor(Math.log10(getMaxOfArray(startList)))+1;
 
     //Set font size (optional) -- this ensures the text stays within the bounds of the element rect
@@ -880,6 +899,26 @@ function runPracticeMode (ex) {
 
 function runQuizMode (ex) {
     
+        ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
+            // Default Arguments!
+            if(typeof(width) == 'undefined') {width = ex.width()/3;}
+            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
+            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
+            if(typeof(height) == 'undefined') {height = width;}
+
+            var element = ex.alert(message, {
+                fontSize: (width/height * 25),
+                stay: true,
+                removeXButton: true
+            });
+            element.style(options);
+            if (typeof(left) == 'undefined') {left = cx - width / 2}
+            if (typeof(top) == 'undefined') {top = cy - height / 2}
+            element.position(left, top);
+
+            return element;
+        };
+    
     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
             var identifier = "$TEXTAREA$";
             ex.insertDropdown(TextboxElement, identifier, textarea);
@@ -1498,6 +1537,26 @@ function runQuizMode (ex) {
 }
 
 function runQuizDelayMode (ex) {
+    
+        ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
+            // Default Arguments!
+            if(typeof(width) == 'undefined') {width = ex.width()/3;}
+            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
+            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
+            if(typeof(height) == 'undefined') {height = width;}
+
+            var element = ex.alert(message, {
+                fontSize: (width/height * 25),
+                stay: true,
+                removeXButton: true
+            });
+            element.style(options);
+            if (typeof(left) == 'undefined') {left = cx - width / 2}
+            if (typeof(top) == 'undefined') {top = cy - height / 2}
+            element.position(left, top);
+
+            return element;
+        };
     
      ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
             var identifier = "$TEXTAREA$";

@@ -421,7 +421,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 var confID = ex.data.meta.id;
 
                 //Hot fix for ex.data.meta.mode
-                ex.data.meta.mode = "practice";
+                ex.data.meta.mode = "quiz-immediate";
 
                 // Get system time and encode to b64 using .btoa()
                 var sysTime = Date.now().toString();
@@ -589,12 +589,12 @@ function define112Exercise(exerciseConstructor,wrapper) {
      */
     function setupCanvas() {
         var exID = UNIQUE_ID;
-        var canvasID = exID + "-canvas";
+        ex.canvasID = exID + "-canvas";
         var width = $("#" + exID).width();
         var height = $("#" + exID).height();
 
         var $canvas = $("<canvas></canvas>", {
-            id: canvasID,
+            id: ex.canvasID,
         }).attr("width", width)
           .attr("height", height)
           .appendTo($("#" + exID));
@@ -1454,7 +1454,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 var id = UNIQUE_ID + Date.now().toString();
                 // Base 64 encoding
                 var b64 = window.btoa(id) + String(Math.floor(1000 * Math.random()));
-                // console.log(b64);
                 // String replace equals signs, only use last 10 digits
                 return (b64.replace(/=/g, "_")).slice(-10);
             })();
@@ -1503,7 +1502,10 @@ function define112Exercise(exerciseConstructor,wrapper) {
                         case "height":
                             $_elt.height(val);
                             break;
-
+                        case "fontSize":
+                            assert(_kind === "alert")
+                            $_elt.css("font-size",val);
+                            break;
                         case "fontStyle":
                             assert(
                                 member(_kind, ["header", "paragraph"]),
@@ -1656,7 +1658,7 @@ function define112Exercise(exerciseConstructor,wrapper) {
              * @public
              */
             this.disable = function() {
-                // assertArgsLength(arguments,0,0);
+                assertArgsLength(arguments,0,0);
 
                 switch (_kind) {
                     case "dropdown":
@@ -2474,7 +2476,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
             return element;
         };
 
-
         /**
          * Creates an alert popup that automatically fades.
          *
@@ -2501,6 +2502,8 @@ function define112Exercise(exerciseConstructor,wrapper) {
             var $alert = $("<div></div>")
                             .addClass("alert")
                             .width(width);
+                            
+            $alert.css("z-index","999999");
             $alert.css({
                 opacity: "1.0",
                 visibility: "visible",
@@ -2516,10 +2519,8 @@ function define112Exercise(exerciseConstructor,wrapper) {
 
             // Add message, then put button at the beginning of div
             $alert.html(message);
-            $alert.prepend($closeButton);
+            if (!(options["removeXButton"])) $alert.prepend($closeButton);
             $_container.append($alert);
-
-            //Code to "embed" a dropdown
 
             var element = new Element112($alert[0], "alert");
             element.style(options);
@@ -2532,40 +2533,6 @@ function define112Exercise(exerciseConstructor,wrapper) {
                 });
             }
 
-            return element;
-        };
-
-        ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
-            // Default Arguments!
-            if(typeof(width) == 'undefined') {width = ex.width()/3;}
-            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
-            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
-            if(typeof(height) == 'undefined') {height = width;}
-            var $textbox112 = $("<div></div>")
-                            .addClass("alert")
-                            .width(width);
-            $textbox112.css({
-                opacity: "0.9",
-                visibility: "visible",
-                fontSize: (width/height * 25)
-            });
-            // Add message, then put button at the beginning of div
-            $textbox112.html(message);
-            // $textbox112.prepend($closeButton);
-            $_container.append($textbox112);
-
-            var element = new Element112($textbox112[0], "alert");
-            element.style(options);
-            if (typeof(left) == 'undefined') {left = cx - width / 2}
-            if (typeof(top) == 'undefined') {top = cy - height / 2}
-            element.position(left, top);
-
-            if (!options || options.stay != true) {
-                // Automatically remove after transition completes
-                element.hide(function() {
-                    this.remove();
-                });
-            }
             return element;
         };
 
@@ -2752,6 +2719,17 @@ function define112Exercise(exerciseConstructor,wrapper) {
             ex.data.meta.feedback = feedback;
             ex.chromeElements.feedbackButton.trigger("click");
             ex.chromeElements.feedbackBody.html(feedback);
+        };
+
+        /**
+         * For use with permission only. 
+         * Sets a height for the canvas and makes it scrollable. 
+         * @param {number} new canvas height
+         * @returns {undefined}
+         */ 
+        ex.scroll = function(height) {
+            $_container.css("overflow","scroll");
+            $("#" + ex.canvasID).attr("height",height + "px");
         };
 
         setupChrome();
