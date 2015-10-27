@@ -3,7 +3,7 @@ function main (ex) {
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
-    if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
+    if (("finishedPractice" in ex.dataca) && (ex.data.finishedPractice)) {
         ex.data.meta.mode = "quiz-delay"; 
     } else {
         ex.data.meta.mode = "practice"; 
@@ -726,12 +726,14 @@ function runPracticeMode (ex) {
             currentInstruction = "";
             afterCloseInstruction();
             ex.data.finishedPractice = true;
+            delete ex.data.run;
             main(ex);
         });
         buttonPracticeMore.on("click", function () {
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            delete ex.data.run;
             main(ex);
         });
         ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
@@ -760,6 +762,7 @@ function runPracticeMode (ex) {
         moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
         bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+        delete ex.data.run;
         currentInstruction = "createStartInstruction";
         drawAll();
         runInstruction();
@@ -1568,6 +1571,14 @@ function runQuizDelayMode (ex) {
         };
 
     /***************************************************************************
+     * Initialize instructions
+     **************************************************************************/
+     
+    var currentInstruction = "createStartInstruction";
+    var instrElem, currentI;
+    var instrValList = [instrElem,currentI];
+    
+    /***************************************************************************
      * Initialize List & Buckets
      **************************************************************************/
 
@@ -1652,6 +1663,7 @@ function runQuizDelayMode (ex) {
     var maxIndex = 0;
     var numberOfIterations = Math.floor(Math.log10(getMaxOfArray(startList)))+1;
     var currentIteration = 0;
+    var canSubmit = false;
 
     var recentBucket = 0;
     var correctBucket = false;
@@ -1745,6 +1757,7 @@ function runQuizDelayMode (ex) {
         if(workingIndex < listLength) {
             draggableList.enable(workingIndex);
         } else {
+           canSubmit = true;
            ex.chromeElements.submitButton.enable()
         }
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
@@ -1762,6 +1775,7 @@ function runQuizDelayMode (ex) {
      **************************************************************************/  
 
      function createStartInstruction () {
+        currentInstruction = "createStartInstruction";
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1772,6 +1786,7 @@ function runQuizDelayMode (ex) {
                 }, instrW, instrX);
         button.on("click", function () {
             introBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
         });
@@ -1779,6 +1794,7 @@ function runQuizDelayMode (ex) {
      }
 
      function createIterationQ () {
+        currentInstruction = "createIterationQ";
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1795,8 +1811,10 @@ function runQuizDelayMode (ex) {
                 score = score + listLength/4;
                 afterCloseInstruction();
                 iterationQ.remove();
+                currentInstruction = "";
             } else {
                 iterationQ.remove();
+                currentInstruction = "";
                 afterCloseInstruction();
             }
             console.log("score:",score);
@@ -1806,6 +1824,9 @@ function runQuizDelayMode (ex) {
     }
 
     function createAfterOneIterationQ (element, correctI) {
+        instrValList[0] = element;
+        instrValList[1] = correctI;
+        currentInstruction = "createAfterOneIterationQ";
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1831,11 +1852,13 @@ function runQuizDelayMode (ex) {
                             ex.showFeedback(feedback);
                         }
                         iterationQ.remove();
+                        currentInstruction = "";
                     }
 
                 else {
                     console.log(currentIteration);
                     iterationQ.remove();
+                    currentInstruction = "";
                         console.log(currentIteration);
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
@@ -1854,6 +1877,7 @@ function runQuizDelayMode (ex) {
     }
 
     function createNextIterationInstruction () {
+        currentInstruction = "createNextIterationInstruction";
         beforeShowInstruction();
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
@@ -1886,6 +1910,7 @@ function runQuizDelayMode (ex) {
             currentIteration = nextDigitI;
             console.log(currentIteration);
             nextIterationBox.remove();
+            currentInstruction = "";
             afterCloseInstruction();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
@@ -1937,6 +1962,58 @@ function runQuizDelayMode (ex) {
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
+    function saveData(){
+        if(typeof ex.data.run == 'undefined') ex.data.run = {};
+            ex.data.run.startList = JSON.stringify(startList);
+            ex.data.run.strings = JSON.stringify(strings);
+            ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
+            ex.data.run.emptySpots = JSON.stringify(emptySpots);
+            //draggablelist data
+            ex.data.run.elementList = JSON.stringify(draggableList.elementList);
+            ex.data.run.elementList = JSON.stringify(draggableList.list);
+            ex.data.run.workingIndex = workingIndex;
+            ex.data.run.maxIndex = maxIndex;
+            ex.data.run.digitIndex = digitIndex;
+            ex.data.run.currentIteration = currentIteration;
+            ex.data.run.currentInstruction = currentInstruction;
+            console.log("instr:" + currentInstruction);
+            ex.data.run.instrValList = JSON.stringify(instrValList);
+            //quiz mode only
+            ex.data.run.score = score;
+            ex.data.run.canSubmit = canSubmit;
+    }
+
+    function loadData(){
+        if(typeof ex.data.run != 'undefined'){
+            startList = JSON.parse(ex.data.run.startList);
+            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
+            emptySpots = JSON.parse(ex.data.run.emptySpots);
+            workingIndex = ex.data.run.workingIndex;
+            maxIndex = ex.data.run.maxIndex;
+            currentIteration = ex.data.run.currentIteration;
+            digitIndex = ex.data.run.digitIndex;
+            //reconstruct draggabeList data
+            elementList = JSON.parse(ex.data.run.elementList);
+            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+                                                 maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+            for (var i = 0; i < elementList.length; i++) {
+                var elem = elementList[i];
+                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
+                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
+                //Only enable the working element
+                if (i != workingIndex) {
+                    draggableList.list[i].disable();
+                }
+            }
+            currentInstruction = ex.data.run.currentInstruction;
+            instrValList = JSON.parse(ex.data.run.instrValList);
+            score = ex.data.run.score;
+            console.log("score" + score);
+            canSubmit = ex.data.run.canSubmit;
+            console.log("load: " + canSubmit);
+            if(canSubmit) ex.chromeElements.submitButton.enable();
+        }
+    }
 
     function bindButtons(){
         ex.graphics.on("mousedown", draggableList.mousedown);
@@ -1956,7 +2033,7 @@ function runQuizDelayMode (ex) {
     }
 
      function setUp(){
-        ex.chromeElements.submitButton.disable();
+        if(!canSubmit) ex.chromeElements.submitButton.disable();
         ex.chromeElements.submitButton.off("click");
         ex.chromeElements.submitButton.on("click", submit);
         ex.chromeElements.displayCAButton.disable();
@@ -1968,13 +2045,31 @@ function runQuizDelayMode (ex) {
         ex.chromeElements.redoButton.enable();
         ex.chromeElements.redoButton.off("click");
         ex.chromeElements.redoButton.on("click", redo);
+        ex.unload(saveData);
+    }
+
+    function runInstruction(){
+        switch(currentInstruction){
+            case "createStartInstruction":
+                createStartInstruction();
+                break;
+            case "createIterationQ":
+                createIterationQ();
+                break;
+            case "createAfterOneIterationQ":
+                createAfterOneIterationQ(instrValList[0],instrValList[1]);
+                break;
+            case "createNextIterationInstruction":
+                createNextIterationInstruction();
+                break;
+        } 
     }
 
     function run(){
-        // loadSavedData();
+        loadData();
         bindButtons();
         setUp();
-        createStartInstruction();
+        runInstruction();
         drawAll();
     }
 
