@@ -70,7 +70,7 @@ var getStrings = function () {
     };
     obj.practiceAfterOneIteration = function (number, nextIteration) {
         var iterationConversion = {1:"1st", 2:"2nd", 3:"3rd", 4:"4th", 5:"5th"}
-        return "Great job!  We will now move the numbers back into the list  What will the new index of the number ").concat(String(number)).concat(" be? <span>$TEXTAREA$</span> <span>BTNA</span>");
+        return "Great job!  We will now move the numbers back into the list.  What will the new index of the number ").concat(String(number)).concat(" be? <span>$TEXTAREA$</span> <span>BTNA</span>");
     };
     obj.practiceAfterOneIterationCorrect = function (number) {
         return "Correct! <span>BTNA</span>";
