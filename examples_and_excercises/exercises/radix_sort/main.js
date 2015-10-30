@@ -3,11 +3,17 @@ function main (ex) {
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
-    if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
-        ex.data.meta.mode = "quiz-delay"; 
-    } else {
-        ex.data.meta.mode = "practice"; 
+    if (ex.data.instance.state != null){
+        ex.data.meta.mode = "practice"
     }
+    else{
+        ex.data.meta.mode = "quiz-immediate"
+    }
+    // if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
+    //     ex.data.meta.mode = "quiz-delay"; 
+    // } else {
+    //     ex.data.meta.mode = "practice"; 
+    // }
     
     if (ex.data.meta.mode == "practice") {
         runPracticeMode(ex);
@@ -798,6 +804,7 @@ function runPracticeMode (ex) {
         ex.data.run.attempts = attempts;
         ex.data.run.currentInstruction = currentInstruction;
         ex.data.run.instrValList = JSON.stringify(instrValList);
+        ex.saveState(ex.data.run)
     }
 
     function loadData(){
@@ -1334,6 +1341,8 @@ function runQuizMode (ex) {
                 createNextIterationInstruction();
             } else { //End of quiz
                 var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var scoreForUser = percent / 100;
+                ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
             }
@@ -1358,6 +1367,8 @@ function runQuizMode (ex) {
                 createNextIterationInstruction();
             } else { //End of quiz
                 var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var scoreForUser = percent / 100;
+                ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
             }
@@ -1428,6 +1439,7 @@ function runQuizMode (ex) {
             ex.data.run.score = score;
             ex.data.run.canSubmit = canSubmit;
             ex.data.run.hasCurrentElementFailed = hasCurrentElementFailed;
+            ex.saveState(ex.data.run);
     }
 
     function loadData(){
@@ -1848,6 +1860,8 @@ function runQuizDelayMode (ex) {
                             createNextIterationInstruction();
                         } else { //End of quiz
                             var percent = Math.round(score/possibleScore*100);
+                            var scoreForUser = percent / 100;
+                            ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
                         }
@@ -1864,6 +1878,8 @@ function runQuizDelayMode (ex) {
                             createNextIterationInstruction();
                         } else { //End of quiz
                             var percent = Math.round(score/possibleScore*100);
+                            var scoreForUser = percent / 100;
+                            ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
                         }
@@ -1981,6 +1997,7 @@ function runQuizDelayMode (ex) {
             //quiz mode only
             ex.data.run.score = score;
             ex.data.run.canSubmit = canSubmit;
+            ex.saveState(ex.data.run);
     }
 
     function loadData(){
