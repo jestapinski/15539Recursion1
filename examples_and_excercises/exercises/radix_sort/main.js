@@ -515,7 +515,7 @@ var getStrings = function () {
     return obj;
 };
 
-function main (ex) {
+function main (ex, mode) {
     /*This is so that once the user clicks the button "take the quiz," it loads
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
@@ -525,12 +525,11 @@ function main (ex) {
     // } else {
     //     ex.data.meta.mode = "practice"; 
     // }
-    
-    if (ex.data.instance.state == null){
+
+    if (mode === undefined) {
         ex.data.meta.mode = "practice";
-    }
-    else{
-        ex.data.meta.mode = "quiz-immediate";
+    } else {
+        ex.data.meta.mode = mode;
     }
 
     ex.setTitle("Radix Sort");
@@ -802,6 +801,9 @@ function runPracticeMode (ex) {
     var questionsColor = "blue";
     var correctAnsColor = "green";
     var incorrectAnsColor = "red";
+
+    //Indicates whether to ignore the stored data or not
+    var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -1251,15 +1253,16 @@ function runPracticeMode (ex) {
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
-            ex.data.finishedPractice = true;
-            delete ex.data.run;
-            main(ex);
+            ignoreData = true;
+            saveData();
+            main(ex, "quiz-immediate");
         });
         buttonPracticeMore.on("click", function () {
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
-            delete ex.data.run;
+            ignoreData = true;
+            saveData();
             main(ex);
         });
         ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
@@ -1310,34 +1313,35 @@ function runPracticeMode (ex) {
     }
     
     function saveData(){
-        if(typeof ex.data.run == 'undefined') ex.data.run = {};
-        ex.data.run.startList = JSON.stringify(startList);
-        ex.data.run.strings = JSON.stringify(strings);
-        ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
-        ex.data.run.emptySpots = JSON.stringify(emptySpots);
+        data = {};
+        data.startList = startList;
+        data.strings = strings;
+        data.bucketSpots = bucketSpots;
+        data.emptySpots = emptySpots;
         //draggablelist data
-        ex.data.run.elementList = JSON.stringify(draggableList.elementList);
-        ex.data.run.elementList = JSON.stringify(draggableList.list);
-        ex.data.run.workingIndex = workingIndex;
-        ex.data.run.maxIndex = maxIndex;
-        ex.data.run.currentIteration = currentIteration;
-        ex.data.run.attempts = attempts;
-        ex.data.run.currentInstruction = currentInstruction;
-        ex.data.run.instrValList = JSON.stringify(instrValList);
-        ex.saveState(ex.data.run);
+        data.elementList = draggableList.elementList;
+        data.elementList = draggableList.list;
+        data.workingIndex = workingIndex;
+        data.maxIndex = maxIndex;
+        data.currentIteration = currentIteration;
+        data.attempts = attempts;
+        data.currentInstruction = currentInstruction;
+        data.instrValList = instrValList;
+        data.ignoreData = ignoreData;
+        ex.saveState(data);
     }
 
     function loadData(){
-        if(typeof ex.data.run != 'undefined'){
-            startList = JSON.parse(ex.data.run.startList);
-            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
-            emptySpots = JSON.parse(ex.data.run.emptySpots);
-            workingIndex = ex.data.run.workingIndex;
-            maxIndex = ex.data.run.maxIndex;
-            currentIteration = ex.data.run.currentIteration;
-            attempts = ex.data.run.attempts;
+        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){ 
+            startList = ex.data.instance.state.startList;
+            bucketSpots = ex.data.instance.state.bucketSpots;
+            emptySpots = ex.data.instance.state.emptySpots;
+            workingIndex = ex.data.instance.state.workingIndex;
+            maxIndex = ex.data.instance.state.maxIndex;
+            currentIteration = ex.data.instance.state.currentIteration;
+            attempts = ex.data.instance.state.attempts;
             //draggabeList data
-            elementList = JSON.parse(ex.data.run.elementList);
+            elementList = ex.data.instance.state.elementList;
             draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
             for (var i = 0; i < elementList.length; i++) {
@@ -1349,8 +1353,9 @@ function runPracticeMode (ex) {
                 }
 
             }
-            currentInstruction = ex.data.run.currentInstruction;
-            instrValList = JSON.parse(ex.data.run.instrValList);
+            currentInstruction = ex.data.instance.state.currentInstruction;
+            instrValList = ex.data.instance.state.instrValList;
+            ignoreData = ex.data.instance.state.ignoreData;
         }
     }
 
@@ -1429,25 +1434,25 @@ function runPracticeMode (ex) {
 
 function runQuizMode (ex) {
     
-        ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
-            // Default Arguments!
-            if(typeof(width) == 'undefined') {width = ex.width()/3;}
-            if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
-            if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
-            if(typeof(height) == 'undefined') {height = width;}
+    ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
+        // Default Arguments!
+        if(typeof(width) == 'undefined') {width = ex.width()/3;}
+        if(typeof(cx) == 'undefined') {cx = ex.width() / 2;}
+        if(typeof(cy) == 'undefined') {cy = ex.height() / 2;}
+        if(typeof(height) == 'undefined') {height = width;}
 
-            var element = ex.alert(message, {
-                fontSize: (width/height * 25),
-                stay: true,
-                removeXButton: true
-            });
-            element.style(options);
-            if (typeof(left) == 'undefined') {left = cx - width / 2}
-            if (typeof(top) == 'undefined') {top = cy - height / 2}
-            element.position(left, top);
+        var element = ex.alert(message, {
+            fontSize: (width/height * 25),
+            stay: true,
+            removeXButton: true
+        });
+        element.style(options);
+        if (typeof(left) == 'undefined') {left = cx - width / 2}
+        if (typeof(top) == 'undefined') {top = cy - height / 2}
+        element.position(left, top);
 
-            return element;
-        };
+        return element;
+    };
     
     ex.insertTextAreaTextbox112 = function(TextboxElement, textarea) {
             var identifier = "$TEXTAREA$";
@@ -1524,6 +1529,7 @@ function runQuizMode (ex) {
         hasCurrentElementFailed = false;
         console.log("score:",score);
         elementPlacedInCorrectBucket(i, bucket);
+        saveData()
     };
 
     var failureFn = function (i, bucket) {
@@ -1533,6 +1539,7 @@ function runQuizMode (ex) {
             hasCurrentElementFailed = undefined; // Undefined means that they have failed once before, so are not eligible for additional partial credit
         }
         createIncorrectAnsMessage(i, bucket);
+        saveData()
     }
 
     //for integers only
@@ -1562,6 +1569,8 @@ function runQuizMode (ex) {
     var recentBucket = 0;
     var correctBucket = false;
     var bucketColor = "#CEE8F0";
+
+    var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -1940,39 +1949,41 @@ function runQuizMode (ex) {
      * Main Game Code
      **************************************************************************/
     function saveData(){
-        if(typeof ex.data.run == 'undefined') ex.data.run = {};
-            ex.data.run.startList = JSON.stringify(startList);
-            ex.data.run.strings = JSON.stringify(strings);
-            ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
-            ex.data.run.emptySpots = JSON.stringify(emptySpots);
-            //draggablelist data
-            ex.data.run.elementList = JSON.stringify(draggableList.elementList);
-            ex.data.run.elementList = JSON.stringify(draggableList.list);
-            ex.data.run.workingIndex = workingIndex;
-            ex.data.run.maxIndex = maxIndex;
-            ex.data.run.digitIndex = digitIndex;
-            ex.data.run.currentIteration = currentIteration;
-            ex.data.run.currentInstruction = currentInstruction;
-            console.log("instr:" + currentInstruction);
-            ex.data.run.instrValList = JSON.stringify(instrValList);
-            //quiz mode only
-            ex.data.run.score = score;
-            ex.data.run.canSubmit = canSubmit;
-            ex.data.run.hasCurrentElementFailed = hasCurrentElementFailed;
-            ex.saveState(ex.data.run);
+        data = {};
+        data.startList = startList;
+        data.strings = strings;
+        data.bucketSpots = bucketSpots;
+        data.emptySpots = emptySpots;
+        //draggablelist data
+        data.elementList = draggableList.elementList;
+        data.elementList = draggableList.list;
+        data.workingIndex = workingIndex;
+        data.maxIndex = maxIndex;
+        data.digitIndex = digitIndex;
+        data.currentIteration = currentIteration;
+        data.currentInstruction = currentInstruction;
+        console.log("instr:" + currentInstruction);
+        data.instrValList = instrValList;
+        //quiz mode only
+        data.score = score;
+        data.canSubmit = canSubmit;
+        data.hasCurrentElementFailed = hasCurrentElementFailed;
+        data.mode = ex.data.meta.mode;
+        data.ignoreData = ignoreData;
+        ex.saveState(data);
     }
 
     function loadData(){
-        if(typeof ex.data.run != 'undefined'){
-            startList = JSON.parse(ex.data.run.startList);
-            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
-            emptySpots = JSON.parse(ex.data.run.emptySpots);
-            workingIndex = ex.data.run.workingIndex;
-            maxIndex = ex.data.run.maxIndex;
-            currentIteration = ex.data.run.currentIteration;
-            digitIndex = ex.data.run.digitIndex;
+        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+            startList = ex.data.instance.state.startList;
+            bucketSpots = ex.data.instance.state.bucketSpots;
+            emptySpots = ex.data.instance.state.emptySpots;
+            workingIndex = ex.data.instance.state.workingIndex;
+            maxIndex = ex.data.instance.state.maxIndex;
+            currentIteration = ex.data.instance.state.currentIteration;
+            digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
-            elementList = JSON.parse(ex.data.run.elementList);
+            elementList = ex.data.instance.state.elementList;
             draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
             for (var i = 0; i < elementList.length; i++) {
@@ -1984,14 +1995,15 @@ function runQuizMode (ex) {
                     draggableList.list[i].disable();
                 }
             }
-            currentInstruction = ex.data.run.currentInstruction;
-            instrValList = JSON.parse(ex.data.run.instrValList);
-            score = ex.data.run.score;
+            currentInstruction = ex.data.instance.state.currentInstruction;
+            instrValList = ex.data.instance.state.instrValList;
+            score = ex.data.instance.state.score;
             console.log("score" + score);
-            hasCurrentElementFailed = ex.data.run.hasCurrentElementFailed;
-            canSubmit = ex.data.run.canSubmit;
+            hasCurrentElementFailed = ex.data.instance.state.hasCurrentElementFailed;
+            canSubmit = ex.data.instance.state.canSubmit;
             console.log("load: " + canSubmit);
             if(canSubmit) ex.chromeElements.submitButton.enable();
+            ex.data.meta.mode = ex.data.instance.state.mode;
         }
     }
 
@@ -2204,6 +2216,8 @@ function runQuizDelayMode (ex) {
     // List of undoed moves that can be redone
     var redoList = [];
     var wasRedoButtonPressed = false;
+
+    var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -2499,38 +2513,40 @@ function runQuizDelayMode (ex) {
      * Main Game Code
      **************************************************************************/
     function saveData(){
-        if(typeof ex.data.run == 'undefined') ex.data.run = {};
-            ex.data.run.startList = JSON.stringify(startList);
-            ex.data.run.strings = JSON.stringify(strings);
-            ex.data.run.bucketSpots = JSON.stringify(bucketSpots);
-            ex.data.run.emptySpots = JSON.stringify(emptySpots);
-            //draggablelist data
-            ex.data.run.elementList = JSON.stringify(draggableList.elementList);
-            ex.data.run.elementList = JSON.stringify(draggableList.list);
-            ex.data.run.workingIndex = workingIndex;
-            ex.data.run.maxIndex = maxIndex;
-            ex.data.run.digitIndex = digitIndex;
-            ex.data.run.currentIteration = currentIteration;
-            ex.data.run.currentInstruction = currentInstruction;
-            console.log("instr:" + currentInstruction);
-            ex.data.run.instrValList = JSON.stringify(instrValList);
-            //quiz mode only
-            ex.data.run.score = score;
-            ex.data.run.canSubmit = canSubmit;
-            ex.saveState(ex.data.run);
+        data = {};
+        data.startList = startList;
+        data.strings = strings;
+        data.bucketSpots = bucketSpots;
+        data.emptySpots = emptySpots;
+        //draggablelist data
+        data.elementList = draggableList.elementList;
+        data.elementList = draggableList.list;
+        data.workingIndex = workingIndex;
+        data.maxIndex = maxIndex;
+        data.digitIndex = digitIndex;
+        data.currentIteration = currentIteration;
+        data.currentInstruction = currentInstruction;
+        console.log("instr:" + currentInstruction);
+        data.instrValList = instrValList;
+        //quiz mode only
+        data.score = score;
+        data.canSubmit = canSubmit;
+        data.mode = ex.data.meta.mode;
+        data.ignoreData = ignoreData;
+        ex.saveState(data);
     }
 
     function loadData(){
-        if(typeof ex.data.run != 'undefined'){
-            startList = JSON.parse(ex.data.run.startList);
-            bucketSpots = JSON.parse(ex.data.run.bucketSpots);
-            emptySpots = JSON.parse(ex.data.run.emptySpots);
-            workingIndex = ex.data.run.workingIndex;
-            maxIndex = ex.data.run.maxIndex;
-            currentIteration = ex.data.run.currentIteration;
-            digitIndex = ex.data.run.digitIndex;
+        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+            startList = ex.data.instance.state.startList;
+            bucketSpots = ex.data.instance.state.bucketSpots;
+            emptySpots = ex.data.instance.state.emptySpots;
+            workingIndex = ex.data.instance.state.workingIndex;
+            maxIndex = ex.data.instance.state.maxIndex;
+            currentIteration = ex.data.instance.state.currentIteration;
+            digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
-            elementList = JSON.parse(ex.data.run.elementList);
+            elementList = ex.data.instance.state.elementList;
             draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
             for (var i = 0; i < elementList.length; i++) {
@@ -2542,13 +2558,14 @@ function runQuizDelayMode (ex) {
                     draggableList.list[i].disable();
                 }
             }
-            currentInstruction = ex.data.run.currentInstruction;
-            instrValList = JSON.parse(ex.data.run.instrValList);
-            score = ex.data.run.score;
+            currentInstruction = ex.data.instance.state.currentInstruction;
+            instrValList = ex.data.instance.state.instrValList;
+            score = ex.data.instance.state.score;
             console.log("score" + score);
-            canSubmit = ex.data.run.canSubmit;
+            canSubmit = ex.data.instance.state.canSubmit;
             console.log("load: " + canSubmit);
             if(canSubmit) ex.chromeElements.submitButton.enable();
+            ex.data.meta.mode = ex.data.instance.state.mode;
         }
     }
 
