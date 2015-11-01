@@ -20,6 +20,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.currentBucket = undefined;
     element.drawAllFn = drawAllFn;
     element.isInCorrectBucket = false;
+    element.isAnimating = false;
+    element.animationTargetX = undefined;
+    element.animationTargetY = undefined;
 
     element.draw = function () {
         ctx.fillStyle = element.color;
@@ -59,13 +62,15 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.move = function(x, y, animate) {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
+        element.isAnimating = true;
+        element.animationTargetX = x;
+        element.animationTargetY = y;
         var steps = 40;
         if (animate) {
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
             var dx = (x - element.x)/steps;
             var dy = (y - element.y)/steps;
             var i = 1;
-            var isAnimationFinished = false;
             var animateFn = function () {
                 if (element.currentBucket == undefined) {
                     if (i <= steps) {
@@ -76,7 +81,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                         i++;
                         setTimeout(animateFn, 50);
                     } else {
-                        isAnimationFinished = true;
+                        element.isAnimating = false;
+                        element.animationTargetX = undefined;
+                        element.animationTargetY = undefined;
                     }
                 }
             };
@@ -374,8 +381,16 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         }
     }
 
+    self.isAnimating = function () {
+        for (var i = 0; i < self.list.length; i++) {
+            if (self.list[i].isAnimating) return true;
+        }
+        return false;
+    }
+
     return self;
 }
+
 
 
 var getStrings = function () {
@@ -520,17 +535,21 @@ function main (ex, mode) {
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
-    // if (("finishedPractice" in ex.data) && (ex.data.finishedPractice)) {
-    //     ex.data.meta.mode = "quiz-delay"; 
-    // } else {
-    //     ex.data.meta.mode = "practice"; 
-    // }
-
+      
+    //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
+    //ex.data.instance.state.ignoreData = true;
+    
+    console.log(ex.data.instance.state);
     if (mode === undefined) {
-        ex.data.meta.mode = "practice";
+        if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
+            ex.data.meta.mode = "practice";
+        } else {
+            ex.data.meta.mode = ex.data.instance.state.mode;
+        }
     } else {
         ex.data.meta.mode = mode;
     }
+    console.log(ex.data.meta.mode);
 
     ex.setTitle("Radix Sort");
     
@@ -756,6 +775,7 @@ function runPracticeMode (ex) {
         } else {
             elementPlacedInCorrectBucket(i, bucket);
         }
+        saveData();
     };
 
     var failureFn = function (i, bucket) {
@@ -766,6 +786,7 @@ function runPracticeMode (ex) {
             createIncorrectAnsMessage(i, bucket);
             attempts = 0;
         }
+        saveData();
     }
 
     //for integers only
@@ -918,12 +939,15 @@ function runPracticeMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             introBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
+            saveData();
         });
         ex.insertButtonTextbox112(introBox, button, "BTNA");
+        saveData();
      }
 
     function createIterationQ () {
@@ -938,6 +962,7 @@ function runPracticeMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             iterationQ.remove();
             currentInstruction = "";
             console.log(input.text());
@@ -947,9 +972,11 @@ function runPracticeMode (ex) {
             } else {
                 createIterationQIncorrect();
             }
+            saveData();
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        saveData();
     }
 
     function createIterationQCorrect(){
@@ -962,11 +989,14 @@ function runPracticeMode (ex) {
                     color: correctAnsColor
                 }, instrW, instrX);
         correctButton.on("click", function () {
+            saveData();
             correctBox.remove();
             currentInstruction = "";
             createStartSortInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+        saveData();
     }
 
     function createIterationQIncorrect(){
@@ -979,11 +1009,14 @@ function runPracticeMode (ex) {
                     color: incorrectAnsColor
                 }, instrW, instrX);
         incorrectButton.on("click", function () {
+            saveData();
             incorrectBox.remove();
             currentInstruction = "";
             createStartSortInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+        saveData();
     }
 
     function createStartSortInstruction () {
@@ -997,11 +1030,14 @@ function runPracticeMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             startBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(startBox, button, "BTNA");
+        saveData();
     }
 
     function createHint1Message (i, bucket) {
@@ -1023,11 +1059,14 @@ function runPracticeMode (ex) {
                     color: incorrectAnsColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             hintBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(hintBox, button, "BTNA");
+        saveData();
     }
 
     function createCorrectAnsMessage (i, bucket) {
@@ -1043,12 +1082,15 @@ function runPracticeMode (ex) {
                     color: correctAnsColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             correctAnsBox.remove();
             currentInstruction = "";
             elementPlacedInCorrectBucket(i, bucket);
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+        saveData();
     }
 
     function createIncorrectAnsMessage (i, bucket) {
@@ -1062,6 +1104,7 @@ function runPracticeMode (ex) {
         // Generate a number with the same number of digits as the elem that is currently being placed
         var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
         submitButton.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
@@ -1074,6 +1117,7 @@ function runPracticeMode (ex) {
                 wrongAnsBox.remove();
                 currentInstruction = "";
             }
+            saveData();
         });
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.practiceIncorrectAns(num, digitIndex, draggableList.elementList[i]);//IncorrectAnsAfterHint
@@ -1084,6 +1128,7 @@ function runPracticeMode (ex) {
                 }, instrW, instrX);             
         ex.insertButtonTextbox112(wrongAnsBox, submitButton, "BTNA");
         ex.insertTextAreaTextbox112(wrongAnsBox, input);
+        saveData();
     }
 
     function createIncorrectAnsCorrect(num,i){
@@ -1096,11 +1141,14 @@ function runPracticeMode (ex) {
             color: correctAnsColor
         }, instrW, instrX);
         button.on("click", function () { 
+            saveData();
             correctAnsBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+        saveData();
     }
 
     function createIncorrectAnsIncorrect(num,i){
@@ -1113,11 +1161,14 @@ function runPracticeMode (ex) {
             color: incorrectAnsColor
         }, instrW, instrX);
         button.on("click", function () { 
+            saveData();
             wrongAnsBox2.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+        saveData();
     }
 
     function createAfterOneIterationQ (element, correctI) {
@@ -1134,6 +1185,7 @@ function runPracticeMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log(numOfDigits);
             if (input.text() != "") {
@@ -1147,9 +1199,11 @@ function runPracticeMode (ex) {
                     createAfterOneIterationIncorrect(element,correctI);
                 }
             }
+            saveData();
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        saveData();
     }
 
     function createAfterOneIterationCorrect(element,correctI){
@@ -1164,15 +1218,29 @@ function runPracticeMode (ex) {
                     color: correctAnsColor
                 }, instrW, instrX);
         correctButton.on("click", function () {
+            saveData();
             correctBox.remove();
             currentInstruction = "";
-            if (currentIteration <= numberOfIterations) {
+            //move elements back
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering);
+            emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
+            draggableList.setEmptySpots(emptySpots);
+            workingIndex = 0;
+            draggableList.enable(workingIndex);
+            digitIndex++;
+            draggableList.setDigitIndex(digitIndex);
+            currentIteration++;
+            console.log(currentIteration);
+            if (currentIteration <= numberOfIterations+1) {
                 createNextIterationInstruction();
             } else { //End of sort
                 createEndOfSortMessage();
             }
+            drawAll();
+            saveData();
         });
         ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+        saveData();
     }
 
     function createAfterOneIterationIncorrect(element,correctI){
@@ -1187,30 +1255,12 @@ function runPracticeMode (ex) {
                     color: incorrectAnsColor
                 }, instrW, instrX);
         incorrectButton.on("click", function () {
+            saveData();
             incorrectBox.remove();   
             currentInstruction = "";
             console.log(currentIteration);
-            if (currentIteration <= numberOfIterations) {
-                createNextIterationInstruction();
-            } else { //End of sort
-                createEndOfSortMessage();
-            }
-        });
-        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
-    }
-
-    function createNextIterationInstruction () {
-        currentInstruction = "createNextIterationInstruction";
-        beforeShowInstruction();
-        var text = strings.practiceNextIteration(digitIndex+1);
-        var button = ex.createButton(0, 0, strings.okButtonText());
-        var nextIterationBox = ex.textbox112(text,
-                {
-                    stay: true,
-                    color: instrColor
-                }, instrW, instrX);
-        button.on("click", function () {
-            moveBack(draggableList, bucketSpots, bucketOrdering);
+            //move elements back
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -1219,25 +1269,44 @@ function runPracticeMode (ex) {
             draggableList.setDigitIndex(digitIndex);
             currentIteration++;
             console.log(currentIteration);
+            if (currentIteration <= numberOfIterations+1) {
+                createNextIterationInstruction();
+            } else { //End of sort
+                createEndOfSortMessage();
+            }
+            drawAll();
+            saveData();
+        });
+        ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+        saveData();
+    }
+
+    function createNextIterationInstruction () {
+        currentInstruction = "createNextIterationInstruction";
+        beforeShowInstruction();
+        var text = strings.practiceNextIteration(digitIndex);
+        var button = ex.createButton(0, 0, strings.okButtonText());
+        var nextIterationBox = ex.textbox112(text,
+                {
+                    stay: true,
+                    color: instrColor
+                }, instrW, instrX);
+        button.on("click", function () {
+            saveData();
             nextIterationBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            drawAll();
+            saveData();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
+        saveData();
     }
 
     function createEndOfSortMessage () {
         //Move elements back
         currentInstruction = "createEndOfSortMessage";
-        moveBack(draggableList, bucketSpots, bucketOrdering);
-        emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
-        draggableList.setEmptySpots(emptySpots);
-        workingIndex = 0;
-        draggableList.enable(workingIndex);
-        digitIndex++;
-        draggableList.setDigitIndex(digitIndex);
-        currentIteration++;
-        console.log(currentIteration);
+        
 
         //Show the instruction
         beforeShowInstruction();
@@ -1250,14 +1319,17 @@ function runPracticeMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         buttonTakeQuiz.on("click", function () {
+            saveData();
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
             ignoreData = true;
+            ex.data.meta.mode = "quiz-immediate"
             saveData();
-            main(ex, "quiz-immediate");
+            main(ex);//, "quiz-immediate");
         });
         buttonPracticeMore.on("click", function () {
+            saveData();
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
@@ -1267,6 +1339,7 @@ function runPracticeMode (ex) {
         });
         ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
         ex.insertButtonTextbox112(endOfSortBox, buttonPracticeMore, "BTNA2");
+        saveData();
     }
 
     /***************************************************************************
@@ -1288,7 +1361,7 @@ function runPracticeMode (ex) {
             newOrder[i] = startList.indexOf(draggableList.elementList[i]);
         }
 
-        moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
+        if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
         bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
         delete ex.data.run;
@@ -1315,12 +1388,24 @@ function runPracticeMode (ex) {
     function saveData(){
         data = {};
         data.startList = startList;
-        data.strings = strings;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
         //draggablelist data
-        data.elementList = draggableList.elementList;
-        data.elementList = draggableList.list;
+        data.elementList = draggableList.elementList.slice();
+        // If list elements are aniamting, snap them into end positions
+        if (draggableList.isAnimating()) {
+            data.list = [];
+            for (var i = 0; i < draggableList.list.length; i++) {
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                if (draggableList.list[i].isAnimating) {
+                    data.list[i].x = draggableList.list[i].animationTargetX;
+                    data.list[i].y = draggableList.list[i].animationTargetY;
+                }
+            }
+        } else {
+            data.list = draggableList.list;
+        }
+        data.digitIndex = digitIndex;
         data.workingIndex = workingIndex;
         data.maxIndex = maxIndex;
         data.currentIteration = currentIteration;
@@ -1328,31 +1413,42 @@ function runPracticeMode (ex) {
         data.currentInstruction = currentInstruction;
         data.instrValList = instrValList;
         data.ignoreData = ignoreData;
+        data.mode = ex.data.meta.mode;
         ex.saveState(data);
+        console.log(ex.data.instance.state);
+        console.log(data.ignoreData);
+        console.log(data.list);
     }
 
     function loadData(){
-        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){ 
+        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){ 
             startList = ex.data.instance.state.startList;
             bucketSpots = ex.data.instance.state.bucketSpots;
             emptySpots = ex.data.instance.state.emptySpots;
             workingIndex = ex.data.instance.state.workingIndex;
             maxIndex = ex.data.instance.state.maxIndex;
             currentIteration = ex.data.instance.state.currentIteration;
+            digitIndex = ex.data.instance.state.digitIndex;
             attempts = ex.data.instance.state.attempts;
             //draggabeList data
-            elementList = ex.data.instance.state.elementList;
-            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+            elementList = ex.data.instance.state.elementList.slice();
+            console.log(elementList);
+            list = jQuery.extend(true, {}, ex.data.instance.state.list);
+            console.log(list);
+            console.log("before create draggable list.");
+            draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
-            for (var i = 0; i < elementList.length; i++) {
-                var elem = elementList[i];
+            console.log("after create draggable list.");
+            for (var i = 0; i < list.length; i++) {
+                var elem = list[i];
                 draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
                 elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
                 if (i != workingIndex) {
                     draggableList.list[i].disable();
                 }
-
             }
+            console.log(draggableList);
+            console.log("after create individual draggable list.");
             currentInstruction = ex.data.instance.state.currentInstruction;
             instrValList = ex.data.instance.state.instrValList;
             ignoreData = ex.data.instance.state.ignoreData;
@@ -1683,12 +1779,15 @@ function runQuizMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             introBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
+            saveData();
         });
         ex.insertButtonTextbox112(introBox, button, "BTNA");
+        saveData();
      }
 
     function createIterationQ () {
@@ -1703,6 +1802,7 @@ function runQuizMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
@@ -1712,9 +1812,11 @@ function runQuizMode (ex) {
                 iterationQ.remove();
                 createQuizNumIterationIncorrect();
             }
+            saveData();
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        saveData();
     }
 
     function createQuizNumIterationCorrect(){
@@ -1729,11 +1831,14 @@ function runQuizMode (ex) {
                     color: correctAnsColor
                 }, instrW, instrX);
         correctButton.on("click", function () {
+            saveData();
             correctBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+        saveData();
     }
 
     function createQuizNumIterationIncorrect(){
@@ -1746,11 +1851,14 @@ function runQuizMode (ex) {
                     color: incorrectAnsColor
                 }, instrW, instrX);
         incorrectButton.on("click", function () {
+            saveData();
             incorrectBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+        saveData();
     }
 
     function createIncorrectAnsMessage (i, bucket) {
@@ -1765,6 +1873,7 @@ function runQuizMode (ex) {
         instrValList[1] = bucket;
         instrValList[2] = num;
         submitButton.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
@@ -1775,6 +1884,7 @@ function runQuizMode (ex) {
                 createQuizIncorrectAnsIncorrect(num,i);
                 wrongAnsBox.remove();
             }
+            saveData();
         });
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizIncorrectAns(num, digitIndex, draggableList.elementList[i]);
@@ -1785,6 +1895,7 @@ function runQuizMode (ex) {
                 }, instrW, instrX);             
         ex.insertButtonTextbox112(wrongAnsBox, submitButton, "BTNA");
         ex.insertTextAreaTextbox112(wrongAnsBox, input);
+        saveData();
     }
 
     function createQuizIncorrectAnsCorrect(num,i){
@@ -1799,11 +1910,14 @@ function runQuizMode (ex) {
             color: correctAnsColor
         }, instrW, instrX);
         button.on("click", function () { 
+            saveData();
             correctAnsBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(correctAnsBox, button, "BTNA");
+        saveData();
     }
 
     function createQuizIncorrectAnsIncorrect(num,i){
@@ -1814,11 +1928,14 @@ function runQuizMode (ex) {
             color: incorrectAnsColor
         }, instrW, instrX);
         button.on("click", function () { 
+            saveData();
             wrongAnsBox2.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            saveData();
         });
         ex.insertButtonTextbox112(wrongAnsBox2, button, "BTNA");
+        saveData();
     }
 
     function createAfterOneIterationQ (element, correctI) {
@@ -1835,6 +1952,7 @@ function runQuizMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log(numOfDigits);
             if (input.text() != "") {
@@ -1846,10 +1964,12 @@ function runQuizMode (ex) {
                     createQuizAfterOneIterationIncorrect(element,correctI);
                 }
             }
+            saveData();
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
         console.log("score:",score);
+        saveData();
     }
 
     function createQuizAfterOneIterationCorrect (element,correctI){
@@ -1864,6 +1984,7 @@ function runQuizMode (ex) {
                     color: correctAnsColor
                 }, instrW, instrX);
         correctButton.on("click", function () {
+            saveData();
             correctBox.remove();
             currentInstruction = "";
             if (currentIteration == 0) {
@@ -1875,8 +1996,10 @@ function runQuizMode (ex) {
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
             }
+            saveData();
         });
         ex.insertButtonTextbox112(correctBox, correctButton, "BTNA");
+        saveData();
 }
 
     function createQuizAfterOneIterationIncorrect (element,correctI){
@@ -1889,6 +2012,7 @@ function runQuizMode (ex) {
                     color: incorrectAnsColor
                 }, instrW, instrX);
         incorrectButton.on("click", function () {
+            saveData();
             incorrectBox.remove();   
             currentInstruction = "";
             console.log(currentIteration);
@@ -1901,8 +2025,10 @@ function runQuizMode (ex) {
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
             }
+            saveData();
         });
         ex.insertButtonTextbox112(incorrectBox, incorrectButton, "BTNA");
+        saveData();
     }
 
     function createNextIterationInstruction () {
@@ -1917,6 +2043,7 @@ function runQuizMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             var partiallySortedList = startList;
             for (var i = 0; i < nextDigitI; i++) {
                 console.log(partiallySortedList);
@@ -1929,7 +2056,7 @@ function runQuizMode (ex) {
                 newOrder[i] = startList.indexOf(partiallySortedList[i]);
             }
             console.log(newOrder);
-            moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -1941,8 +2068,11 @@ function runQuizMode (ex) {
             nextIterationBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            drawAll();
+            saveData();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
+        saveData();
     }
     
     /***************************************************************************
@@ -1951,12 +2081,23 @@ function runQuizMode (ex) {
     function saveData(){
         data = {};
         data.startList = startList;
-        data.strings = strings;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
         //draggablelist data
         data.elementList = draggableList.elementList;
-        data.elementList = draggableList.list;
+        // If list elements are aniamting, snap them into end positions
+        if (draggableList.isAnimating()) {
+            data.list = [];
+            for (var i = 0; i < draggableList.list.length; i++) {
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                if (draggableList.list[i].isAnimating) {
+                    data.list[i].x = draggableList.list[i].animationTargetX;
+                    data.list[i].y = draggableList.list[i].animationTargetY;
+                }
+            }
+        } else {
+            data.list = draggableList.list;
+        }
         data.workingIndex = workingIndex;
         data.maxIndex = maxIndex;
         data.digitIndex = digitIndex;
@@ -1974,7 +2115,7 @@ function runQuizMode (ex) {
     }
 
     function loadData(){
-        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
             startList = ex.data.instance.state.startList;
             bucketSpots = ex.data.instance.state.bucketSpots;
             emptySpots = ex.data.instance.state.emptySpots;
@@ -1984,10 +2125,12 @@ function runQuizMode (ex) {
             digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
             elementList = ex.data.instance.state.elementList;
-            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+            list = ex.data.instance.state.list;
+            console.log(maxNumberOfDigits);
+            draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
-            for (var i = 0; i < elementList.length; i++) {
-                var elem = elementList[i];
+            for (var i = 0; i < list.length; i++) {
+                var elem = list[i];
                 draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
                 elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
                 //Only enable the working element
@@ -2178,10 +2321,12 @@ function runQuizDelayMode (ex) {
         score = score + 1.0;
         console.log("score:",score);
         elementPlacedInCorrectBucket(i, bucket);
+        saveData();
     };
 
     var failureFn = function (i, bucket) {
         elementPlacedInCorrectBucket(i, bucket);
+        saveData();
     }
 
     //for integers only
@@ -2331,12 +2476,15 @@ function runQuizDelayMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             introBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
             createIterationQ();
+            saveData();
         });
         ex.insertButtonTextbox112(introBox, button, "BTNA");
+        saveData();
      }
 
      function createIterationQ () {
@@ -2351,6 +2499,7 @@ function runQuizDelayMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
@@ -2364,9 +2513,11 @@ function runQuizDelayMode (ex) {
                 afterCloseInstruction();
             }
             console.log("score:",score);
+            saveData();
             });             
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        saveData();
     }
 
     function createAfterOneIterationQ (element, correctI) {
@@ -2383,6 +2534,7 @@ function runQuizDelayMode (ex) {
                         color: questionsColor
                     }, instrW, instrX);
         button.on("click", function() {
+            saveData();
             console.log(input.text());
             console.log(numOfDigits);
             if (input.text() != "") {
@@ -2420,10 +2572,11 @@ function runQuizDelayMode (ex) {
                     }
                     console.log("score:",score);
                 }
-        }
-        )            
+                saveData();
+        });           
         ex.insertButtonTextbox112(iterationQ, button, "BTNA");
         ex.insertTextAreaTextbox112(iterationQ, input); 
+        saveData();
     }
 
     function createNextIterationInstruction () {
@@ -2438,6 +2591,7 @@ function runQuizDelayMode (ex) {
                     color: instrColor
                 }, instrW, instrX);
         button.on("click", function () {
+            saveData();
             var partiallySortedList = startList;
             for (var i = 0; i < nextDigitI; i++) {
                 console.log(partiallySortedList);
@@ -2450,7 +2604,7 @@ function runQuizDelayMode (ex) {
                 newOrder[i] = startList.indexOf(partiallySortedList[i]);
             }
             console.log(newOrder);
-            moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -2462,8 +2616,11 @@ function runQuizDelayMode (ex) {
             nextIterationBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
+            drawAll();
+            saveData();
         });
         ex.insertButtonTextbox112(nextIterationBox, button, "BTNA");
+        saveData();
     }
 
     /***************************************************************************
@@ -2515,12 +2672,23 @@ function runQuizDelayMode (ex) {
     function saveData(){
         data = {};
         data.startList = startList;
-        data.strings = strings;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
         //draggablelist data
         data.elementList = draggableList.elementList;
-        data.elementList = draggableList.list;
+        // If list elements are aniamting, snap them into end positions
+        if (draggableList.isAnimating()) {
+            data.list = [];
+            for (var i = 0; i < draggableList.list.length; i++) {
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                if (draggableList.list[i].isAnimating) {
+                    data.list[i].x = draggableList.list[i].animationTargetX;
+                    data.list[i].y = draggableList.list[i].animationTargetY;
+                }
+            }
+        } else {
+            data.list = draggableList.list;
+        }
         data.workingIndex = workingIndex;
         data.maxIndex = maxIndex;
         data.digitIndex = digitIndex;
@@ -2537,7 +2705,7 @@ function runQuizDelayMode (ex) {
     }
 
     function loadData(){
-        if("ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
             startList = ex.data.instance.state.startList;
             bucketSpots = ex.data.instance.state.bucketSpots;
             emptySpots = ex.data.instance.state.emptySpots;
@@ -2547,10 +2715,12 @@ function runQuizDelayMode (ex) {
             digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
             elementList = ex.data.instance.state.elementList;
-            draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
+            list = ex.data.instance.state.list;
+            console.log(maxNumberOfDigits);
+            draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
-            for (var i = 0; i < elementList.length; i++) {
-                var elem = elementList[i];
+            for (var i = 0; i < list.length; i++) {
+                var elem = list[i];
                 draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
                 elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
                 //Only enable the working element

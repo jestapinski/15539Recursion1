@@ -20,6 +20,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.currentBucket = undefined;
     element.drawAllFn = drawAllFn;
     element.isInCorrectBucket = false;
+    element.isAnimating = false;
+    element.animationTargetX = undefined;
+    element.animationTargetY = undefined;
 
     element.draw = function () {
         ctx.fillStyle = element.color;
@@ -59,6 +62,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.move = function(x, y, animate) {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
+        element.isAnimating = true;
+        element.animationTargetX = x;
+        element.animationTargetY = y;
         var steps = 40;
         if (animate) {
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
@@ -77,6 +83,9 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                         setTimeout(animateFn, 50);
                     } else {
                         isAnimationFinished = true;
+                        element.isAnimating = false;
+                        element.animationTargetX = undefined;
+                        element.animationTargetY = undefined;
                     }
                 }
             };
@@ -372,6 +381,13 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
             self.list[j].setStartPos(self.x0, y);
             self.list[j].move(self.x0, y, animate);
         }
+    }
+
+    self.isAnimating = function () {
+        for (var i = 0; i < self.list.length; i++) {
+            if (self.list[i].isAnimating) return true;
+        }
+        return false;
     }
 
     return self;
