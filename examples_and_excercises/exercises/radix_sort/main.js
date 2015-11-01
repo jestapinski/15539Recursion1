@@ -1327,7 +1327,7 @@ function runPracticeMode (ex) {
             ex.data.meta.mode = "quiz-immediate"
             console.log(ex.data.meta.mode);
             saveData();
-            main(ex);//, "quiz-immediate");
+            main(ex, "quiz-immediate");
         });
         buttonPracticeMore.on("click", function () {
             saveData();
