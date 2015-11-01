@@ -1387,7 +1387,7 @@ function runPracticeMode (ex) {
     }
     
     function saveData(){
-        data = {};
+        var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
@@ -2082,7 +2082,7 @@ function runQuizMode (ex) {
      * Main Game Code
      **************************************************************************/
     function saveData(){
-        data = {};
+        var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
@@ -2673,7 +2673,7 @@ function runQuizDelayMode (ex) {
      * Main Game Code
      **************************************************************************/
     function saveData(){
-        data = {};
+        var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
         data.emptySpots = emptySpots;
