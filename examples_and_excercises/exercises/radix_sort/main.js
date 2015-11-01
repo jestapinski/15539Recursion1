@@ -1325,6 +1325,7 @@ function runPracticeMode (ex) {
             afterCloseInstruction();
             ignoreData = true;
             ex.data.meta.mode = "quiz-immediate"
+            console.log(ex.data.meta.mode);
             saveData();
             main(ex);//, "quiz-immediate");
         });
@@ -1414,6 +1415,8 @@ function runPracticeMode (ex) {
         data.instrValList = instrValList;
         data.ignoreData = ignoreData;
         data.mode = ex.data.meta.mode;
+        console.log(ex.data.meta.mode);
+        console.log(data.mode);
         ex.saveState(data);
         console.log(ex.data.instance.state);
         console.log(data.ignoreData);
