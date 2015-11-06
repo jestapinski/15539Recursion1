@@ -64,7 +64,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         element.isInCorrectBucket = false;
         element.isAnimating = animate;
         var steps = 40;
-        if (true) {
+        if (element.isAnimating) {
             console.log(element.x == element.startX);
             console.log(element.y);
             console.log(x);
@@ -79,7 +79,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                 if (element.currentBucket === undefined) {
                     if (i <= steps) {
                         console.log("Getting closer");
-                        element.x = element.x + i*dx;
+                        element.x = element.x + dx;
                         element.y = element.y + dy;
                         console.log(i);
                         element.drawAllFn();
@@ -101,8 +101,8 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.moveBackToStartPos = function () {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
-        // element.x = element.startX;
-        // element.y = element.startY;
+        element.x = element.startX;
+        element.y = element.startY;
     };
     element.drag = function () {
         element.isBeingDragged = true;
@@ -1485,7 +1485,7 @@ function runPracticeMode (ex, ignoreData) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = draggableList.list[i];
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
@@ -2202,7 +2202,7 @@ function runQuizMode (ex, ignoreData) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = draggableList.list[i];
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
@@ -2804,7 +2804,7 @@ function runQuizDelayMode (ex, ignoreData) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = draggableList.list[i];
+                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
