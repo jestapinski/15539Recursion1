@@ -62,11 +62,11 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.move = function(x, y, animate) {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
-        element.isAnimating = true;
-        element.animationTargetX = x;
-        element.animationTargetY = y;
+        element.isAnimating = animate;
         var steps = 40;
         if (animate) {
+            element.animationTargetX = x;
+            element.animationTargetY = y;
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
             var dx = (x - element.x)/steps;
             var dy = (y - element.y)/steps;
@@ -541,7 +541,8 @@ function main (ex, mode) {
     
     console.log(ex.data.instance.state);
     console.log(mode);
-    ex.data.instance.state.ignoreData = true;
+    ignoreData = false;
+    // ex.data.instance.state.ignoreData = true;
     if (mode === undefined) {
         // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
         //     ex.data.meta.mode = "practice";
@@ -551,17 +552,18 @@ function main (ex, mode) {
         ex.data.meta.mode = "practice";
     } else {
         ex.data.meta.mode = mode;
+        ignoreData = true;
     }
     console.log(ex.data.meta.mode);
 
     ex.setTitle("Radix Sort");
     
     if (ex.data.meta.mode == "practice") {
-        runPracticeMode(ex);
+        runPracticeMode(ex, ignoreData);
     } else if (ex.data.meta.mode == "quiz-immediate") {
-        runQuizMode(ex);
+        runQuizMode(ex, ignoreData);
     } else if (ex.data.meta.mode == "quiz-delay") {
-        runQuizDelayMode(ex);
+        runQuizDelayMode(ex, ignoreData);
     }
 
 };
@@ -634,7 +636,7 @@ function getBucketSpots(bucketNum, x0, y0, width, height, elementW, elementH){
     var spacing = (height/bucketNum)-elementH;
     for (var i = 0; i < bucketNum; i++) {
         var y = y0 + i*(elementH + spacing);
-        bucketSpots[String(i)] = [x0,y,elementW,elementH,[],[]];
+        bucketSpots[String(i)] = [x0,y,elementW,elementH,[]];
     }
 
     console.log(bucketSpots);
@@ -692,7 +694,7 @@ function LSDDigitSort(L, digitIndex){
  * Functions to run each mode
  ******************************************************************************/
 
-function runPracticeMode (ex) {
+function runPracticeMode (ex, ignoreData) {
     ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
             // Default Arguments!
             if(typeof(width) == 'undefined') {width = ex.width()/3;}
@@ -775,9 +777,8 @@ function runPracticeMode (ex) {
     var successFn = function (i, bucket) {
         if (workingIndex == 0 && digitIndex == 0) { // If it is the first element
             createCorrectAnsMessage(i, bucket);
-        } else {
-            elementPlacedInCorrectBucket(i, bucket);
-        }
+        } 
+        elementPlacedInCorrectBucket(i, bucket);
         saveData();
     };
 
@@ -827,7 +828,7 @@ function runPracticeMode (ex) {
     var incorrectAnsColor = "red";
 
     //Indicates whether to ignore the stored data or not
-    var ignoreData = false;
+    // var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -894,6 +895,7 @@ function runPracticeMode (ex) {
         draggableList.setEmptySpots(emptySpots);
         drawAll();
         attempts = 0;
+        saveData();
     }
 
     var endOfOneIteration = function () {
@@ -933,6 +935,7 @@ function runPracticeMode (ex) {
 
     function createStartInstruction () {
         currentInstruction = "createStartInstruction";
+        saveData();
         beforeShowInstruction();
         var text = strings.practiceIntro(); // (1)
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -955,6 +958,7 @@ function runPracticeMode (ex) {
 
     function createIterationQ () {
         currentInstruction = "createIterationQ";
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -984,6 +988,7 @@ function runPracticeMode (ex) {
 
     function createIterationQCorrect(){
         currentInstruction = "createIterationQCorrect";
+        saveData();
         var correctText = strings.practiceNumIterationCorrect(); //(2) Correct
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
         var correctBox = ex.textbox112(correctText,
@@ -1004,6 +1009,7 @@ function runPracticeMode (ex) {
 
     function createIterationQIncorrect(){
         currentInstruction = "createIterationQIncorrect";
+        saveData();
         var incorrectText = strings.practiceNumIterationIncorrect(getMaxOfArray(startList));//(2) Incorrect
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
@@ -1024,6 +1030,7 @@ function runPracticeMode (ex) {
 
     function createStartSortInstruction () {
         currentInstruction = "createStartSortInstruction";
+        saveData();
         beforeShowInstruction();
         var text = strings.practiceStartSort(); //  (3)
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1047,6 +1054,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createHint1Message";
         instrValList[0] = i;
         instrValList[1] = bucket;
+        saveData();
         beforeShowInstruction();
         var elem = draggableList.elementList[i];
         var text = strings.practiceHint1(digitIndex, elem); //hint1
@@ -1076,6 +1084,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createCorrectAnsMessage";
         instrValList[0] = i;
         instrValList[1] = bucket;
+        saveData();
         beforeShowInstruction();
         var text = strings.practiceCorrectAns(digitIndex); //correct sorting
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1088,7 +1097,7 @@ function runPracticeMode (ex) {
             saveData();
             correctAnsBox.remove();
             currentInstruction = "";
-            elementPlacedInCorrectBucket(i, bucket);
+            //elementPlacedInCorrectBucket(i, bucket);
             afterCloseInstruction();
             saveData();
         });
@@ -1100,6 +1109,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createIncorrectAnsMessage";
         instrValList[0] = i;
         instrValList[1] = bucket;
+        saveData();
         beforeShowInstruction();
         var submitButton = ex.createButton(0, 0, strings.submitButtonText());
         var elem = draggableList.elementList[i];
@@ -1138,6 +1148,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createIncorrectAnsCorrect";
         instrValList[2] = num;
         instrValList[3] = i;
+        saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
         var correctAnsBox = ex.textbox112(strings.practiceIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
@@ -1158,6 +1169,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createIncorrectAnsIncorrect";
         instrValList[2] = num;
         instrValList[3] = i;
+        saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
         var wrongAnsBox2 = ex.textbox112(strings.practiceIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
@@ -1178,6 +1190,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createAfterOneIterationQ";
         instrValList[4] = element;
         instrValList[5] = correctI;
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1213,6 +1226,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createAfterOneIterationCorrect";
         instrValList[4] = element;
         instrValList[5] = correctI;
+        saveData();
         var correctText = strings.practiceAfterOneIterationCorrect(element, correctI);
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
         var correctBox = ex.textbox112(correctText,
@@ -1250,6 +1264,7 @@ function runPracticeMode (ex) {
         currentInstruction = "createAfterOneIterationIncorrect";
         instrValList[4] = element;
         instrValList[5] = correctI;
+        saveData();
         var incorrectText = strings.practiceAfterOneIterationIncorrect(element, correctI);
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
@@ -1286,6 +1301,7 @@ function runPracticeMode (ex) {
 
     function createNextIterationInstruction () {
         currentInstruction = "createNextIterationInstruction";
+        saveData();
         beforeShowInstruction();
         var text = strings.practiceNextIteration(digitIndex);
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1309,7 +1325,7 @@ function runPracticeMode (ex) {
     function createEndOfSortMessage () {
         //Move elements back
         currentInstruction = "createEndOfSortMessage";
-        
+        saveData();
 
         //Show the instruction
         beforeShowInstruction();
@@ -1386,6 +1402,11 @@ function runPracticeMode (ex) {
         ex.chromeElements.resetButton.enable();
         ex.chromeElements.resetButton.off("click");
         ex.chromeElements.resetButton.on("click", reset);
+        ex.chromeElements.newButton.enable();
+        ex.chromeElements.newButton.off("click");
+        ex.chromeElements.newButton.on("click", function () {
+            main(ex, "practice");
+        });
         ex.unload(saveData);
     }
     
@@ -1400,7 +1421,7 @@ function runPracticeMode (ex) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                data.list[i] = draggableList.list[i];
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
@@ -1416,7 +1437,7 @@ function runPracticeMode (ex) {
         data.attempts = attempts;
         data.currentInstruction = currentInstruction;
         data.instrValList = instrValList;
-        data.ignoreData = false;//ignoreData;
+        // data.ignoreData = false;//ignoreData;
         console.log(data.ignoreData);
         // data.mode = ex.data.meta.mode;
         // console.log(ex.data.meta.mode);
@@ -1429,11 +1450,15 @@ function runPracticeMode (ex) {
     }
 
     function loadData(){
-        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){ 
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){ 
             startList = ex.data.instance.state.startList;
-            bucketSpots = ex.data.instance.state.bucketSpots;
+            bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            for (spot in ex.data.instance.state.bucketSpots) {
+                bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+            } 
             emptySpots = ex.data.instance.state.emptySpots;
             workingIndex = ex.data.instance.state.workingIndex;
+            console.log(workingIndex);
             maxIndex = ex.data.instance.state.maxIndex;
             currentIteration = ex.data.instance.state.currentIteration;
             digitIndex = ex.data.instance.state.digitIndex;
@@ -1441,7 +1466,7 @@ function runPracticeMode (ex) {
             //draggabeList data
             elementList = ex.data.instance.state.elementList.slice();
             console.log(elementList);
-            list = jQuery.extend(true, {}, ex.data.instance.state.list);
+            list = ex.data.instance.state.list;
             console.log(list);
             console.log("before create draggable list.");
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
@@ -1449,11 +1474,15 @@ function runPracticeMode (ex) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
-                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
+                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].text = elem.text;
+                draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
                     draggableList.list[i].disable();
+                } else {
+                    draggableList.list[i].enable();
                 }
+                console.log(draggableList.list[i]);
             }
             console.log(draggableList);
             console.log("after create individual draggable list.");
@@ -1536,7 +1565,7 @@ function runPracticeMode (ex) {
     run();
 }
 
-function runQuizMode (ex) {
+function runQuizMode (ex, ignoreData) {
     
     ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
         // Default Arguments!
@@ -1674,7 +1703,7 @@ function runQuizMode (ex) {
     var correctBucket = false;
     var bucketColor = "#CEE8F0";
 
-    var ignoreData = false;
+    // var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -1778,6 +1807,7 @@ function runQuizMode (ex) {
 
     function createStartInstruction () {
         currentInstruction = "createStartInstruction";
+        saveData();
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -1800,6 +1830,7 @@ function runQuizMode (ex) {
 
     function createIterationQ () {
         currentInstruction = "createIterationQ";
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1830,6 +1861,7 @@ function runQuizMode (ex) {
     function createQuizNumIterationCorrect(){
         currentInstruction = "createQuizNumIterationCorrect";
         score = score + listLength/4;
+        saveData();
         console.log("score:",score);
         var correctText = strings.quizNumIterationCorrect();
         var correctButton = ex.createButton(0, 0, strings.okButtonText());
@@ -1851,6 +1883,7 @@ function runQuizMode (ex) {
 
     function createQuizNumIterationIncorrect(){
         currentInstruction = "createQuizNumIterationIncorrect";
+        saveData();
         var incorrectText = strings.quizNumIterationIncorrect(getMaxOfArray(startList));
         var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
@@ -1870,7 +1903,8 @@ function runQuizMode (ex) {
     }
 
     function createIncorrectAnsMessage (i, bucket) {
-        currentInstruction = "createIncorrectAnsMessage"
+        currentInstruction = "createIncorrectAnsMessage";
+        saveData();
         beforeShowInstruction();
         var submitButton = ex.createButton(0, 0, strings.submitButtonText());
         var elem = draggableList.elementList[i];
@@ -1911,6 +1945,7 @@ function runQuizMode (ex) {
         if (hasCurrentElementFailed == undefined) {
             score = score+0.5;
         }
+        saveData();
         console.log("score:",score);
         var button = ex.createButton(0, 0, strings.okButtonText());
         var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
@@ -1930,6 +1965,7 @@ function runQuizMode (ex) {
 
     function createQuizIncorrectAnsIncorrect(num,i){
         currentInstruction = "createQuizIncorrectAnsIncorrect";
+        saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
         var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
@@ -1950,6 +1986,7 @@ function runQuizMode (ex) {
         currentInstruction = "createAfterOneIterationQ";
         instrValList[3] = element;
         instrValList[4] = correctI;
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -1983,6 +2020,7 @@ function runQuizMode (ex) {
     function createQuizAfterOneIterationCorrect (element,correctI){
         currentInstruction = "createQuizAfterOneIterationCorrect";
         score = score+listLength/4;
+        saveData();
         console.log("score:",score);
         var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
@@ -2012,6 +2050,7 @@ function runQuizMode (ex) {
 
     function createQuizAfterOneIterationIncorrect (element,correctI){
         currentInstruction = "createQuizAfterOneIterationIncorrect";
+        saveData();
         var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
         var incorrectBox = ex.textbox112(incorrectText,
@@ -2041,6 +2080,7 @@ function runQuizMode (ex) {
 
     function createNextIterationInstruction () {
         currentInstruction = "createNextIterationInstruction";
+        saveData();
         beforeShowInstruction();
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
@@ -2097,7 +2137,7 @@ function runQuizMode (ex) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                data.list[i] = draggableList.list[i];
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
@@ -2118,14 +2158,17 @@ function runQuizMode (ex) {
         data.canSubmit = canSubmit;
         data.hasCurrentElementFailed = hasCurrentElementFailed;
         // data.mode = ex.data.meta.mode;
-        data.ignoreData = ignoreData;
+        // data.ignoreData = ignoreData;
         ex.saveState(data);
     }
 
     function loadData(){
-        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){
             startList = ex.data.instance.state.startList;
-            bucketSpots = ex.data.instance.state.bucketSpots;
+            bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            for (spot in ex.data.instance.state.bucketSpots) {
+                bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+            } 
             emptySpots = ex.data.instance.state.emptySpots;
             workingIndex = ex.data.instance.state.workingIndex;
             maxIndex = ex.data.instance.state.maxIndex;
@@ -2137,14 +2180,18 @@ function runQuizMode (ex) {
             console.log(maxNumberOfDigits);
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+            console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
-                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
-                //Only enable the working element
+                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].text = elem.text;
+                draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
                     draggableList.list[i].disable();
+                } else {
+                    draggableList.list[i].enable();
                 }
+                console.log(draggableList.list[i]);
             }
             currentInstruction = ex.data.instance.state.currentInstruction;
             instrValList = ex.data.instance.state.instrValList;
@@ -2234,7 +2281,7 @@ function runQuizMode (ex) {
     run();
 }
 
-function runQuizDelayMode (ex) {
+function runQuizDelayMode (ex, ignoreData) {
     
         ex.textbox112 = function(message, options, width, left, top, cx, cy, height) {
             // Default Arguments!
@@ -2370,7 +2417,7 @@ function runQuizDelayMode (ex) {
     var redoList = [];
     var wasRedoButtonPressed = false;
 
-    var ignoreData = false;
+    // var ignoreData = false;
 
     /***************************************************************************
      * Draw Functions
@@ -2475,6 +2522,7 @@ function runQuizDelayMode (ex) {
 
      function createStartInstruction () {
         currentInstruction = "createStartInstruction";
+        saveData();
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -2497,6 +2545,7 @@ function runQuizDelayMode (ex) {
 
      function createIterationQ () {
         currentInstruction = "createIterationQ";
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -2532,6 +2581,7 @@ function runQuizDelayMode (ex) {
         instrValList[0] = element;
         instrValList[1] = correctI;
         currentInstruction = "createAfterOneIterationQ";
+        saveData();
         beforeShowInstruction();
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
@@ -2589,6 +2639,7 @@ function runQuizDelayMode (ex) {
 
     function createNextIterationInstruction () {
         currentInstruction = "createNextIterationInstruction";
+        saveData();
         beforeShowInstruction();
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
@@ -2688,7 +2739,7 @@ function runQuizDelayMode (ex) {
         if (draggableList.isAnimating()) {
             data.list = [];
             for (var i = 0; i < draggableList.list.length; i++) {
-                data.list[i] = jQuery.extend(true, {}, draggableList.list[i]);
+                data.list[i] = draggableList.list[i];
                 if (draggableList.list[i].isAnimating) {
                     data.list[i].x = draggableList.list[i].animationTargetX;
                     data.list[i].y = draggableList.list[i].animationTargetY;
@@ -2708,14 +2759,17 @@ function runQuizDelayMode (ex) {
         data.score = score;
         data.canSubmit = canSubmit;
         // data.mode = ex.data.meta.mode;
-        data.ignoreData = ignoreData;
+        // data.ignoreData = ignoreData;
         ex.saveState(data);
     }
 
     function loadData(){
-        if(ex.data.instance.state != null && "ignoreData" in ex.data.instance.state && !ex.data.instance.state.ignoreData){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){
             startList = ex.data.instance.state.startList;
-            bucketSpots = ex.data.instance.state.bucketSpots;
+            bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            for (spot in ex.data.instance.state.bucketSpots) {
+                bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+            } 
             emptySpots = ex.data.instance.state.emptySpots;
             workingIndex = ex.data.instance.state.workingIndex;
             maxIndex = ex.data.instance.state.maxIndex;
@@ -2727,14 +2781,18 @@ function runQuizDelayMode (ex) {
             console.log(maxNumberOfDigits);
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+            console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i] = createDraggableListElement(ex.graphics.ctx, [elem.x,elem.y,elem.w,elem.h], 
-                elem.text, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAll);
-                //Only enable the working element
+                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].text = elem.text;
+                draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
                     draggableList.list[i].disable();
+                } else {
+                    draggableList.list[i].enable();
                 }
+                console.log(draggableList.list[i]);
             }
             currentInstruction = ex.data.instance.state.currentInstruction;
             instrValList = ex.data.instance.state.instrValList;
