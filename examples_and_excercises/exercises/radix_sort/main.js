@@ -537,15 +537,18 @@ function main (ex, mode) {
       setting as the standard quiz mode.)*/
       
     //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
-    //ex.data.instance.state.ignoreData = true;
+    // ex.data.instance.state.ignoreData = true;
     
     console.log(ex.data.instance.state);
+    console.log(mode);
+    ex.data.instance.state.ignoreData = true;
     if (mode === undefined) {
-        if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
-            ex.data.meta.mode = "practice";
-        } else {
-            ex.data.meta.mode = ex.data.instance.state.mode;
-        }
+        // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
+        //     ex.data.meta.mode = "practice";
+        // } else {
+        //     ex.data.meta.mode = ex.data.instance.state.mode;
+        // }
+        ex.data.meta.mode = "practice";
     } else {
         ex.data.meta.mode = mode;
     }
@@ -1413,11 +1416,13 @@ function runPracticeMode (ex) {
         data.attempts = attempts;
         data.currentInstruction = currentInstruction;
         data.instrValList = instrValList;
-        data.ignoreData = ignoreData;
-        data.mode = ex.data.meta.mode;
-        console.log(ex.data.meta.mode);
-        console.log(data.mode);
+        data.ignoreData = false;//ignoreData;
+        console.log(data.ignoreData);
+        // data.mode = ex.data.meta.mode;
+        // console.log(ex.data.meta.mode);
+        // console.log(data.mode);
         ex.saveState(data);
+        console.log(ex.data.instance.state.ignoreData);
         console.log(ex.data.instance.state);
         console.log(data.ignoreData);
         console.log(data.list);
@@ -2112,7 +2117,7 @@ function runQuizMode (ex) {
         data.score = score;
         data.canSubmit = canSubmit;
         data.hasCurrentElementFailed = hasCurrentElementFailed;
-        data.mode = ex.data.meta.mode;
+        // data.mode = ex.data.meta.mode;
         data.ignoreData = ignoreData;
         ex.saveState(data);
     }
@@ -2149,7 +2154,7 @@ function runQuizMode (ex) {
             canSubmit = ex.data.instance.state.canSubmit;
             console.log("load: " + canSubmit);
             if(canSubmit) ex.chromeElements.submitButton.enable();
-            ex.data.meta.mode = ex.data.instance.state.mode;
+            // ex.data.meta.mode = ex.data.instance.state.mode;
         }
     }
 
@@ -2702,7 +2707,7 @@ function runQuizDelayMode (ex) {
         //quiz mode only
         data.score = score;
         data.canSubmit = canSubmit;
-        data.mode = ex.data.meta.mode;
+        // data.mode = ex.data.meta.mode;
         data.ignoreData = ignoreData;
         ex.saveState(data);
     }
@@ -2738,7 +2743,7 @@ function runQuizDelayMode (ex) {
             canSubmit = ex.data.instance.state.canSubmit;
             console.log("load: " + canSubmit);
             if(canSubmit) ex.chromeElements.submitButton.enable();
-            ex.data.meta.mode = ex.data.instance.state.mode;
+            // ex.data.meta.mode = ex.data.instance.state.mode;
         }
     }
 
