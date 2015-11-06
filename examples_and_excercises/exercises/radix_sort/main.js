@@ -594,23 +594,23 @@ function main (ex, mode) {
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
       
-    //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
-    ex.data.instance.state.ignoreData = true;
     console.log(ex.data.instance.state);
     console.log(ex.data);
     console.log(mode);
     ignoreData = false;
-    // ex.data.instance.state.ignoreData = true;
-    if (mode === undefined) {
+    if (mode !== undefined) {
+        ex.data.meta.mode = mode;
+        ignoreData = true;
         // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
         //     ex.data.meta.mode = "practice";
         // } else {
         //     ex.data.meta.mode = ex.data.instance.state.mode;
         // }
-        ex.data.meta.mode = "practice";
+        
+    } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && "mode" in ex.data.instance.state) {
+        ex.data.meta.mode = ex.data.instance.state.mode;
     } else {
-        ex.data.meta.mode = mode;
-        ignoreData = true;
+        ex.data.meta.mode = "practice";
     }
     console.log(ex.data.meta.mode);
 
@@ -1503,11 +1503,11 @@ function runPracticeMode (ex, ignoreData) {
         data.instrValList = instrValList;
         // data.ignoreData = false;//ignoreData;
         console.log(data.ignoreData);
-        // data.mode = ex.data.meta.mode;
+        data.mode = ex.data.meta.mode;
         // console.log(ex.data.meta.mode);
         // console.log(data.mode);
         ex.saveState(data);
-        console.log(ex.data.instance.state.ignoreData);
+        // console.log(ex.data.instance.state.ignoreData);
         console.log(ex.data.instance.state);
         console.log(data.ignoreData);
         console.log(data.list);
@@ -1552,7 +1552,7 @@ function runPracticeMode (ex, ignoreData) {
             console.log("after create individual draggable list.");
             currentInstruction = ex.data.instance.state.currentInstruction;
             instrValList = ex.data.instance.state.instrValList;
-            ignoreData = ex.data.instance.state.ignoreData;
+            // ignoreData = ex.data.instance.state.ignoreData;
         }
     }
 
@@ -1718,7 +1718,7 @@ function runQuizMode (ex, ignoreData) {
     //The users score
     var score = 0.0;
     var possibleScore = 22;
-    var hasCurrentElementFailed = false;
+    var hasCurrentElementFailed = false; // false means they have failed 0 times before, true means they have failed once before, undefined means they have failed more than once before
     var canSubmit = false;
 
     //Functions to be called when a list element clicks into a bucket
@@ -1731,9 +1731,9 @@ function runQuizMode (ex, ignoreData) {
     };
 
     var failureFn = function (i, bucket) {
-        if (hasCurrentElementFailed == false) {
+        if (hasCurrentElementFailed === false) {
             hasCurrentElementFailed = true;
-        } else if (hasCurrentElementFailed == true) {
+        } else if (hasCurrentElementFailed === true) {
             hasCurrentElementFailed = undefined; // Undefined means that they have failed once before, so are not eligible for additional partial credit
         }
         createIncorrectAnsMessage(i, bucket);
@@ -2007,7 +2007,7 @@ function runQuizMode (ex, ignoreData) {
 
     function createQuizIncorrectAnsCorrect(num,i){
         currentInstruction = "createQuizIncorrectAnsCorrect";
-        if (hasCurrentElementFailed == undefined) {
+        if (hasCurrentElementFailed === true) {
             score = score+0.5;
         }
         saveData();
@@ -2358,7 +2358,8 @@ function runQuizDelayMode (ex, ignoreData) {
             var element = ex.alert(message, {
                 fontSize: (width/height * 25),
                 stay: true,
-                removeXButton: true
+                removeXButton: true,
+                opacity: 0.8
             });
             element.style(options);
             if (typeof(left) == 'undefined') {left = cx - width / 2}
