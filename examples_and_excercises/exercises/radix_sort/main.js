@@ -64,7 +64,11 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         element.isInCorrectBucket = false;
         element.isAnimating = animate;
         var steps = 40;
-        if (animate) {
+        if (true) {
+            console.log(element.x == element.startX);
+            console.log(element.y);
+            console.log(x);
+            console.log(y);
             element.animationTargetX = x;
             element.animationTargetY = y;
             console.log("elementMove ".concat(element.text).concat(" x ").concat(x).concat(" y ").concat(y));
@@ -72,9 +76,10 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
             var dy = (y - element.y)/steps;
             var i = 1;
             var animateFn = function () {
-                if (element.currentBucket == undefined) {
+                if (element.currentBucket === undefined) {
                     if (i <= steps) {
-                        element.x = element.x + dx;
+                        console.log("Getting closer");
+                        element.x = element.x + i*dx;
                         element.y = element.y + dy;
                         console.log(i);
                         element.drawAllFn();
@@ -96,8 +101,8 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
     element.moveBackToStartPos = function () {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
-        element.x = element.startX;
-        element.y = element.startY;
+        // element.x = element.startX;
+        // element.y = element.startY;
     };
     element.drag = function () {
         element.isBeingDragged = true;
@@ -146,8 +151,8 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
             }
             element.currentBucket = undefined;
             element.isInCorrectBucket = false;
-            element.x = element.startX;
-            element.y = element.startY;
+            // element.x = element.startX;
+            // element.y = element.startY;
         }
     };
     element.snapIntoPlace = function (spot) {
@@ -377,6 +382,8 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         for (var j = 0; j < self.list.length; j++) {
             var y = self.y0+j*self.elementH;
             self.list[j].setStartPos(self.x0, y);
+            console.log(self.x0)
+            console.log(y)
             self.list[j].move(self.x0, y, animate);
         }
     }
@@ -530,6 +537,57 @@ var getStrings = function () {
     return obj;
 };
 
+var iterationQ;
+var correctBox;
+var introBox;
+var startBox;
+var incorrectBox;
+var hintBox;
+var correctAnsBox;
+var wrongAnsBox;
+var wrongAnsBox2;
+var nextIterationBox;
+var endOfSortBox;
+
+
+function checkAndRemoveAlerts(){
+    if (iterationQ != undefined){
+        iterationQ.remove();
+    }
+    if (correctBox != undefined){
+        correctBox.remove();
+    }
+    if (introBox != undefined){
+        introBox.remove()
+    }
+    if (startBox != undefined){
+        startBox.remove()
+    }
+    if (incorrectBox != undefined){
+        incorrectBox.remove()
+    }
+    if (hintBox != undefined){
+        hintBox.remove()
+    }
+    if (correctAnsBox != undefined){
+        correctAnsBox.remove()
+    }
+    if (wrongAnsBox != undefined){
+        wrongAnsBox.remove()
+    }
+    if (wrongAnsBox2 != undefined){
+        wrongAnsBox2.remove()
+    }
+    if (nextIterationBox != undefined){
+        nextIterationBox.remove()
+    }
+    if (endOfSortBox != undefined){
+        endOfSortBox.remove()
+    }
+    return;
+}
+
+
 function main (ex, mode) {
     /*This is so that once the user clicks the button "take the quiz," it loads
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
@@ -537,9 +595,9 @@ function main (ex, mode) {
       setting as the standard quiz mode.)*/
       
     //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
-    // ex.data.instance.state.ignoreData = true;
-    
+    ex.data.instance.state.ignoreData = true;
     console.log(ex.data.instance.state);
+    console.log(ex.data);
     console.log(mode);
     ignoreData = false;
     // ex.data.instance.state.ignoreData = true;
@@ -705,7 +763,8 @@ function runPracticeMode (ex, ignoreData) {
             var element = ex.alert(message, {
                 fontSize: (width/height * 25),
                 stay: true,
-                removeXButton: true
+                removeXButton: true,
+                opacity: 0.8
             });
             element.style(options);
             if (typeof(left) == 'undefined') {left = cx - width / 2}
@@ -939,7 +998,7 @@ function runPracticeMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.practiceIntro(); // (1)
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var introBox = ex.textbox112(text,
+        introBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -963,7 +1022,7 @@ function runPracticeMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.practiceNumIteractionQ(); // (2)
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -991,7 +1050,7 @@ function runPracticeMode (ex, ignoreData) {
         saveData();
         var correctText = strings.practiceNumIterationCorrect(); //(2) Correct
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-        var correctBox = ex.textbox112(correctText,
+        correctBox = ex.textbox112(correctText,
                 {
                     stay: true,
                     color: correctAnsColor
@@ -1012,7 +1071,7 @@ function runPracticeMode (ex, ignoreData) {
         saveData();
         var incorrectText = strings.practiceNumIterationIncorrect(getMaxOfArray(startList));//(2) Incorrect
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-        var incorrectBox = ex.textbox112(incorrectText,
+        incorrectBox = ex.textbox112(incorrectText,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1034,7 +1093,7 @@ function runPracticeMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.practiceStartSort(); //  (3)
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var startBox = ex.textbox112(text,
+        startBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -1064,7 +1123,7 @@ function runPracticeMode (ex, ignoreData) {
         console.log("bucket" + bucket);
 
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var hintBox = ex.textbox112(text,
+        hintBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1088,7 +1147,7 @@ function runPracticeMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.practiceCorrectAns(digitIndex); //correct sorting
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var correctAnsBox = ex.textbox112(text,
+        correctAnsBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: correctAnsColor
@@ -1134,7 +1193,7 @@ function runPracticeMode (ex, ignoreData) {
         });
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.practiceIncorrectAns(num, digitIndex, draggableList.elementList[i]);//IncorrectAnsAfterHint
-        var wrongAnsBox = ex.textbox112(text,
+        wrongAnsBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1150,7 +1209,7 @@ function runPracticeMode (ex, ignoreData) {
         instrValList[3] = i;
         saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var correctAnsBox = ex.textbox112(strings.practiceIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
+        correctAnsBox = ex.textbox112(strings.practiceIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
             color: correctAnsColor
         }, instrW, instrX);
@@ -1171,7 +1230,7 @@ function runPracticeMode (ex, ignoreData) {
         instrValList[3] = i;
         saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var wrongAnsBox2 = ex.textbox112(strings.practiceIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
+        wrongAnsBox2 = ex.textbox112(strings.practiceIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
             color: incorrectAnsColor
         }, instrW, instrX);
@@ -1195,7 +1254,7 @@ function runPracticeMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.practiceAfterOneIteration(element, currentIteration+1);
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -1229,7 +1288,7 @@ function runPracticeMode (ex, ignoreData) {
         saveData();
         var correctText = strings.practiceAfterOneIterationCorrect(element, correctI);
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-        var correctBox = ex.textbox112(correctText,
+        correctBox = ex.textbox112(correctText,
                 {
                     stay: true,
                     color: correctAnsColor
@@ -1267,7 +1326,7 @@ function runPracticeMode (ex, ignoreData) {
         saveData();
         var incorrectText = strings.practiceAfterOneIterationIncorrect(element, correctI);
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-        var incorrectBox = ex.textbox112(incorrectText,
+        incorrectBox = ex.textbox112(incorrectText,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1305,7 +1364,7 @@ function runPracticeMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.practiceNextIteration(digitIndex);
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var nextIterationBox = ex.textbox112(text,
+        nextIterationBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -1332,7 +1391,7 @@ function runPracticeMode (ex, ignoreData) {
         var text = strings.practiceEndOfSort();
         var buttonTakeQuiz = ex.createButton(0, 0, strings.practiceTakeTheQuizButtonText());
         var buttonPracticeMore = ex.createButton(0, 0, strings.practiceMoreButtonText());
-        var endOfSortBox = ex.textbox112(text,
+        endOfSortBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -1405,6 +1464,11 @@ function runPracticeMode (ex, ignoreData) {
         ex.chromeElements.newButton.enable();
         ex.chromeElements.newButton.off("click");
         ex.chromeElements.newButton.on("click", function () {
+            ex.graphics.ctx.clearRect(0,0, ex.width, ex.height);
+            ex._element_references = {};
+            // console.log(_elementReferences);
+            console.log(ex.elementReferences);
+            checkAndRemoveAlerts();
             main(ex, "practice");
         });
         ex.unload(saveData);
@@ -1577,7 +1641,8 @@ function runQuizMode (ex, ignoreData) {
         var element = ex.alert(message, {
             fontSize: (width/height * 25),
             stay: true,
-            removeXButton: true
+            removeXButton: true,
+            opacity: 0.8
         });
         element.style(options);
         if (typeof(left) == 'undefined') {left = cx - width / 2}
@@ -1811,7 +1876,7 @@ function runQuizMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var introBox = ex.textbox112(text,
+        introBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -1835,7 +1900,7 @@ function runQuizMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizNumIteractionQ();
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -1865,7 +1930,7 @@ function runQuizMode (ex, ignoreData) {
         console.log("score:",score);
         var correctText = strings.quizNumIterationCorrect();
         var correctButton = ex.createButton(0, 0, strings.okButtonText());
-        var correctBox = ex.textbox112(correctText,
+        correctBox = ex.textbox112(correctText,
                 {
                     stay: true,
                     color: correctAnsColor
@@ -1886,7 +1951,7 @@ function runQuizMode (ex, ignoreData) {
         saveData();
         var incorrectText = strings.quizNumIterationIncorrect(getMaxOfArray(startList));
         var incorrectButton = ex.createButton(0, 0, strings.okButtonText());
-        var incorrectBox = ex.textbox112(incorrectText,
+        incorrectBox = ex.textbox112(incorrectText,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1930,7 +1995,7 @@ function runQuizMode (ex, ignoreData) {
         });
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizIncorrectAns(num, digitIndex, draggableList.elementList[i]);
-        var wrongAnsBox = ex.textbox112(text,
+        wrongAnsBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -1948,7 +2013,7 @@ function runQuizMode (ex, ignoreData) {
         saveData();
         console.log("score:",score);
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
+        correctAnsBox = ex.textbox112(strings.quizIncorrectAnsCorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
             color: correctAnsColor
         }, instrW, instrX);
@@ -1967,7 +2032,7 @@ function runQuizMode (ex, ignoreData) {
         currentInstruction = "createQuizIncorrectAnsIncorrect";
         saveData();
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
+        wrongAnsBox2 = ex.textbox112(strings.quizIncorrectAnsIncorrect(num, digitIndex, draggableList.elementList[i]),{
             stay: true,
             color: incorrectAnsColor
         }, instrW, instrX);
@@ -1991,7 +2056,7 @@ function runQuizMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizAfterOneIteration(element, correctI);
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -2024,7 +2089,7 @@ function runQuizMode (ex, ignoreData) {
         console.log("score:",score);
         var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
         var correctButton = ex.createButton(0, 0, strings.nextButtonText());
-        var correctBox = ex.textbox112(correctText,
+        correctBox = ex.textbox112(correctText,
                 {
                     stay: true,
                     color: correctAnsColor
@@ -2053,7 +2118,7 @@ function runQuizMode (ex, ignoreData) {
         saveData();
         var incorrectText = strings.quizAfterOneIterationIncorrect(element, correctI);
         var incorrectButton = ex.createButton(0, 0, strings.nextButtonText());
-        var incorrectBox = ex.textbox112(incorrectText,
+        incorrectBox = ex.textbox112(incorrectText,
                 {
                     stay: true,
                     color: incorrectAnsColor
@@ -2085,7 +2150,7 @@ function runQuizMode (ex, ignoreData) {
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var nextIterationBox = ex.textbox112(text,
+        nextIterationBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -2526,7 +2591,7 @@ function runQuizDelayMode (ex, ignoreData) {
         beforeShowInstruction();
         var text = strings.quizIntro();
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var introBox = ex.textbox112(text,
+        introBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
@@ -2550,7 +2615,7 @@ function runQuizDelayMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizNumIteractionQ();
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -2586,7 +2651,7 @@ function runQuizDelayMode (ex, ignoreData) {
         var button = ex.createButton(0, 0, strings.submitButtonText());
         var input = ex.createInputText(0,0,"?", {inputSize: 1});
         var text = strings.quizAfterOneIteration(element, correctI);
-        var iterationQ = ex.textbox112(text,
+        iterationQ = ex.textbox112(text,
                     {
                         stay: true,
                         color: questionsColor
@@ -2644,7 +2709,7 @@ function runQuizDelayMode (ex, ignoreData) {
         var nextDigitI = 2;
         var text = strings.quizNextIteration(nextDigitI);
         var button = ex.createButton(0, 0, strings.okButtonText());
-        var nextIterationBox = ex.textbox112(text,
+        nextIterationBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
