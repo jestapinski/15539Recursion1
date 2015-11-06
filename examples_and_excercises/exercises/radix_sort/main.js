@@ -59,7 +59,7 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
         element.startX = startX;
         element.startY = startY;
     }
-    element.move = function(x, y, animate, postAnimationCallback) {
+    element.move = function(x, y, animate) {
         element.currentBucket = undefined;
         element.isInCorrectBucket = false;
         element.isAnimating = animate;
@@ -89,7 +89,6 @@ function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emp
                         element.isAnimating = false;
                         element.animationTargetX = undefined;
                         element.animationTargetY = undefined;
-                        if (postAnimationCallback !== undefined) postAnimationCallback();
                     }
                 }
             };
@@ -368,7 +367,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
         }
     }
 
-    self.moveElementsBack = function (newOrder, animate, postAnimationCallback) {
+    self.moveElementsBack = function (newOrder, animate) {
         if (animate == undefined) {
             animate = true;
         }
@@ -385,7 +384,7 @@ function createDraggableList(ex, elementList, elementW, elementH, x0, y0, succes
             self.list[j].setStartPos(self.x0, y);
             console.log(self.x0)
             console.log(y)
-            self.list[j].move(self.x0, y, animate, postAnimationCallback);
+            self.list[j].move(self.x0, y, animate);
         }
     }
 
@@ -424,25 +423,25 @@ var getStrings = function () {
         return "Practice More"
     };
 
-    /***************************************************************************
+     /***************************************************************************
      * Practice Mode Strings
      **************************************************************************/
 
     obj.practiceIntro = function () {
-        return "Let's radix sort this list by sorting the numbers one digit at a time.  Click the info button for help. <span>BTNA</span>";
+        return "Let's radix sort this list one digit at a time.  Click the info button for help. <span>BTNA</span>";
     };
     obj.practiceNumIteractionQ = function () {
-        return "Radix sort iterates over the digit of the longest number in a list.  How many digits are in the largest number of this list? <span>$TEXTAREA$</span> <span>BTNA</span>";
+        return "How many digits are in the largest number of this list (Iterations to make)? <span>$TEXTAREA$</span> <span>BTNA</span>";
     };
     obj.practiceNumIterationCorrect = function () {
         return "Correct! <span>BTNA</span>";
     };
     obj.practiceNumIterationIncorrect = function (maxNum) {
         var numDigits = Math.floor(Math.log10(maxNum))+1;
-        return "Incorrect! The largest number is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits.  Hence, radix sort will have ").concat(String(numDigits)).concat(" iterations. <span>BTNA</span>");
+        return "Incorrect! The largest is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits. Thus, ").concat(String(numDigits)).concat(" iterations happen. <span>BTNA</span>");
     };
     obj.practiceStartSort = function () {
-        return "Now place each number into the appropriate bucket, starting with the first number in the list and the ones digit of each number. <span>BTNA</span>"
+        return "Now place each number into the bucket based on ones digit. <span>BTNA</span>"
     }
     obj.practiceCorrectAns = function (digitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
@@ -453,15 +452,15 @@ var getStrings = function () {
         var digitDescription = {0:"rightmost digit", 1:"first digit from the right", 2:"second digit from the right", 3:"third digit from the right", 4:"fourth digit from the right"};
         var numOfDigitsMinusOne = Math.floor(Math.log10(number));
         if (digitI <= numOfDigitsMinusOne) {
-            return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(" digit, which is the ".concat(digitDescription[digitI]).concat(".  Place the number ").concat(String(number)).concat(" into the bucket corresponding to the ").concat(digitConversion[digitI]).concat(" digit. <span>BTNA</span>"));
+            return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(".  Place the number into the bucket corresponding to the ").concat(digitConversion[digitI]).concat(" digit. <span>BTNA</span>");
         } else {
-            return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(" digit, which is the ".concat(digitDescription[digitI]).concat(".  What does it mean if a number does not have a red digit? <span>BTNA</span>"));
+            return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(".  What does it mean if a number does not have a red digit? <span>BTNA</span>");
         }
     };
     obj.practiceIncorrectAns = function (num, digitI, number) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
         var digitDescription = {0:"rightmost digit", 1:"first digit from the right", 2:"second digit from the right", 3:"third digit from the right", 4:"fourth digit from the right"};
-        return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(" digit, which is the ".concat(digitDescription[digitI]).concat(".  For example, what is the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>")));
+        return "Incorrect.  We are currently sorting by the ".concat(digitConversion[digitI]).concat(" digit, which is the ".concat(digitDescription[digitI]))//.concat(".  For example, what is the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>")));
     };
     obj.practiceIncorrectAnsCorrect = function (num, digitI, number) {
         return "Correct! Using this principle, place the number ".concat(String(number)).concat(" into the correct bucket! <span>BTNA</span>");
@@ -470,7 +469,7 @@ var getStrings = function () {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
         var digitDescription = {0:"rightmost digit", 1:"first digit from the right", 2:"second digit from the right", 3:"third digit from the right", 4:"fourth digit from the right"};
         var actualDigit = Math.floor(num/Math.pow(10, digitI))%10;
-        return "Incorrect! the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat(" is the ").concat(digitDescription[digitI]).concat(", which is ").concat(String(actualDigit)).concat(".  Using this principle, place the number ").concat(String(number)).concat(" into the correct bucket! <span>BTNA</span>");
+        return "Incorrect! the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat(" is the ").concat(digitDescription[digitI]).concat(", which is ").concat(String(actualDigit)).concat(".  Using this principle, place the number ").concat(String(number)).concat("<span>BTNA</span>");
     };
     obj.practiceAfterOneIteration = function (number, nextIteration) {
         var iterationConversion = {1:"1st", 2:"2nd", 3:"3rd", 4:"4th", 5:"5th"}
@@ -496,30 +495,30 @@ var getStrings = function () {
      **************************************************************************/
 
     obj.quizIntro = function () {
-        return "Here, we have an unsorted list. Using radix sort, move the numbers into the correct buckets. <span>BTNA</span>";
+        return "Radix sort the numbers by the ones digit. <span>BTNA</span>";
     };
     obj.quizNumIteractionQ = function () {
         return "How many iterations would it take to sort this list? <span>$TEXTAREA$</span> <span>BTNA</span>";
     };
     obj.quizNumIterationCorrect = function () {
-        return "Correct! Now sort this list, starting with the first number in the list and the ones digit of each number. <span>BTNA</span>";
+        return "Correct! Now sort this list, starting by the ones digit. <span>BTNA</span>";
     };
     obj.quizNumIterationIncorrect = function (maxNum) {
         var numDigits = Math.floor(Math.log10(maxNum))+1;
-        return "Incorrect! The max number is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits.  Hence, radix sort will have ").concat(String(numDigits)).concat(" iterations. <span>BTNA</span>");
+        return "Incorrect! The max is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits.  Thus ").concat(String(numDigits)).concat(" iterations occur. <span>BTNA</span>");
     };
     obj.quizIncorrectAns = function (num, digitI, number) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
         return "Incorrect.  What is the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat("? <span>$TEXTAREA$</span> <span>BTNA</span>");
     };
     obj.quizIncorrectAnsCorrect = function (num, digitI, number) {
-        return "Correct! Using this principle, place the number ".concat(String(number)).concat(" into the correct bucket! <span>BTNA</span>");
+        return "Correct! Place the number ".concat(String(number)).concat(" into the correct bucket! <span>BTNA</span>");
     };
     obj.quizIncorrectAnsIncorrect = function (num, digitI, number) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
         var digitDescription = {0:"rightmost digit", 1:"first digit from the right", 2:"second digit from the right", 3:"third digit from the right", 4:"fourth digit from the right"};
         var actualDigit = Math.floor(num/Math.pow(10, digitI))%10;
-        return "Incorrect! the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat(" is the ").concat(digitDescription[digitI]).concat(", which is ").concat(String(actualDigit)).concat(".  Using this principle, place the number ").concat(String(number)).concat(" into the correct bucket! <span>BTNA</span>");
+        return "Incorrect! the ".concat(digitConversion[digitI]).concat(" digit of ").concat(String(num)).concat(" is the ").concat(digitDescription[digitI]).concat(", which is ").concat(String(actualDigit)).concat("<span>BTNA</span>");
     };
     obj.quizAfterOneIteration = function (number) {
         return "What will the new index of the number ".concat(String(number)).concat(" be? <span>$TEXTAREA$</span> <span>BTNA</span>");
@@ -529,11 +528,11 @@ var getStrings = function () {
     };
     obj.quizAfterOneIterationIncorrect = function (number, correctI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
-        return "Incorrect! The number ".concat(String(number)).concat(" would go to index ").concat(String(correctI)).concat(" since there are ").concat(String(correctI)).concat(" numbers before it. <span>BTNA</span>");
+        return "Incorrect! ".concat(String(number)).concat(" is index ").concat(String(correctI)).concat(", there are ").concat(String(correctI)).concat(" numbers before it. <span>BTNA</span>");
     };
     obj.quizNextIteration = function (nextDigitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
-        return "We have now sorted the list up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit for you.  Now you sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
+        return "We have now sorted up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit.  Now sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
     };
     return obj;
 };
@@ -595,23 +594,23 @@ function main (ex, mode) {
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
       
+    //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
+    ex.data.instance.state.ignoreData = true;
     console.log(ex.data.instance.state);
     console.log(ex.data);
     console.log(mode);
     ignoreData = false;
-    if (mode !== undefined) {
-        ex.data.meta.mode = mode;
-        ignoreData = true;
+    // ex.data.instance.state.ignoreData = true;
+    if (mode === undefined) {
         // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
         //     ex.data.meta.mode = "practice";
         // } else {
         //     ex.data.meta.mode = ex.data.instance.state.mode;
         // }
-        
-    } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && "mode" in ex.data.instance.state) {
-        ex.data.meta.mode = ex.data.instance.state.mode;
-    } else {
         ex.data.meta.mode = "practice";
+    } else {
+        ex.data.meta.mode = mode;
+        ignoreData = true;
     }
     console.log(ex.data.meta.mode);
 
@@ -663,7 +662,7 @@ function createStartList(listLength, maxNumberOfDigits){
     return list;
 }
 
-function moveBack (draggableList, bucketSpots, bucketOrdering, postAnimationCallback, newOrder, animate) {
+function moveBack (draggableList, bucketSpots, bucketOrdering, newOrder, animate) {
     if (animate == undefined) {
         animate = true;
     }
@@ -682,7 +681,7 @@ function moveBack (draggableList, bucketSpots, bucketOrdering, postAnimationCall
         var bucketLabel = bucketOrdering[i];
         bucketSpots[bucketLabel][4] = [];
     }
-    draggableList.moveElementsBack(newOrder, animate, postAnimationCallback);
+    draggableList.moveElementsBack(newOrder, animate);
 }
 
 /*******************************************************************************
@@ -1299,9 +1298,7 @@ function runPracticeMode (ex, ignoreData) {
             correctBox.remove();
             currentInstruction = "";
             //move elements back
-            var postAnimationCallback = undefined;
-            if (currentIteration > numberOfIterations) postAnimationCallback = createEndOfSortMessage;
-            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, postAnimationCallback);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -1312,9 +1309,9 @@ function runPracticeMode (ex, ignoreData) {
             console.log(currentIteration);
             if (currentIteration <= numberOfIterations+1) {
                 createNextIterationInstruction();
-            } /*else { //End of sort
+            } else { //End of sort
                 createEndOfSortMessage();
-            }*/
+            }
             drawAll();
             saveData();
         });
@@ -1340,9 +1337,7 @@ function runPracticeMode (ex, ignoreData) {
             currentInstruction = "";
             console.log(currentIteration);
             //move elements back
-            var postAnimationCallback = undefined;
-            if (currentIteration > numberOfIterations) postAnimationCallback = createEndOfSortMessage;
-            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, postAnimationCallback);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -1353,9 +1348,9 @@ function runPracticeMode (ex, ignoreData) {
             console.log(currentIteration);
             if (currentIteration <= numberOfIterations+1) {
                 createNextIterationInstruction();
-            } /*else { //End of sort
+            } else { //End of sort
                 createEndOfSortMessage();
-            }*/
+            }
             drawAll();
             saveData();
         });
@@ -1396,21 +1391,22 @@ function runPracticeMode (ex, ignoreData) {
         var text = strings.practiceEndOfSort();
         var buttonTakeQuiz = ex.createButton(0, 0, strings.practiceTakeTheQuizButtonText());
         var buttonPracticeMore = ex.createButton(0, 0, strings.practiceMoreButtonText());
+        // if (endOfSortBox != undefined){endOfSortBox.remove();}
         endOfSortBox = ex.textbox112(text,
                 {
                     stay: true,
                     color: instrColor
                 }, instrW, instrX);
+        // if (endOfSortBox != undefined){endOfSortBox.remove();}
         buttonTakeQuiz.on("click", function () {
             saveData();
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
             ignoreData = true;
-            console.log("end of sort message click take quiz");
-            ex.data.meta.mode = "quiz-immediate";
+            ex.data.meta.mode = "quiz-immediate"
             console.log(ex.data.meta.mode);
-            saveData("quiz-immediate");
+            saveData();
             main(ex, "quiz-immediate");
         });
         buttonPracticeMore.on("click", function () {
@@ -1418,10 +1414,9 @@ function runPracticeMode (ex, ignoreData) {
             endOfSortBox.remove();
             currentInstruction = "";
             afterCloseInstruction();
-            ex.data.meta.mode = "practice";
-            console.log(ex.data.meta.mode);
-            saveData("practice");
-            main(ex, "practice");
+            ignoreData = true;
+            saveData();
+            main(ex);
         });
         ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
         ex.insertButtonTextbox112(endOfSortBox, buttonPracticeMore, "BTNA2");
@@ -1432,11 +1427,10 @@ function runPracticeMode (ex, ignoreData) {
      * Main Game Code
      **************************************************************************/
 
-    function reset () {
-        if(ex.data.instance.state != undefined) delete ex.data.instance.state;
+     function reset () {
+        checkAndRemoveAlerts();
         draggableList.disable(workingIndex);
         workingIndex = 0;
-        digitIndex = 0;
         draggableList.enable(workingIndex);
         //highest index that has been moved so far
         maxIndex = 0;
@@ -1449,14 +1443,11 @@ function runPracticeMode (ex, ignoreData) {
             newOrder[i] = startList.indexOf(draggableList.elementList[i]);
         }
 
-        if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, undefined, newOrder, false);
+        if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
         bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
-        draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, 
-            failureFn, drawAll, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
-        //delete ex.data.run;
+        delete ex.data.run;
         currentInstruction = "createStartInstruction";
-        saveData();
         drawAll();
         runInstruction();
      }
@@ -1481,15 +1472,12 @@ function runPracticeMode (ex, ignoreData) {
             // console.log(_elementReferences);
             console.log(ex.elementReferences);
             checkAndRemoveAlerts();
-            ex.data.meta.mode = "practice";
-            saveData("practice");
             main(ex, "practice");
         });
         ex.unload(saveData);
     }
     
-    function saveData(mode){
-        if (mode === undefined) mode = "practice";
+    function saveData(){
         var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
@@ -1517,20 +1505,18 @@ function runPracticeMode (ex, ignoreData) {
         data.currentInstruction = currentInstruction;
         data.instrValList = instrValList;
         // data.ignoreData = false;//ignoreData;
-        // console.log(data.ignoreData);
-        data.mode = mode;
-        console.log("saveState Mode".concat(ex.data.meta.mode));
+        console.log(data.ignoreData);
+        // data.mode = ex.data.meta.mode;
         // console.log(ex.data.meta.mode);
         // console.log(data.mode);
         ex.saveState(data);
-        // console.log(ex.data.instance.state.ignoreData);
+        console.log(ex.data.instance.state.ignoreData);
         console.log(ex.data.instance.state);
-        // console.log(data.ignoreData);
+        console.log(data.ignoreData);
         console.log(data.list);
     }
 
     function loadData(){
-        console.log("loadData");
         if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){ 
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
@@ -1569,8 +1555,7 @@ function runPracticeMode (ex, ignoreData) {
             console.log("after create individual draggable list.");
             currentInstruction = ex.data.instance.state.currentInstruction;
             instrValList = ex.data.instance.state.instrValList;
-            console.log("end load data mode ".concat(ex.data.meta.mode));
-            // ignoreData = ex.data.instance.state.ignoreData;
+            ignoreData = ex.data.instance.state.ignoreData;
         }
     }
 
@@ -1736,7 +1721,7 @@ function runQuizMode (ex, ignoreData) {
     //The users score
     var score = 0.0;
     var possibleScore = 22;
-    var hasCurrentElementFailed = false; // false means they have failed 0 times before, true means they have failed once before, undefined means they have failed more than once before
+    var hasCurrentElementFailed = false;
     var canSubmit = false;
 
     //Functions to be called when a list element clicks into a bucket
@@ -1749,9 +1734,9 @@ function runQuizMode (ex, ignoreData) {
     };
 
     var failureFn = function (i, bucket) {
-        if (hasCurrentElementFailed === false) {
+        if (hasCurrentElementFailed == false) {
             hasCurrentElementFailed = true;
-        } else if (hasCurrentElementFailed === true) {
+        } else if (hasCurrentElementFailed == true) {
             hasCurrentElementFailed = undefined; // Undefined means that they have failed once before, so are not eligible for additional partial credit
         }
         createIncorrectAnsMessage(i, bucket);
@@ -1928,7 +1913,6 @@ function runQuizMode (ex, ignoreData) {
             console.log(input.text());
             console.log(numOfDigits);
             if (parseInt(input.text()) == numOfDigits){
-                score = score + listLength/4;
                 createQuizNumIterationCorrect();
                 iterationQ.remove();
             } else {
@@ -1944,6 +1928,7 @@ function runQuizMode (ex, ignoreData) {
 
     function createQuizNumIterationCorrect(){
         currentInstruction = "createQuizNumIterationCorrect";
+        score = score + listLength/4;
         saveData();
         console.log("score:",score);
         var correctText = strings.quizNumIterationCorrect();
@@ -2002,10 +1987,6 @@ function runQuizMode (ex, ignoreData) {
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
-                if (hasCurrentElementFailed === true) {
-                    score = score+0.5;
-                    // hasCurrentElementFailed = undefined;
-                }
                 createQuizIncorrectAnsCorrect(num,i);
                 wrongAnsBox.remove();
                 afterCloseInstruction();
@@ -2029,6 +2010,9 @@ function runQuizMode (ex, ignoreData) {
 
     function createQuizIncorrectAnsCorrect(num,i){
         currentInstruction = "createQuizIncorrectAnsCorrect";
+        if (hasCurrentElementFailed == undefined) {
+            score = score+0.5;
+        }
         saveData();
         console.log("score:",score);
         var button = ex.createButton(0, 0, strings.okButtonText());
@@ -2085,9 +2069,7 @@ function runQuizMode (ex, ignoreData) {
             console.log(input.text());
             console.log(numOfDigits);
             if (input.text() != "") {
-                currentInstruction = "";
                 if (parseInt(input.text()) == correctI){
-                    score = score+listLength/4;
                     createQuizAfterOneIterationCorrect(element,correctI);
                     iterationQ.remove();
                 } else {
@@ -2105,6 +2087,7 @@ function runQuizMode (ex, ignoreData) {
 
     function createQuizAfterOneIterationCorrect (element,correctI){
         currentInstruction = "createQuizAfterOneIterationCorrect";
+        score = score+listLength/4;
         saveData();
         console.log("score:",score);
         var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
@@ -2117,12 +2100,12 @@ function runQuizMode (ex, ignoreData) {
         correctButton.on("click", function () {
             saveData();
             correctBox.remove();
-            // currentInstruction = "";
+            currentInstruction = "";
             if (currentIteration == 0) {
                 createNextIterationInstruction();
             } else { //End of quiz
-                var scoreForUser = Math.round((score/possibleScore)) ;
-                var percent = scoreForUser * 100;
+                var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var scoreForUser = percent / 100;
                 ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
@@ -2146,13 +2129,13 @@ function runQuizMode (ex, ignoreData) {
         incorrectButton.on("click", function () {
             saveData();
             incorrectBox.remove();   
-            // currentInstruction = "";
+            currentInstruction = "";
             console.log(currentIteration);
             if (currentIteration == 0) {
                 createNextIterationInstruction();
             } else { //End of quiz
-                var scoreForUser = Math.round((score/possibleScore));
-                var percent = scoreForUser * 100;
+                var percent = Math.round((score/possibleScore*100) * 100) / 100 ;
+                var scoreForUser = percent / 100;
                 ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.showFeedback(feedback);
@@ -2211,8 +2194,7 @@ function runQuizMode (ex, ignoreData) {
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
-    function saveData(mode){
-        if (mode === undefined) mode = "quiz-immediate";
+    function saveData(){
         var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
@@ -2239,7 +2221,6 @@ function runQuizMode (ex, ignoreData) {
         data.currentInstruction = currentInstruction;
         console.log("instr:" + currentInstruction);
         data.instrValList = instrValList;
-        data.mode = mode;
         //quiz mode only
         data.score = score;
         data.canSubmit = canSubmit;
@@ -2314,20 +2295,9 @@ function runQuizMode (ex, ignoreData) {
         ex.chromeElements.displayCAButton.disable();
         ex.chromeElements.undoButton.disable();
         ex.chromeElements.redoButton.disable();
+        ex.chromeElements.newButton.disable();
         ex.chromeElements.resetButton.disable();
-        ex.chromeElements.newButton.enable();
-        ex.chromeElements.newButton.off("click");
-        ex.chromeElements.newButton.on("click", function () {
-            ex.graphics.ctx.clearRect(0,0, ex.width, ex.height);
-            ex._element_references = {};
-            // console.log(_elementReferences);
-            console.log(ex.elementReferences);
-            checkAndRemoveAlerts();
-            ex.data.meta.mode = "practice";
-            saveData("practice");
-            main(ex, "practice");
-        });
-        // ex.unload(saveData);
+        ex.unload(saveData);
     }
     
     function runInstruction(){
@@ -2391,8 +2361,7 @@ function runQuizDelayMode (ex, ignoreData) {
             var element = ex.alert(message, {
                 fontSize: (width/height * 25),
                 stay: true,
-                removeXButton: true,
-                opacity: 0.8
+                removeXButton: true
             });
             element.style(options);
             if (typeof(left) == 'undefined') {left = cx - width / 2}
@@ -2702,8 +2671,8 @@ function runQuizDelayMode (ex, ignoreData) {
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
-                            var scoreForUser = score/possibleScore;
-                            var percent = Math.round(scoreForUser * 100);
+                            var percent = Math.round(score/possibleScore*100);
+                            var scoreForUser = percent / 100;
                             ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
@@ -2715,13 +2684,13 @@ function runQuizDelayMode (ex, ignoreData) {
                 else {
                     console.log(currentIteration);
                     iterationQ.remove();
-                    // currentInstruction = "";
+                    currentInstruction = "";
                         console.log(currentIteration);
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
-                            var scoreForUser = score/possibleScore;
-                            var percent = Math.round(scoreForUser * 100);
+                            var percent = Math.round(score/possibleScore*100);
+                            var scoreForUser = percent / 100;
                             ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
@@ -2827,8 +2796,7 @@ function runQuizDelayMode (ex, ignoreData) {
     /***************************************************************************
      * Main Game Code
      **************************************************************************/
-    function saveData(mode){
-        if (mode === undefined) mode = "quiz-delay";
+    function saveData(){
         var data = {};
         data.startList = startList;
         data.bucketSpots = bucketSpots;
@@ -2858,7 +2826,7 @@ function runQuizDelayMode (ex, ignoreData) {
         //quiz mode only
         data.score = score;
         data.canSubmit = canSubmit;
-        data.mode = mode;
+        // data.mode = ex.data.meta.mode;
         // data.ignoreData = ignoreData;
         ex.saveState(data);
     }
