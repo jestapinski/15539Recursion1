@@ -1425,9 +1425,11 @@ function runPracticeMode (ex, ignoreData) {
      * Main Game Code
      **************************************************************************/
 
-     function reset () {
+    function reset () {
+        if(ex.data.instance.state != undefined) delete ex.data.instance.state;
         draggableList.disable(workingIndex);
         workingIndex = 0;
+        digitIndex = 0;
         draggableList.enable(workingIndex);
         //highest index that has been moved so far
         maxIndex = 0;
@@ -1443,8 +1445,11 @@ function runPracticeMode (ex, ignoreData) {
         if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder, false);
         bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
         emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
-        delete ex.data.run;
+        draggableList = createDraggableList(ex, startList, elementW, elementH, x0, y0, successFn, 
+            failureFn, drawAll, digitIndex, maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
+        //delete ex.data.run;
         currentInstruction = "createStartInstruction";
+        saveData();
         drawAll();
         runInstruction();
      }
