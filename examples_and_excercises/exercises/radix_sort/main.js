@@ -1180,14 +1180,14 @@ function runPracticeMode (ex, ignoreData) {
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
+                currentInstruction = "";
                 createIncorrectAnsCorrect(num,i);
                 wrongAnsBox.remove();
-                currentInstruction = "";
                 afterCloseInstruction();
             } else {
+                currentInstruction = "";
                 createIncorrectAnsIncorrect(num,i);
                 wrongAnsBox.remove();
-                currentInstruction = "";
             }
             saveData();
         });
@@ -1265,9 +1265,9 @@ function runPracticeMode (ex, ignoreData) {
             console.log(numOfDigits);
             if (input.text() != "") {
                 if (parseInt(input.text()) == correctI){
+                    currentInstruction = "";
                     createAfterOneIterationCorrect(element,correctI);
                     iterationQ.remove();
-                    currentInstruction = "";
                 } else {
                     iterationQ.remove();
                     currentInstruction = "";
@@ -2669,6 +2669,7 @@ function runQuizDelayMode (ex, ignoreData) {
                 if (parseInt(input.text()) == correctI){
                     score = score+listLength/4;
                     console.log(currentIteration);
+                    currentInstruction = "";
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
@@ -2679,7 +2680,6 @@ function runQuizDelayMode (ex, ignoreData) {
                             ex.showFeedback(feedback);
                         }
                         iterationQ.remove();
-                        currentInstruction = "";
                     }
 
                 else {
