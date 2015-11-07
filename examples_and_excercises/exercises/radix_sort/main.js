@@ -1398,7 +1398,7 @@ function runPracticeMode (ex, ignoreData) {
         var text = strings.practiceEndOfSort();
         var buttonTakeQuiz = ex.createButton(0, 0, strings.practiceTakeTheQuizButtonText());
         var buttonPracticeMore = ex.createButton(0, 0, strings.practiceMoreButtonText());
-        // if (endOfSortBox != undefined){endOfSortBox.remove();}
+        if (endOfSortBox != undefined){endOfSortBox.remove();}
         endOfSortBox = ex.textbox112(text,
                 {
                     stay: true,
