@@ -601,29 +601,31 @@ function main (ex, mode) {
     console.log(ex.data);
     console.log(mode);
     ignoreData = false;
-    // ex.data.instance.state.ignoreData = true;
-    if (mode === undefined) {
-        // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
-        //     ex.data.meta.mode = "practice";
-        // } else {
-        //     ex.data.meta.mode = ex.data.instance.state.mode;
-        // }
-        ex.data.meta.mode = "practice";
-    } else {
-        ex.data.meta.mode = mode;
-        ignoreData = true;
-    }
-    console.log(ex.data.meta.mode);
-
-    ex.setTitle("Radix Sort");
-    
-    if (ex.data.meta.mode == "practice") {
-        runPracticeMode(ex, ignoreData);
-    } else if (ex.data.meta.mode == "quiz-immediate") {
-        runQuizMode(ex, ignoreData);
-    } else if (ex.data.meta.mode == "quiz-delay") {
-        runQuizDelayMode(ex, ignoreData);
-    }
+     if (mode !== undefined) {
+         ex.data.meta.mode = mode;
+         ignoreData = true;
+         // if (ex.data.instance.state == null || ex.data.instance.state.ignoreData || !("mode" in ex.data.instance.state)) {
+         //     ex.data.meta.mode = "practice";
+         // } else {
+         //     ex.data.meta.mode = ex.data.instance.state.mode;
+         // }
+         
+     } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && "mode" in ex.data.instance.state) {
+         ex.data.meta.mode = ex.data.instance.state.mode;
+     } else {
+         ex.data.meta.mode = "practice";
+     }
+     console.log(ex.data.meta.mode);
+ 
+     ex.setTitle("Radix Sort");
+     
+     if (ex.data.meta.mode == "practice") {
+         runPracticeMode(ex, ignoreData);
+     } else if (ex.data.meta.mode == "quiz-immediate") {
+         runQuizMode(ex, ignoreData);
+     } else if (ex.data.meta.mode == "quiz-delay") {
+         runQuizDelayMode(ex, ignoreData);
+     }
 
 };
 
@@ -1736,24 +1738,26 @@ function runQuizMode (ex, ignoreData) {
     //The users score
     var score = 0.0;
     var possibleScore = 22;
-    var hasCurrentElementFailed = false;
+    var numOfTimesElementIsIncorrect = 0; 
+    var answeredIncorrectAnsCorrectly = false;
     var canSubmit = false;
 
     //Functions to be called when a list element clicks into a bucket
     var successFn = function (i, bucket) {
-        if (hasCurrentElementFailed == false) { score = score + 1.0; }
-        hasCurrentElementFailed = false;
+        if (numOfTimesElementIsIncorrect === 0) { 
+            score = score + 1.0; 
+        } else if (numOfTimesElementIsIncorrect === 1 && answeredIncorrectAnsCorrectly) {
+            score = score + 0.5; 
+        }
+        answeredIncorrectAnsCorrectly = false;
+        numOfTimesElementIsIncorrect = 0;
         console.log("score:",score);
         elementPlacedInCorrectBucket(i, bucket);
         saveData()
     };
 
     var failureFn = function (i, bucket) {
-        if (hasCurrentElementFailed == false) {
-            hasCurrentElementFailed = true;
-        } else if (hasCurrentElementFailed == true) {
-            hasCurrentElementFailed = undefined; // Undefined means that they have failed once before, so are not eligible for additional partial credit
-        }
+        numOfTimesElementIsIncorrect++;
         createIncorrectAnsMessage(i, bucket);
         saveData()
     }
@@ -2002,10 +2006,11 @@ function runQuizMode (ex, ignoreData) {
             console.log(input.text());
             console.log((Math.floor(num/Math.pow(10, digitIndex)))%10);
             if (parseInt(input.text()) == Math.floor(num/Math.pow(10, digitIndex))%10){
-                if (hasCurrentElementFailed === true) {
-                    score = score+0.5;
-                    // hasCurrentElementFailed = undefined;
-                }
+                answeredIncorrectAnsCorrectly = true;
+                // if (numOfTimesElementIsIncorrect === 1) {
+                //     score = score+0.5;
+                //     // hasCurrentElementFailed = undefined;
+                // }
                 createQuizIncorrectAnsCorrect(num,i);
                 wrongAnsBox.remove();
                 afterCloseInstruction();
@@ -2105,7 +2110,6 @@ function runQuizMode (ex, ignoreData) {
 
     function createQuizAfterOneIterationCorrect (element,correctI){
         currentInstruction = "createQuizAfterOneIterationCorrect";
-        score = score+listLength/4;
         saveData();
         console.log("score:",score);
         var correctText = strings.quizAfterOneIterationCorrect(element, correctI);
@@ -2122,7 +2126,7 @@ function runQuizMode (ex, ignoreData) {
             if (currentIteration == 0) {
                 createNextIterationInstruction();
             } else { //End of quiz
-                var scoreForUser = Math.round((score/possibleScore)) ;
+                var scoreForUser = score/possibleScore;
                 var percent = scoreForUser * 100;
                 ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
@@ -2152,7 +2156,7 @@ function runQuizMode (ex, ignoreData) {
             if (currentIteration == 0) {
                 createNextIterationInstruction();
             } else { //End of quiz
-                var scoreForUser = Math.round((score/possibleScore));
+                var scoreForUser = score/possibleScore;
                 var percent = scoreForUser * 100;
                 ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
@@ -2190,7 +2194,7 @@ function runQuizMode (ex, ignoreData) {
                 newOrder[i] = startList.indexOf(partiallySortedList[i]);
             }
             console.log(newOrder);
-            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, undefined, newOrder);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -2244,7 +2248,7 @@ function runQuizMode (ex, ignoreData) {
         //quiz mode only
         data.score = score;
         data.canSubmit = canSubmit;
-        data.hasCurrentElementFailed = hasCurrentElementFailed;
+        data.numOfTimesElementIsIncorrect = numOfTimesElementIsIncorrect;
         // data.mode = ex.data.meta.mode;
         // data.ignoreData = ignoreData;
         ex.saveState(data);
@@ -2285,7 +2289,7 @@ function runQuizMode (ex, ignoreData) {
             instrValList = ex.data.instance.state.instrValList;
             score = ex.data.instance.state.score;
             console.log("score" + score);
-            hasCurrentElementFailed = ex.data.instance.state.hasCurrentElementFailed;
+            numOfTimesElementIsIncorrect = ex.data.instance.state.numOfTimesElementIsIncorrect;
             canSubmit = ex.data.instance.state.canSubmit;
             console.log("load: " + canSubmit);
             if(canSubmit) ex.chromeElements.submitButton.enable();
@@ -2391,7 +2395,8 @@ function runQuizDelayMode (ex, ignoreData) {
             var element = ex.alert(message, {
                 fontSize: (width/height * 25),
                 stay: true,
-                removeXButton: true
+                removeXButton: true,
+                opacity: 0.8
             });
             element.style(options);
             if (typeof(left) == 'undefined') {left = cx - width / 2}
@@ -2703,7 +2708,7 @@ function runQuizDelayMode (ex, ignoreData) {
                             createNextIterationInstruction();
                         } else { //End of quiz
                             var scoreForUser = score/possibleScore;
-                            var percent = Math.round(scoreForUser * 100);
+                            var percent = scoreForUser * 100;
                             ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
@@ -2720,7 +2725,7 @@ function runQuizDelayMode (ex, ignoreData) {
                             createNextIterationInstruction();
                         } else { //End of quiz
                             var scoreForUser = score/possibleScore;
-                            var percent = Math.round(scoreForUser * 100);
+                            var percent = scoreForUser * 100;
                             ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.showFeedback(feedback);
@@ -2761,7 +2766,7 @@ function runQuizDelayMode (ex, ignoreData) {
                 newOrder[i] = startList.indexOf(partiallySortedList[i]);
             }
             console.log(newOrder);
-            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, newOrder);
+            if (draggableList.list[0].currentBucket !== undefined) moveBack(draggableList, bucketSpots, bucketOrdering, undefined, newOrder);
             emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             draggableList.setEmptySpots(emptySpots);
             workingIndex = 0;
@@ -2787,7 +2792,6 @@ function runQuizDelayMode (ex, ignoreData) {
      function undo () {
         if (workingIndex > 0) {
             if (workingIndex < startList.length) {
-                hasCurrentElementFailed = false;
                 draggableList.disable(workingIndex);
             }
             workingIndex--;
