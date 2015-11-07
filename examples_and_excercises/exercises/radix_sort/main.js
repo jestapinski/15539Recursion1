@@ -610,7 +610,7 @@ function main (ex, mode) {
          //     ex.data.meta.mode = ex.data.instance.state.mode;
          // }
          
-     } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && "mode" in ex.data.instance.state) {
+     } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && typeof(ex.data.instance.state) === "object" && "mode" in ex.data.instance.state) {
          ex.data.meta.mode = ex.data.instance.state.mode;
      } else {
          ex.data.meta.mode = "practice";
@@ -1533,13 +1533,20 @@ function runPracticeMode (ex, ignoreData) {
     function loadData(){
         console.log("loadData");
         console.log(typeof(ex.data.instance.state));
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){ 
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && typeof(ex.data.instance.state) == "object" && Object.keys(ex.data.instance.state).length > 0){ 
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            list = ex.data.instance.state.list;
             for (spot in ex.data.instance.state.bucketSpots) {
                 bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+                for (var i = 0; i < bucketSpots[spot][4].length; i++) {
+                    var elemI = bucketSpots[spot][4][i];
+                    //Adjust position if the screen is a different size than when state was saved
+                    list[elemI].x = bucketSpots[spot][0] + bucketSpots[spot][2]*(i+1);
+                    list[elemI].y = bucketSpots[spot][1];
+                }
             } 
-            emptySpots = ex.data.instance.state.emptySpots;
+            emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             workingIndex = ex.data.instance.state.workingIndex;
             console.log(workingIndex);
             maxIndex = ex.data.instance.state.maxIndex;
@@ -1549,7 +1556,6 @@ function runPracticeMode (ex, ignoreData) {
             //draggabeList data
             elementList = ex.data.instance.state.elementList.slice();
             console.log(elementList);
-            list = ex.data.instance.state.list;
             console.log(list);
             console.log("before create draggable list.");
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
@@ -2255,20 +2261,26 @@ function runQuizMode (ex, ignoreData) {
     }
 
     function loadData(){
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && typeof(ex.data.instance.state) == "object" && Object.keys(ex.data.instance.state).length > 0){
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            list = ex.data.instance.state.list;
             for (spot in ex.data.instance.state.bucketSpots) {
                 bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+                for (var i = 0; i < bucketSpots[spot][4].length; i++) {
+                    var elemI = bucketSpots[spot][4][i];
+                    //Adjust position if the screen is a different size than when state was saved
+                    list[elemI].x = bucketSpots[spot][0] + bucketSpots[spot][2]*(i+1);
+                    list[elemI].y = bucketSpots[spot][1];
+                }
             } 
-            emptySpots = ex.data.instance.state.emptySpots;
+            emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             workingIndex = ex.data.instance.state.workingIndex;
             maxIndex = ex.data.instance.state.maxIndex;
             currentIteration = ex.data.instance.state.currentIteration;
             digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
             elementList = ex.data.instance.state.elementList;
-            list = ex.data.instance.state.list;
             console.log(maxNumberOfDigits);
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
@@ -2867,20 +2879,26 @@ function runQuizDelayMode (ex, ignoreData) {
     }
 
     function loadData(){
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && typeof(ex.data.instance.state) == "object" && Object.keys(ex.data.instance.state).length > 0){
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
+            list = ex.data.instance.state.list;
             for (spot in ex.data.instance.state.bucketSpots) {
                 bucketSpots[spot][4] = ex.data.instance.state.bucketSpots[spot][4];
+                for (var i = 0; i < bucketSpots[spot][4].length; i++) {
+                    var elemI = bucketSpots[spot][4][i];
+                    //Adjust position if the screen is a different size than when state was saved
+                    list[elemI].x = bucketSpots[spot][0] + bucketSpots[spot][2]*(i+1);
+                    list[elemI].y = bucketSpots[spot][1];
+                }
             } 
-            emptySpots = ex.data.instance.state.emptySpots;
+            emptySpots = getEmptySpots(bucketSpots, bucketOrdering);
             workingIndex = ex.data.instance.state.workingIndex;
             maxIndex = ex.data.instance.state.maxIndex;
             currentIteration = ex.data.instance.state.currentIteration;
             digitIndex = ex.data.instance.state.digitIndex;
             //reconstruct draggabeList data
             elementList = ex.data.instance.state.elementList;
-            list = ex.data.instance.state.list;
             console.log(maxNumberOfDigits);
             draggableList = createDraggableList(ex, elementList, elementW, elementH, x0, y0, successFn, failureFn, drawAll, digitIndex,
                                                  maxNumberOfDigits, emptySpots, enabledColor, disabledColor, fontSize);
