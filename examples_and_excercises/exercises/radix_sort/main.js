@@ -1517,7 +1517,8 @@ function runPracticeMode (ex, ignoreData) {
     }
 
     function loadData(){
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){ 
+        console.log(typeof(ex.data.instance.state));
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){ 
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
             for (spot in ex.data.instance.state.bucketSpots) {
@@ -2231,7 +2232,7 @@ function runQuizMode (ex, ignoreData) {
     }
 
     function loadData(){
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
             for (spot in ex.data.instance.state.bucketSpots) {
@@ -2832,7 +2833,7 @@ function runQuizDelayMode (ex, ignoreData) {
     }
 
     function loadData(){
-        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0){
+        if(!ignoreData && ex.data.instance.state != null && ex.data.instance.state != undefined && Object.keys(ex.data.instance.state).length > 0 && typeof(ex.data.instance.state) == "object"){
             startList = ex.data.instance.state.startList;
             bucketSpots = getBucketSpots(bucketNum, bucketX, bucketY, bucketW, bucketH, elementW, elementH);
             for (spot in ex.data.instance.state.bucketSpots) {
