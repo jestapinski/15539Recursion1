@@ -1,3 +1,8 @@
+/* Radix Sort
+ * Authors: Amal Nanavati, Baseball Yoovidhya, Jordan Stapinski
+ * AndrweIDs: arnanava, pyoovidh, jstapins
+ */
+
 function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAllFn) {
     var element = {};
     
