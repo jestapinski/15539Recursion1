@@ -1568,7 +1568,7 @@ function runPracticeMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].move(x0, y0+i*elementH, false);
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
