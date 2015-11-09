@@ -1,6 +1,5 @@
 /* Radix Sort
  * Authors: Amal Nanavati, Baseball Yoovidhya, Jordan Stapinski
- * AndrweIDs: arnanava, pyoovidh, jstapins
  */
 
 function createDraggableListElement (ctx, bbox, text, digitIndex, maxDigits, emptySpots, enabledColor, disabledColor, fontSize, drawAllFn) {
@@ -493,7 +492,7 @@ var getStrings = function () {
         return "We will now move on to the ".concat(digitConversion[nextDigitI]).concat(" digit.  Continue sorting the list! <span>BTNA</span>");
     };
     obj.practiceEndOfSort = function () {
-        return "Congratulations!  You have succesfully sorted the list! <span>BTNA1</span> <span>BTNA2</span>"
+        return "Congratulations!  You have succesfully sorted the list! <span>BTNA</span>"
     };
 
     /***************************************************************************
@@ -595,13 +594,18 @@ function checkAndRemoveAlerts(){
 
 
 function main (ex, mode) {
+    console.log ("hi")
+    console.log(ex.data.instance)
+    
     /*This is so that once the user clicks the button "take the quiz," it loads
       the quiz.  Basically, if finishedPractice doesn't exist or is false, it
       runs practice mode, else runs quiz immediate (which we are arbitrarily 
       setting as the standard quiz mode.)*/
       
     //UNCOMMENT below lines if you want it to load from scratch i.e. without a stored state, testing purposes only
-    ex.data.instance.state.ignoreData = true;
+    // ex.saveState({});
+    // throw "Error2";
+    
     console.log(ex.data.instance.state);
     console.log(ex.data);
     console.log(mode);
@@ -615,11 +619,11 @@ function main (ex, mode) {
          //     ex.data.meta.mode = ex.data.instance.state.mode;
          // }
          
-     } else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && typeof(ex.data.instance.state) === "object" && "mode" in ex.data.instance.state) {
+     } /*else if (ex.data.instance.state !== undefined && ex.data.instance.state !== null && typeof(ex.data.instance.state) === "object" && "mode" in ex.data.instance.state) {
          ex.data.meta.mode = ex.data.instance.state.mode;
      } else {
          ex.data.meta.mode = "practice";
-     }
+     }*/
      console.log(ex.data.meta.mode);
  
      ex.setTitle("Radix Sort");
@@ -902,6 +906,8 @@ function runPracticeMode (ex, ignoreData) {
      **************************************************************************/
      function drawBuckets(){
         //Draw dashed lines
+        console.log("yeah");
+        console.log(emptySpots);
         for (var spot in emptySpots) {
             var x = emptySpots[spot][0];
             var y = emptySpots[spot][1];
@@ -1401,7 +1407,7 @@ function runPracticeMode (ex, ignoreData) {
         //Show the instruction
         beforeShowInstruction();
         var text = strings.practiceEndOfSort();
-        var buttonTakeQuiz = ex.createButton(0, 0, strings.practiceTakeTheQuizButtonText());
+        // var buttonTakeQuiz = ex.createButton(0, 0, strings.practiceTakeTheQuizButtonText());
         var buttonPracticeMore = ex.createButton(0, 0, strings.practiceMoreButtonText());
         if (endOfSortBox != undefined){endOfSortBox.remove();}
         endOfSortBox = ex.textbox112(text,
@@ -1410,18 +1416,18 @@ function runPracticeMode (ex, ignoreData) {
                     color: instrColor
                 }, instrW, instrX);
         // if (endOfSortBox != undefined){endOfSortBox.remove();}
-        buttonTakeQuiz.on("click", function () {
-            saveData();
-            endOfSortBox.remove();
-            currentInstruction = "";
-            afterCloseInstruction();
-            ignoreData = true;
-            console.log("end of sort message click take quiz");
-            ex.data.meta.mode = "quiz-immediate";
-            console.log(ex.data.meta.mode);
-            saveData("quiz-immediate");
-            main(ex, "quiz-immediate");
-        });
+        // buttonTakeQuiz.on("click", function () {
+        //     saveData();
+        //     endOfSortBox.remove();
+        //     currentInstruction = "";
+        //     afterCloseInstruction();
+        //     ignoreData = true;
+        //     console.log("end of sort message click take quiz");
+        //     ex.data.meta.mode = "quiz-immediate";
+        //     console.log(ex.data.meta.mode);
+        //     saveData("quiz-immediate");
+        //     main(ex, "quiz-immediate");
+        // });
         buttonPracticeMore.on("click", function () {
             saveData();
             endOfSortBox.remove();
@@ -1432,8 +1438,8 @@ function runPracticeMode (ex, ignoreData) {
             saveData("practice");
             main(ex, "practice");
         });
-        ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
-        ex.insertButtonTextbox112(endOfSortBox, buttonPracticeMore, "BTNA2");
+        // ex.insertButtonTextbox112(endOfSortBox, buttonTakeQuiz, "BTNA1");
+        ex.insertButtonTextbox112(endOfSortBox, buttonPracticeMore, "BTNA");
         saveData();
     }
 
@@ -1467,7 +1473,9 @@ function runPracticeMode (ex, ignoreData) {
      }
 
     function bindButtons(){
+        ex.graphics.off("mousedown");
         ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.off("keydown");
         ex.on("keydown", draggableList.keydown);
     }
      function setUp(){
@@ -1559,6 +1567,7 @@ function runPracticeMode (ex, ignoreData) {
             digitIndex = ex.data.instance.state.digitIndex;
             attempts = ex.data.instance.state.attempts;
             //draggabeList data
+            console.log(ex.data.instance.state)
             elementList = ex.data.instance.state.elementList.slice();
             console.log(elementList);
             console.log(list);
@@ -2139,8 +2148,8 @@ function runQuizMode (ex, ignoreData) {
             } else { //End of quiz
                 var scoreForUser = score/possibleScore;
                 var percent = scoreForUser * 100;
-                ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                ex.setGrade(scoreForUser, feedback);
                 ex.showFeedback(feedback);
             }
             saveData();
@@ -2169,8 +2178,8 @@ function runQuizMode (ex, ignoreData) {
             } else { //End of quiz
                 var scoreForUser = score/possibleScore;
                 var percent = scoreForUser * 100;
-                ex.setGrade(scoreForUser, "Good Work!");
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                ex.setGrade(scoreForUser, feedback);
                 ex.showFeedback(feedback);
             }
             saveData();
@@ -2292,7 +2301,7 @@ function runQuizMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].move(x0, y0+i*elementH, false);
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
@@ -2315,7 +2324,9 @@ function runQuizMode (ex, ignoreData) {
     }
 
     function bindButtons(){
+        ex.graphics.off("mousedown");
         ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.off("keydown");
         ex.on("keydown", draggableList.keydown);
     }
 
@@ -2337,18 +2348,19 @@ function runQuizMode (ex, ignoreData) {
         ex.chromeElements.undoButton.disable();
         ex.chromeElements.redoButton.disable();
         ex.chromeElements.resetButton.disable();
-        ex.chromeElements.newButton.enable();
-        ex.chromeElements.newButton.off("click");
-        ex.chromeElements.newButton.on("click", function () {
-            ex.graphics.ctx.clearRect(0,0, ex.width, ex.height);
-            ex._element_references = {};
-            // console.log(_elementReferences);
-            console.log(ex.elementReferences);
-            checkAndRemoveAlerts();
-            ex.data.meta.mode = "practice";
-            saveData("practice");
-            main(ex, "practice");
-        });
+        ex.chromeElements.newButton.disable();
+        // ex.chromeElements.newButton.off("click");
+        // ex.chromeElements.newButton.on("click", function () {
+        //     ex.graphics.ctx.clearRect(0,0, ex.width, ex.height);
+        //     ex._element_references = {};
+        //     // console.log(_elementReferences);
+        //     console.log(ex.elementReferences);
+        //     checkAndRemoveAlerts();
+        //     ex.data.meta.mode = "practice";
+        //     saveData("practice");
+        //     main(ex, "practice");
+        // });
+        ex.unload(saveData);
     }
     
     function runInstruction(){
@@ -2726,8 +2738,8 @@ function runQuizDelayMode (ex, ignoreData) {
                         } else { //End of quiz
                             var scoreForUser = score/possibleScore;
                             var percent = scoreForUser * 100;
-                            ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                            ex.setGrade(scoreForUser, feedback);
                             ex.showFeedback(feedback);
                         }
                         iterationQ.remove();
@@ -2743,8 +2755,8 @@ function runQuizDelayMode (ex, ignoreData) {
                         } else { //End of quiz
                             var scoreForUser = score/possibleScore;
                             var percent = scoreForUser * 100;
-                            ex.setGrade(scoreForUser, "Good Work!");
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
+                            ex.setGrade(scoreForUser, feedback);
                             ex.showFeedback(feedback);
                         }
                     }
@@ -2910,7 +2922,7 @@ function runQuizDelayMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(elem.x, elem.y, false);
+                draggableList.list[i].move(x0, y0+i*elementH, false);
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
@@ -2932,7 +2944,9 @@ function runQuizDelayMode (ex, ignoreData) {
     }
 
     function bindButtons(){
+        ex.graphics.off("mousedown");
         ex.graphics.on("mousedown", draggableList.mousedown);
+        ex.off("keydown");
         ex.on("keydown", draggableList.keydown);
     }
 
