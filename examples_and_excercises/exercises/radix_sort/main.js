@@ -437,7 +437,7 @@ var getStrings = function () {
         return "Let's radix sort this list one digit at a time.  Click the info button for help. <span>BTNA</span>";
     };
     obj.practiceNumIteractionQ = function () {
-        return "How many digits are in the largest number of this list (Iterations to make)? <span>$TEXTAREA$</span> <span>BTNA</span>";
+        return "How many digits are in the largest number of this list (iterations the algorithm will make)? <span>$TEXTAREA$</span> <span>BTNA</span>";
     };
     obj.practiceNumIterationCorrect = function () {
         return "Correct! <span>BTNA</span>";
@@ -447,7 +447,7 @@ var getStrings = function () {
         return "Incorrect! The largest is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits. Thus, ").concat(String(numDigits)).concat(" iterations happen. <span>BTNA</span>");
     };
     obj.practiceStartSort = function () {
-        return "Now place each number into the bucket based on ones digit. <span>BTNA</span>"
+        return "Now place each number into a bucket based on the ones digit. <span>BTNA</span>"
     }
     obj.practiceCorrectAns = function (digitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
@@ -501,13 +501,13 @@ var getStrings = function () {
      **************************************************************************/
 
     obj.quizIntro = function () {
-        return "Radix sort the numbers by the ones digit. <span>BTNA</span>";
+        return "Radix sort the numbers starting from the ones digit. <span>BTNA</span>";
     };
     obj.quizNumIteractionQ = function () {
         return "How many iterations would it take to sort this list? <span>$TEXTAREA$</span> <span>BTNA</span>";
     };
     obj.quizNumIterationCorrect = function () {
-        return "Correct! Now sort this list, starting by the ones digit. <span>BTNA</span>";
+        return "Correct! Now sort this list, starting from the ones digit. <span>BTNA</span>";
     };
     obj.quizNumIterationIncorrect = function (maxNum) {
         var numDigits = Math.floor(Math.log10(maxNum))+1;
@@ -1578,7 +1578,12 @@ function runPracticeMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(x0, y0+i*elementH, false);
+                if (elem.x == x0) {
+                    draggableList.list[i].move(x0, y0+i*elementH, false);
+                } else {
+                    draggableList.list[i].move(elem.x, elem.y, false);
+                }
+                
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
@@ -2151,6 +2156,7 @@ function runQuizMode (ex, ignoreData) {
                 var percent = scoreForUser * 100;
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.setGrade(scoreForUser, feedback);
+                console.log(feedback);
                 ex.showFeedback(feedback);
             }
             saveData();
@@ -2172,7 +2178,7 @@ function runQuizMode (ex, ignoreData) {
         incorrectButton.on("click", function () {
             saveData();
             incorrectBox.remove();   
-            currentInstruction = "";
+            // currentInstruction = "";
             console.log(currentIteration);
             if (currentIteration == 0) {
                 createNextIterationInstruction();
@@ -2181,6 +2187,7 @@ function runQuizMode (ex, ignoreData) {
                 var percent = scoreForUser * 100;
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.setGrade(scoreForUser, feedback);
+                console.log(feedback);
                 ex.showFeedback(feedback);
             }
             saveData();
@@ -2302,7 +2309,11 @@ function runQuizMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(x0, y0+i*elementH, false);
+                if (elem.x == x0) {
+                    draggableList.list[i].move(x0, y0+i*elementH, false);
+                } else {
+                    draggableList.list[i].move(elem.x, elem.y, false);
+                }
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
@@ -2733,7 +2744,7 @@ function runQuizDelayMode (ex, ignoreData) {
                 if (parseInt(input.text()) == correctI){
                     score = score+listLength/4;
                     console.log(currentIteration);
-                    currentInstruction = "";
+                    // currentInstruction = "";
                         if (currentIteration == 0) {
                             createNextIterationInstruction();
                         } else { //End of quiz
@@ -2923,7 +2934,11 @@ function runQuizDelayMode (ex, ignoreData) {
             console.log("after create draggable list.");
             for (var i = 0; i < list.length; i++) {
                 var elem = list[i];
-                draggableList.list[i].move(x0, y0+i*elementH, false);
+                if (elem.x == x0) {
+                    draggableList.list[i].move(x0, y0+i*elementH, false);
+                } else {
+                    draggableList.list[i].move(elem.x, elem.y, false);
+                }
                 draggableList.list[i].text = elem.text;
                 draggableList.list[i].currentBucket = elem.currentBucket;
                 if (i != workingIndex) {
