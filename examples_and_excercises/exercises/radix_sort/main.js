@@ -434,10 +434,10 @@ var getStrings = function () {
      **************************************************************************/
 
     obj.practiceIntro = function () {
-        return "Let's radix sort this list one digit at a time.  Click the info button for help. <span>BTNA</span>";
+        return "Let's radix sort this list one digit at a time.  Click the info in top-right corner button for help. <span>BTNA</span>";
     };
     obj.practiceNumIteractionQ = function () {
-        return "How many digits are in the largest number of this list (iterations the algorithm will make)? <span>$TEXTAREA$</span> <span>BTNA</span>";
+        return "How many digits are in the largest number of this list (number of iterations the algorithm will make)? <span>$TEXTAREA$</span> <span>BTNA</span>";
     };
     obj.practiceNumIterationCorrect = function () {
         return "Correct! <span>BTNA</span>";
@@ -447,7 +447,7 @@ var getStrings = function () {
         return "Incorrect! The largest is ".concat(String(maxNum)).concat(", which has ").concat(String(numDigits)).concat(" digits. Thus, ").concat(String(numDigits)).concat(" iterations happen. <span>BTNA</span>");
     };
     obj.practiceStartSort = function () {
-        return "Now place each number into a bucket based on the ones digit. <span>BTNA</span>"
+        return "Now place each number into a bucket based on the ones digit, starting from the first number (in orange.) Click on a bucket, or type the number of the bucket. <span>BTNA</span>"
     }
     obj.practiceCorrectAns = function (digitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
