@@ -538,7 +538,7 @@ var getStrings = function () {
     };
     obj.quizNextIteration = function (nextDigitI) {
         var digitConversion = {0:"ones", 1:"tens", 2:"hundreds", 3:"thousands", 4:"ten thousands"};
-        return "We have now sorted up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit.  Now sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
+        return "We will automatically sort it up to the ".concat(digitConversion[nextDigitI-1]).concat(" digit.  After that, you sort it by the ").concat(digitConversion[nextDigitI]).concat(" digit. <span>BTNA</span>");
     };
     return obj;
 };
@@ -1189,7 +1189,8 @@ function runPracticeMode (ex, ignoreData) {
         var elem = draggableList.elementList[i];
         var numOfDigitsInElem = Math.floor(Math.log10(elem))+1;
         // Generate a number with the same number of digits as the elem that is currently being placed
-        var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        //var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        var num = elem;
         submitButton.on("click", function() {
             saveData();
             console.log(input.text());
@@ -2023,7 +2024,8 @@ function runQuizMode (ex, ignoreData) {
         var elem = draggableList.elementList[i];
         var numOfDigitsInElem = Math.floor(Math.log10(elem))+1;
         // Generate a number with the same number of digits as the elem that is currently being placed
-        var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        //var num = getRandomInt(Math.pow(10, numOfDigitsInElem-1), Math.pow(10, numOfDigitsInElem)-1);
+        var num = elem;
         instrValList[0] = i;
         instrValList[1] = bucket;
         instrValList[2] = num;
@@ -2156,8 +2158,10 @@ function runQuizMode (ex, ignoreData) {
                 var percent = scoreForUser * 100;
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.setGrade(scoreForUser, feedback);
+                console.log("SET GRADE!!!");
                 console.log(feedback);
                 ex.showFeedback(feedback);
+                ex.setGrade(scoreForUser, feedback);
             }
             saveData();
         });
@@ -2187,8 +2191,10 @@ function runQuizMode (ex, ignoreData) {
                 var percent = scoreForUser * 100;
                 var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                 ex.setGrade(scoreForUser, feedback);
+                console.log("SET GRADE!!!");
                 console.log(feedback);
                 ex.showFeedback(feedback);
+                ex.setGrade(scoreForUser, feedback);
             }
             saveData();
         });
@@ -2752,7 +2758,10 @@ function runQuizDelayMode (ex, ignoreData) {
                             var percent = scoreForUser * 100;
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.setGrade(scoreForUser, feedback);
+                            console.log("SET GRADE!!!");
+                            console.log(feedback);
                             ex.showFeedback(feedback);
+                            ex.setGrade(scoreForUser, feedback);
                         }
                         iterationQ.remove();
                     }
@@ -2769,7 +2778,10 @@ function runQuizDelayMode (ex, ignoreData) {
                             var percent = scoreForUser * 100;
                             var feedback = "Score: ".concat(String(score)).concat(" / ").concat(String(possibleScore)).concat("\n ").concat(String(percent)).concat("%");
                             ex.setGrade(scoreForUser, feedback);
+                            console.log("SET GRADE!!!");
+                            console.log(feedback);
                             ex.showFeedback(feedback);
+                            ex.setGrade(scoreForUser, feedback);
                         }
                     }
                     console.log("score:",score);
