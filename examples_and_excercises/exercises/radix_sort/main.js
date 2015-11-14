@@ -426,7 +426,7 @@ var getStrings = function () {
         return "Take the Quiz";
     };
     obj.practiceMoreButtonText = function () {
-        return "Practice More"
+        return "Practice Again!"
     };
 
      /***************************************************************************
